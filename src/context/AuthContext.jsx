@@ -55,8 +55,8 @@ export function AuthProvider ({ children }) {
         await fetchWithTimeout(supabase.rpc('award_xp', { xp_amount: 1 }).throwOnError(), 5000)
         console.log('✅ Daily XP awarded')
         localStorage.setItem(`last_check_in_${userId}`, localToday)
-        // Refresh profile after award
-        await _fetchProfile(userId)
+        // Refresh profile after award without blocking the rest of the app
+        void _fetchProfile(userId)
       } catch (err) {
         console.warn('Failed to award daily XP:', err.message)
         checkInAttempted.current = false // Allow retry on failure
@@ -90,9 +90,15 @@ export function AuthProvider ({ children }) {
 
           if (sessionUser) {
             setUser(sessionUser)
-            const p = await _fetchProfile(sessionUser.id)
-            await _awardDailyXP(sessionUser.id, p.last_active)
             _subscribeToProfile(sessionUser.id)
+            setLoading(false)
+
+            _fetchProfile(sessionUser.id)
+              .then((p) => {
+                void _awardDailyXP(sessionUser.id, p.last_active)
+              })
+              .catch(() => {})
+            return
           }
         }
       } catch (err) {
@@ -141,9 +147,12 @@ export function AuthProvider ({ children }) {
         }
       } else if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         setUser(session.user)
-        const p = await _fetchProfile(session.user.id)
-        await _awardDailyXP(session.user.id, p.last_active)
         _subscribeToProfile(session.user.id)
+        _fetchProfile(session.user.id)
+          .then((p) => {
+            void _awardDailyXP(session.user.id, p.last_active)
+          })
+          .catch(() => {})
       } else if (session?.user) {
         setUser(session.user)
       }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, isSupabaseReady } from '../services/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import { fetchWithTimeout } from '../services/api'
 
 export function useContinueLearning ({ skipFetch = false } = {}) {
   const { user } = useAuth()
@@ -20,12 +21,15 @@ export function useContinueLearning ({ skipFetch = false } = {}) {
       return
     }
     try {
-      const { data } = await supabase
-        .from('resource_views')
-        .select('id, viewed_at, resource_id, resources(id, type, title, branch, semester, icon)')
-        .eq('user_id', user.id)
-        .order('viewed_at', { ascending: false })
-        .limit(5)
+      const { data } = await fetchWithTimeout(
+        supabase
+          .from('resource_views')
+          .select('id, viewed_at, resource_id, resources(id, type, title, branch, semester, icon)')
+          .eq('user_id', user.id)
+          .order('viewed_at', { ascending: false })
+          .limit(5),
+        3500
+      )
 
       const views = (data || [])
         .map(v => ({ ...v, resource: v.resources }))

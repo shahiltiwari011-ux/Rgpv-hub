@@ -4,6 +4,75 @@ import { supabase, isSupabaseReady } from '../services/supabaseClient'
 import { fetchWithTimeout } from '../services/api'
 
 const TRENDING_RESOURCE_FIELDS = 'id, type, title, branch, semester, download_count, icon, created_at'
+const TRENDING_CACHE_KEY = 'studyhub:trending:v1'
+const TRENDING_CACHE_TTL = 60 * 1000
+
+let trendingMemoryCache = null
+let trendingInFlightPromise = null
+
+function readTrendingCache () {
+  if (trendingMemoryCache && (Date.now() - trendingMemoryCache.timestamp) < TRENDING_CACHE_TTL) {
+    return trendingMemoryCache
+  }
+
+  try {
+    const raw = sessionStorage.getItem(TRENDING_CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if ((Date.now() - parsed.timestamp) >= TRENDING_CACHE_TTL) return null
+    trendingMemoryCache = parsed
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function writeTrendingCache (value) {
+  const entry = { ...value, timestamp: Date.now() }
+  trendingMemoryCache = entry
+  try {
+    sessionStorage.setItem(TRENDING_CACHE_KEY, JSON.stringify(entry))
+  } catch {}
+}
+
+async function fetchTrendingPayload () {
+  if (trendingInFlightPromise) return trendingInFlightPromise
+
+  trendingInFlightPromise = (async () => {
+    const [trendData, recentData] = await Promise.all([
+      fetchWithTimeout(
+        supabase.from('resources').select(TRENDING_RESOURCE_FIELDS)
+          .order('download_count', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(8)
+          .throwOnError(),
+        3500
+      ).then(res => res.data),
+
+      fetchWithTimeout(
+        supabase.from('resources').select(TRENDING_RESOURCE_FIELDS)
+          .order('created_at', { ascending: false })
+          .limit(8)
+          .throwOnError(),
+        3500
+      ).then(res => res.data)
+    ])
+
+    const payload = {
+      trending: trendData || [],
+      mostDownloaded: trendData || [],
+      recentlyAdded: recentData || []
+    }
+    writeTrendingCache(payload)
+    return payload
+  })()
+
+  try {
+    return await trendingInFlightPromise
+  } finally {
+    trendingInFlightPromise = null
+  }
+}
 
 export function useTrending () {
   const [trending, setTrending] = useState([])
@@ -14,46 +83,37 @@ export function useTrending () {
   useEffect(() => {
     if (!isSupabaseReady()) { setLoading(false); return }
 
+    const cached = readTrendingCache()
+    if (cached) {
+      setTrending(cached.trending || [])
+      setMostDownloaded(cached.mostDownloaded || [])
+      setRecentlyAdded(cached.recentlyAdded || [])
+      setLoading(false)
+    }
+
     async function fetchAll () {
       try {
-        // Run both queries in PARALLEL with individual abort controllers
-        const [trendData, recentData] = await Promise.all([
-          fetchWithTimeout(
-            supabase.from('resources').select(TRENDING_RESOURCE_FIELDS)
-              .order('download_count', { ascending: false })
-              .order('created_at', { ascending: false })
-              .limit(8)
-              .throwOnError(),
-            6000
-          ).then(res => res.data),
-
-          fetchWithTimeout(
-            supabase.from('resources').select(TRENDING_RESOURCE_FIELDS)
-              .order('created_at', { ascending: false })
-              .limit(8)
-              .throwOnError(),
-            6000
-          ).then(res => res.data)
-        ])
-
-        setTrending(trendData || [])
-        setMostDownloaded(trendData || [])
-        setRecentlyAdded(recentData || [])
+        const payload = await fetchTrendingPayload()
+        setTrending(payload.trending)
+        setMostDownloaded(payload.mostDownloaded)
+        setRecentlyAdded(payload.recentlyAdded)
       } catch (err) {
         console.warn('Trending fetch failed/timed out:', err.message)
-        setTrending([])
-        setMostDownloaded([])
-        setRecentlyAdded([])
+        if (!cached) {
+          setTrending([])
+          setMostDownloaded([])
+          setRecentlyAdded([])
+        }
       } finally {
         setLoading(false)
       }
     }
 
-    fetchAll()
+    void fetchAll()
 
     const channel = supabase.channel('public:resources:trending')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'resources' }, () => {
-        fetchAll()
+        void fetchAll()
       })
       .subscribe()
 
