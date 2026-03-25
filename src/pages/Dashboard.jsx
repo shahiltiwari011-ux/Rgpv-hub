@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { LoadingSpinner, EmptyState } from '../components/States'
+import { LoadingSpinner } from '../components/States'
 import SEO from '../components/SEO'
 
 export default function Dashboard () {
@@ -20,13 +20,14 @@ export default function Dashboard () {
     }
   }, [])
 
-  if (authLoading) return <LoadingSpinner text='Checking authentication…' />
+  if (authLoading) return <LoadingSpinner text='Checking authentication...' />
 
   const handleAuth = async (e) => {
     e.preventDefault()
     setIsActionLoading(true)
     setAuthError('')
     setAuthSuccess('')
+
     try {
       if (isSignUp) {
         await signup(authForm.email, authForm.password)
@@ -44,27 +45,27 @@ export default function Dashboard () {
 
   return (
     <>
-      <SEO title="Dashboard" description="Manage your bookmarks and view your study progress." urlPath="/dashboard" noIndex />
+      <SEO title='Dashboard' description='Manage your bookmarks and view your study progress.' urlPath='/dashboard' noIndex />
+
       <div className='page-hero'>
-        <span className='page-hero-icon'>{user ? '📊' : (isSignUp ? '📝' : '🔐')}</span>
         <h1 className='page-hero-title'>{user ? 'Dashboard' : (isSignUp ? 'Sign Up' : 'Sign In')}</h1>
-        <p className='page-hero-sub'>{user ? `Welcome back, ${user.email}` : 'Access your saved resources'}</p>
+        <p className='page-hero-sub'>
+          {user
+            ? `Welcome back, ${user.email}`
+            : (isSignUp
+                ? 'Create your account to save and sync study resources.'
+                : 'Access your saved resources and continue learning.')}
+        </p>
       </div>
 
       <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem 4rem' }}>
         {user ? (
           <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to your Dashboard! 🚀</h2>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to your dashboard</h2>
             <p style={{ color: 'var(--text-muted)' }}>We are building new features for you. Stay tuned for personalized learning analytics.</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2rem' }}>
-            <EmptyState
-              icon='🔐'
-              title={isSignUp ? 'Join the Study Hub' : 'Welcome back'}
-              message={isSignUp ? 'Create an account to save and sync your study materials.' : 'Sign in to access your saved resources.'}
-            />
-
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 24, padding: '2.5rem', maxWidth: 420, width: '100%', margin: '0 auto', backdropFilter: 'blur(10px)', boxShadow: 'var(--shadow-md)' }}>
               <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.4rem' }}>{isSignUp ? 'Create Account' : 'Sign In'}</h3>
               <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{isSignUp ? 'Enter your details below' : 'Account required for dashboard'}</p>
@@ -75,18 +76,26 @@ export default function Dashboard () {
               <form onSubmit={handleAuth}>
                 <div style={{ marginBottom: '0.75rem', width: '100%' }}>
                   <input
-                    type='email' placeholder='Email' value={authForm.email} onChange={(e) => setAuthForm((p) => ({ ...p, email: e.target.value }))}
-                    required className='form-input'
+                    type='email'
+                    placeholder='Email'
+                    value={authForm.email}
+                    onChange={(e) => setAuthForm((p) => ({ ...p, email: e.target.value }))}
+                    required
+                    className='form-input'
                   />
                 </div>
                 <div style={{ marginBottom: '1.25rem', width: '100%' }}>
                   <input
-                    type='password' placeholder='Password' value={authForm.password} onChange={(e) => setAuthForm((p) => ({ ...p, password: e.target.value }))}
-                    required className='form-input'
+                    type='password'
+                    placeholder='Password'
+                    value={authForm.password}
+                    onChange={(e) => setAuthForm((p) => ({ ...p, password: e.target.value }))}
+                    required
+                    className='form-input'
                   />
                 </div>
                 <button type='submit' className='btn-primary' disabled={isActionLoading} style={{ width: '100%', justifyContent: 'center' }}>
-                  {isActionLoading ? 'Please wait…' : (isSignUp ? 'Create Account' : 'Sign In')}
+                  {isActionLoading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
                 </button>
               </form>
 
