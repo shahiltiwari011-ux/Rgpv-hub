@@ -48,13 +48,11 @@ export default function Dashboard () {
       <SEO title='Dashboard' description='Manage your bookmarks and view your study progress.' urlPath='/dashboard' noIndex />
 
       <div className='page-hero'>
-        <h1 className='page-hero-title'>{user ? 'Dashboard' : (isSignUp ? 'Sign Up' : 'Sign In')}</h1>
+        <h1 className='page-hero-title'>{user ? 'Dashboard' : 'Account Access'}</h1>
         <p className='page-hero-sub'>
           {user
             ? `Welcome back, ${user.email}`
-            : (isSignUp
-                ? 'Create your account to save and sync study resources.'
-                : 'Access your saved resources and continue learning.')}
+            : 'Sign in or create an account from the same place.'}
         </p>
       </div>
 
@@ -67,8 +65,43 @@ export default function Dashboard () {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 24, padding: '2.5rem', maxWidth: 420, width: '100%', margin: '0 auto', backdropFilter: 'blur(10px)', boxShadow: 'var(--shadow-md)' }}>
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.4rem' }}>{isSignUp ? 'Create Account' : 'Sign In'}</h3>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{isSignUp ? 'Enter your details below' : 'Account required for dashboard'}</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', padding: '0.35rem', marginBottom: '1.25rem', background: 'rgba(99, 120, 255, 0.08)', border: '1px solid var(--border)', borderRadius: 999 }}>
+                <button
+                  type='button'
+                  onClick={() => { setIsSignUp(false); setAuthError(''); setAuthSuccess('') }}
+                  style={{
+                    border: 'none',
+                    borderRadius: 999,
+                    padding: '0.8rem 1rem',
+                    fontWeight: 700,
+                    fontFamily: 'inherit',
+                    background: isSignUp ? 'transparent' : 'linear-gradient(135deg, var(--accent-blue), var(--accent-cyan))',
+                    color: isSignUp ? 'var(--text-secondary)' : '#fff',
+                    boxShadow: isSignUp ? 'none' : '0 8px 24px rgba(59, 130, 246, 0.25)'
+                  }}
+                >
+                  Sign In
+                </button>
+                <button
+                  type='button'
+                  onClick={() => { setIsSignUp(true); setAuthError(''); setAuthSuccess('') }}
+                  style={{
+                    border: 'none',
+                    borderRadius: 999,
+                    padding: '0.8rem 1rem',
+                    fontWeight: 700,
+                    fontFamily: 'inherit',
+                    background: isSignUp ? 'linear-gradient(135deg, var(--accent-blue), var(--accent-cyan))' : 'transparent',
+                    color: isSignUp ? '#fff' : 'var(--text-secondary)',
+                    boxShadow: isSignUp ? '0 8px 24px rgba(59, 130, 246, 0.25)' : 'none'
+                  }}
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.4rem' }}>{isSignUp ? 'Create your account' : 'Welcome back'}</h3>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{isSignUp ? 'Use your email and password to get started.' : 'Use your email and password to continue.'}</p>
 
               {authError && <div style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', padding: '0.75rem', borderRadius: 8, marginBottom: '1rem', fontSize: '0.85rem' }}>{authError}</div>}
               {authSuccess && <div style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981', padding: '0.75rem', borderRadius: 8, marginBottom: '1rem', fontSize: '0.85rem' }}>{authSuccess}</div>}
@@ -101,7 +134,7 @@ export default function Dashboard () {
 
               <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem' }}>
                 <p style={{ color: 'var(--text-muted)' }}>
-                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+                  {isSignUp ? 'Already have an account?' : "Need a new account?"}
                   <button
                     onClick={() => { setIsSignUp(!isSignUp); setAuthError(''); setAuthSuccess('') }}
                     style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontWeight: 600, cursor: 'pointer', marginLeft: '0.5rem' }}

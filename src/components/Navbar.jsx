@@ -60,16 +60,15 @@ export default function Navbar () {
             </li>
           </>
         )}
-        {/* Primary and secondary links separated by logic */}
         <li className='mobile-only'>
           {!user
             ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                <Link to='/dashboard?mode=login' className='nav-toggle-btn' onClick={() => setMobileOpen(false)}>
-                  🔑 Sign In Account
+                <Link to='/dashboard' className='nav-toggle-btn' onClick={() => setMobileOpen(false)}>
+                  Sign In
                 </Link>
-                <Link to='/dashboard?mode=signup' className='nav-toggle-btn' style={{ color: 'var(--accent-blue)' }} onClick={() => setMobileOpen(false)}>
-                  ✨ Create New Account
+                <Link to='/dashboard' className='nav-toggle-btn' style={{ color: 'var(--accent-blue)' }} onClick={() => setMobileOpen(false)}>
+                  Create Account
                 </Link>
               </div>
               )
@@ -84,7 +83,6 @@ export default function Navbar () {
       <div className='nav-right'>
         <div className='nav-gamification'>
           <StreakBadge />
-
         </div>
 
         {user && (
@@ -102,8 +100,8 @@ export default function Navbar () {
         {!user
           ? (
             <div className='desktop-only' style={{ display: 'flex', gap: '0.6rem' }}>
-              <Link to='/dashboard?mode=login' className='btn-secondary nav-auth-btn'>Sign In</Link>
-              <Link to='/dashboard?mode=signup' className='btn-primary nav-auth-btn'>Sign Up</Link>
+              <Link to='/dashboard' className='btn-secondary nav-auth-btn'>Sign In</Link>
+              <Link to='/dashboard' className='btn-primary nav-auth-btn'>Sign Up</Link>
             </div>
             )
           : (
