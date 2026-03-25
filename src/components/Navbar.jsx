@@ -22,16 +22,36 @@ export default function Navbar () {
   return (
     <nav className='navbar' role='navigation' aria-label='Main navigation'>
       <Link to='/' className='nav-logo'>
-        <span className='logo-icon' style={{ fontSize: '1.1rem', background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', flexShrink: 0 }}>🔷</span>
-        <span className='logo-text' style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>StudyHub<span style={{ color: 'var(--accent-blue)' }}>.</span></span>
+        <span
+          className='logo-icon'
+          style={{
+            fontSize: '1.1rem',
+            background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            flexShrink: 0
+          }}
+        >
+          🔷
+        </span>
+        <span className='logo-text' style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+          StudyHub<span style={{ color: 'var(--accent-blue)' }}>.</span>
+        </span>
       </Link>
 
       <ul className={`nav-links ${mobileOpen ? 'open' : ''}`}>
         {mobileOpen && (
-          <button className='mobile-close-btn mobile-only' onClick={() => setMobileOpen(false)} aria-label='Close menu'>
-            ✖
-          </button>
+          <>
+            <button className='mobile-close-btn mobile-only' onClick={() => setMobileOpen(false)} aria-label='Close menu'>
+              ✕
+            </button>
+            <li className='mobile-nav-header mobile-only'>
+              <span className='mobile-nav-kicker'>Navigation</span>
+              <span className='mobile-nav-title'>Browse StudyHub</span>
+            </li>
+          </>
         )}
+
         {NAV_LINKS.map((l) => (
           <li key={l.to}>
             <Link to={l.to} className={pathname === l.to ? 'active' : ''} onClick={() => setMobileOpen(false)}>
@@ -39,6 +59,7 @@ export default function Navbar () {
             </Link>
           </li>
         ))}
+
         {user && (
           <>
             <li className='mobile-only'>
@@ -60,14 +81,13 @@ export default function Navbar () {
             </li>
           </>
         )}
-        <li className='mobile-only'>
+
+        <li className='mobile-only mobile-nav-action'>
           {!user
             ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                <Link to='/dashboard?mode=signup' className='nav-toggle-btn' style={{ color: 'var(--accent-blue)' }} onClick={() => setMobileOpen(false)}>
-                  Register
-                </Link>
-              </div>
+              <Link to='/dashboard?mode=signup' className='nav-toggle-btn nav-register-btn' onClick={() => setMobileOpen(false)}>
+                Register
+              </Link>
               )
             : (
               <button className='nav-logout-btn' onClick={() => { logout(); setMobileOpen(false) }}>
@@ -96,7 +116,7 @@ export default function Navbar () {
 
         {!user
           ? (
-            <div className='desktop-only' style={{ display: 'flex', gap: '0.6rem' }}>
+            <div className='nav-auth-actions desktop-only'>
               <Link to='/dashboard?mode=signup' className='btn-primary nav-auth-btn'>Register</Link>
             </div>
             )
@@ -104,7 +124,7 @@ export default function Navbar () {
             <button className='btn-secondary nav-auth-btn desktop-only' onClick={logout}>Sign Out</button>
             )}
 
-        <button type='button' className={`hamburger ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(!mobileOpen)} aria-label='Toggle menu'>
+        <button type='button' className={`hamburger ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(!mobileOpen)} aria-label='Toggle menu' aria-expanded={mobileOpen}>
           <span /><span /><span />
         </button>
       </div>
