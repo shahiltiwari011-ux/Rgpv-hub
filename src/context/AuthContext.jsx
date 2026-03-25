@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { supabase, isSupabaseReady } from '../services/supabaseClient'
-import { fetchWithTimeout, getSafeSession } from '../services/api'
+import { fetchWithTimeout, getSafeSession, getSafeSessionData, isAuthLockError } from '../services/api'
 
 const AuthContext = createContext(null)
 
@@ -85,18 +85,19 @@ export function AuthProvider ({ children }) {
         const user = await getSafeSession(supabase)
         
         if (user) {
-          // If we have a user from safeSession, get the full session object
-          const { data: { session } } = await supabase.auth.getSession()
-          if (session?.user) {
-            setUser(session.user)
-            const p = await _fetchProfile(session.user.id)
-            await _awardDailyXP(session.user.id, p.last_active)
-            _subscribeToProfile(session.user.id)
+          const session = await getSafeSessionData(supabase)
+          const sessionUser = session?.user || user
+
+          if (sessionUser) {
+            setUser(sessionUser)
+            const p = await _fetchProfile(sessionUser.id)
+            await _awardDailyXP(sessionUser.id, p.last_active)
+            _subscribeToProfile(sessionUser.id)
           }
         }
       } catch (err) {
         // Only log real errors, silence lock contention
-        if (!err.message?.includes('lock')) {
+        if (!isAuthLockError(err)) {
           console.error('Auth initialization error:', err)
         }
       } finally {
