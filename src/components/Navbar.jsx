@@ -64,11 +64,8 @@ export default function Navbar () {
           {!user
             ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                <Link to='/dashboard' className='nav-toggle-btn' onClick={() => setMobileOpen(false)}>
-                  Sign In
-                </Link>
-                <Link to='/dashboard' className='nav-toggle-btn' style={{ color: 'var(--accent-blue)' }} onClick={() => setMobileOpen(false)}>
-                  Create Account
+                <Link to='/dashboard?mode=signup' className='nav-toggle-btn' style={{ color: 'var(--accent-blue)' }} onClick={() => setMobileOpen(false)}>
+                  Register
                 </Link>
               </div>
               )
@@ -100,8 +97,7 @@ export default function Navbar () {
         {!user
           ? (
             <div className='desktop-only' style={{ display: 'flex', gap: '0.6rem' }}>
-              <Link to='/dashboard' className='btn-secondary nav-auth-btn'>Sign In</Link>
-              <Link to='/dashboard' className='btn-primary nav-auth-btn'>Sign Up</Link>
+              <Link to='/dashboard?mode=signup' className='btn-primary nav-auth-btn'>Register</Link>
             </div>
             )
           : (
