@@ -10,6 +10,8 @@
 @media (min-width: 768px) {
   .mobile-only { display: none !important; }
   .desktop-only { display: block !important; }
+  .desktop-only.nav-user-group { display: flex !important; }
+  .desktop-only.nav-auth-btn { display: inline-flex !important; }
 }
 
 /* ---------- CSS Variables ---------- */
@@ -333,6 +335,8 @@ a { color: inherit; }
 @media (min-width: 768px) {
   .mobile-only { display: none; }
   .desktop-only { display: block; }
+  .desktop-only.nav-user-group { display: flex !important; }
+  .desktop-only.nav-auth-btn { display: inline-flex !important; }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
