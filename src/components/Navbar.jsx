@@ -40,22 +40,14 @@ export default function Navbar () {
       </Link>
 
       <ul className={`nav-links ${mobileOpen ? 'open' : ''}`}>
-        {mobileOpen && (
-          <>
-            <button className='mobile-close-btn mobile-only' onClick={() => setMobileOpen(false)} aria-label='Close menu'>
-              ✕
-            </button>
-            <li className='mobile-nav-header mobile-only'>
-              <span className='mobile-nav-kicker'>Navigation</span>
-              <span className='mobile-nav-title'>Browse StudyHub</span>
-            </li>
-          </>
-        )}
-
-        {NAV_LINKS.map((l) => (
-          <li key={l.to}>
-            <Link to={l.to} className={pathname === l.to ? 'active' : ''} onClick={() => setMobileOpen(false)}>
-              {l.icon} <span>{l.label}</span>
+        {NAV_LINKS.map((link) => (
+          <li key={link.to}>
+            <Link
+              to={link.to}
+              className={pathname === link.to ? 'active' : ''}
+              onClick={() => setMobileOpen(false)}
+            >
+              {link.icon} <span>{link.label}</span>
             </Link>
           </li>
         ))}
@@ -63,38 +55,47 @@ export default function Navbar () {
         {user && (
           <>
             <li className='mobile-only'>
-              <Link to='/dashboard' className={pathname === '/dashboard' ? 'active' : ''} onClick={() => setMobileOpen(false)}>
+              <Link
+                to='/dashboard'
+                className={pathname === '/dashboard' ? 'active' : ''}
+                onClick={() => setMobileOpen(false)}
+              >
                 📊 <span>Dashboard</span>
               </Link>
             </li>
             {isAdmin && (
               <li className='mobile-only'>
-                <Link to='/admin' className={pathname === '/admin' ? 'active' : ''} onClick={() => setMobileOpen(false)}>
+                <Link
+                  to='/admin'
+                  className={pathname === '/admin' ? 'active' : ''}
+                  onClick={() => setMobileOpen(false)}
+                >
                   ⚙️ <span>Admin Panel</span>
                 </Link>
               </li>
             )}
             <li className='mobile-only'>
-              <Link to={`/profile/${user.id}`} className={pathname.startsWith('/profile') ? 'active' : ''} onClick={() => setMobileOpen(false)}>
+              <Link
+                to={`/profile/${user.id}`}
+                className={pathname.startsWith('/profile') ? 'active' : ''}
+                onClick={() => setMobileOpen(false)}
+              >
                 👤 <span>My Profile</span>
               </Link>
             </li>
-          </>
-        )}
-
-        <li className='mobile-only mobile-nav-action'>
-          {!user
-            ? (
-              <Link to='/dashboard?mode=signup' className='nav-toggle-btn nav-register-btn' onClick={() => setMobileOpen(false)}>
-                Register
-              </Link>
-              )
-            : (
-              <button className='nav-logout-btn' onClick={() => { logout(); setMobileOpen(false) }}>
+            <li className='mobile-only mobile-nav-action'>
+              <button
+                className='nav-logout-btn'
+                onClick={() => {
+                  logout()
+                  setMobileOpen(false)
+                }}
+              >
                 🚪 Logout / Sign Out
               </button>
-              )}
-        </li>
+            </li>
+          </>
+        )}
       </ul>
 
       <div className='nav-right'>
@@ -114,15 +115,11 @@ export default function Navbar () {
           <div className='dark-toggle-knob'>{dark ? '🌙' : '☀️'}</div>
         </button>
 
-        {!user
+        {user
           ? (
-            <div className='nav-auth-actions desktop-only'>
-              <Link to='/dashboard?mode=signup' className='btn-primary nav-auth-btn'>Register</Link>
-            </div>
-            )
-          : (
             <button className='btn-secondary nav-auth-btn desktop-only' onClick={logout}>Sign Out</button>
-            )}
+            )
+          : null}
 
         <button type='button' className={`hamburger ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(!mobileOpen)} aria-label='Toggle menu' aria-expanded={mobileOpen}>
           <span /><span /><span />
