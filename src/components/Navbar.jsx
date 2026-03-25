@@ -52,6 +52,18 @@ export default function Navbar () {
           </li>
         ))}
 
+        {!user && (
+          <li className='mobile-only mobile-nav-action'>
+            <Link
+              to='/dashboard?mode=signup'
+              className='nav-register-btn'
+              onClick={() => setMobileOpen(false)}
+            >
+              Register
+            </Link>
+          </li>
+        )}
+
         {user && (
           <>
             <li className='mobile-only'>

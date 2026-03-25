@@ -299,6 +299,24 @@ a { color: inherit; }
 }
 .nav-logout-btn:hover { background: rgba(239, 68, 68, 0.1); }
 
+.nav-register-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  background: var(--gradient-notes);
+  color: white !important;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.22);
+}
+
+.nav-register-btn:hover {
+  background: var(--gradient-notes);
+  color: white !important;
+  box-shadow: 0 16px 34px rgba(59, 130, 246, 0.26);
+}
+
 .nav-auth-btn {
   padding: 0.35rem 0.75rem !important;
   font-size: 0.8rem !important;
@@ -344,7 +362,8 @@ a { color: inherit; }
   width: 100%;
 }
 
-.mobile-nav-action .nav-logout-btn {
+.mobile-nav-action .nav-logout-btn,
+.mobile-nav-action .nav-register-btn {
   width: 100%;
 }
 
