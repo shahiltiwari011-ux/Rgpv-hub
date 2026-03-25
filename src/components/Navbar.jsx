@@ -131,7 +131,9 @@ export default function Navbar () {
           ? (
             <button className='btn-secondary nav-auth-btn desktop-only' onClick={logout}>Sign Out</button>
             )
-          : null}
+          : (
+            <Link to='/dashboard?mode=signup' className='btn-primary nav-auth-btn desktop-only'>Register</Link>
+            )}
 
         <button type='button' className={`hamburger ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(!mobileOpen)} aria-label='Toggle menu' aria-expanded={mobileOpen}>
           <span /><span /><span />
