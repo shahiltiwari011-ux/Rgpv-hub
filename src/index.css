@@ -18,6 +18,7 @@
   --bg-secondary: #ffffff;
   --bg-card: rgba(255, 255, 255, 0.85);
   --bg-glass: rgba(255, 255, 255, 0.7);
+  --bg-glass-rgb: 255, 255, 255;
   --text-primary: #0b0b1a;
   --text-secondary: #4a5070;
   --text-muted: #8890ae;
@@ -59,6 +60,7 @@
   --bg-secondary: #0a0a1a;
   --bg-card: rgba(15, 15, 30, 0.85);
   --bg-glass: rgba(10, 10, 25, 0.7);
+  --bg-glass-rgb: 10, 10, 25;
   --text-primary: #f1f4ff;
   --text-secondary: #94a3b8;
   --text-muted: #475569;
@@ -94,12 +96,13 @@ a { color: inherit; }
   padding: 0 1rem;
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  background: rgba(var(--bg-glass-rgb, 20, 20, 40), 0.7);
+  background: linear-gradient(180deg, rgba(var(--bg-glass-rgb), 0.92), rgba(var(--bg-glass-rgb), 0.82));
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 10px 35px rgba(44, 72, 152, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: all 0.4s ease;
+  transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
 }
 
 @media (min-width: 1024px) {
@@ -182,13 +185,15 @@ a { color: inherit; }
   text-decoration: none;
   color: var(--text-secondary);
   font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.25s ease;
+  font-weight: 600;
+  transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
 .nav-links a:hover, .nav-links a.active {
-  background: rgba(59, 130, 246, 0.08);
-  color: var(--accent-blue);
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12);
+  transform: translateY(-1px);
 }
 
 @media (min-width: 768px) {
@@ -216,12 +221,13 @@ a { color: inherit; }
   display: flex !important;
   align-items: center;
   gap: 0.5rem;
-  background: var(--bg-card);
+  background: rgba(var(--bg-glass-rgb), 0.75);
   padding: 0.25rem;
   border-radius: 14px;
   border: 1px solid var(--border);
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(44, 72, 152, 0.08);
 }
 
 .nav-user-group .nav-icon-link {
@@ -239,7 +245,7 @@ a { color: inherit; }
   text-decoration: none;
   font-size: 1.1rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0.7;
+  opacity: 0.82;
 }
 
 .nav-icon-link:hover, .nav-icon-link.active {
@@ -375,19 +381,20 @@ a { color: inherit; }
 /* Dark mode toggle */
 .dark-toggle {
   width: 44px; height: 24px;
-  background: var(--border);
+  background: rgba(148, 163, 184, 0.3);
   border-radius: var(--radius-full);
   cursor: pointer;
   position: relative;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid var(--border);
   flex-shrink: 0;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 .dark-toggle.active { background: var(--accent-blue); }
 
 .dark-toggle-knob {
   width: 20px; height: 20px;
-  background: white;
+  background: linear-gradient(180deg, #ffffff, #eef2ff);
   border-radius: 50%;
   position: absolute;
   top: 1px; left: 2px;
@@ -397,6 +404,35 @@ a { color: inherit; }
   font-size: 11px;
 }
 .dark-toggle.active .dark-toggle-knob { transform: translateX(20px); }
+
+[data-theme="light"] .navbar {
+  border-bottom-color: rgba(99, 120, 255, 0.16);
+  box-shadow: 0 14px 36px rgba(44, 72, 152, 0.1);
+}
+
+[data-theme="light"] .nav-links a {
+  color: #42506f;
+}
+
+[data-theme="light"] .nav-links a:hover,
+[data-theme="light"] .nav-links a.active {
+  color: #1e3a8a;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(139, 92, 246, 0.1));
+}
+
+[data-theme="light"] .nav-auth-btn.btn-secondary {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(99, 120, 255, 0.16);
+}
+
+[data-theme="light"] .dark-toggle {
+  background: rgba(191, 219, 254, 0.8);
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+[data-theme="dark"] .navbar {
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.38);
+}
 
 /* ---------- Hero Section ---------- */
 .hero {
@@ -1727,5 +1763,4 @@ footer {
   margin-top: 2rem;
 }
 [data-theme="light"] .comment-input-sticky { background: rgba(255, 255, 255, 0.95); box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
-
 
