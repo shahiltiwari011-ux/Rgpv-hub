@@ -5,11 +5,11 @@
 
 /* ---------- Visibility Utilities ---------- */
 .mobile-only { display: block; }
-.desktop-only { display: none; }
+.desktop-only { display: none !important; }
 
 @media (min-width: 768px) {
   .mobile-only { display: none !important; }
-  .desktop-only { display: block; }
+  .desktop-only { display: block !important; }
 }
 
 /* ---------- CSS Variables ---------- */
@@ -194,7 +194,7 @@ a { color: inherit; }
 }
 
 .nav-user-group {
-  display: flex !important;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
   background: rgba(var(--bg-glass-rgb), 0.75);
@@ -266,6 +266,7 @@ a { color: inherit; }
   margin-left: auto;
   position: relative;
   z-index: 10;
+  min-width: 0;
 }
 @media (min-width: 768px) {
   .nav-right { gap: 0.75rem; }
@@ -339,6 +340,29 @@ a { color: inherit; }
 
 @media (min-width: 768px) {
   .nav-gamification { transform: scale(1); }
+}
+
+@media (max-width: 767px) {
+  .navbar {
+    padding: 0 0.7rem;
+  }
+
+  .nav-logo {
+    min-width: 0;
+    gap: 0.35rem;
+  }
+
+  .logo-text {
+    font-size: 0.95rem;
+  }
+
+  .nav-right {
+    gap: 0.2rem;
+  }
+
+  .nav-gamification {
+    transform: scale(0.72);
+  }
 }
 
 .hamburger {
