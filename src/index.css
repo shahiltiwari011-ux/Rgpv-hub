@@ -126,6 +126,7 @@ a { color: inherit; }
   display: none;
   list-style: none;
   align-items: center;
+  min-width: 0;
 }
 
 .nav-links.open {
@@ -175,7 +176,10 @@ a { color: inherit; }
 @media (min-width: 768px) {
   .nav-links {
     display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
     gap: 0.5rem;
+    min-width: 0;
   }
   .nav-links a span {
     display: none; /* Hide labels by default on compact desktop */
@@ -186,7 +190,7 @@ a { color: inherit; }
   }
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 1280px) {
   .nav-links a span {
     display: inline; /* Show all labels on large screens */
   }
@@ -267,6 +271,7 @@ a { color: inherit; }
   position: relative;
   z-index: 10;
   min-width: 0;
+  flex-shrink: 0;
 }
 @media (min-width: 768px) {
   .nav-right { gap: 0.75rem; }
@@ -322,11 +327,72 @@ a { color: inherit; }
   padding: 0.35rem 0.75rem !important;
   font-size: 0.8rem !important;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {
   .mobile-only { display: none; }
   .desktop-only { display: block; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .nav-links {
+    gap: 0.2rem;
+  }
+
+  .nav-links a {
+    padding: 0.7rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .nav-user-group {
+    gap: 0.25rem;
+    padding: 0.2rem;
+  }
+
+  .nav-user-group .nav-icon-link {
+    padding: 0.5rem;
+  }
+
+  .nav-auth-btn {
+    display: none !important;
+  }
+
+  .nav-gamification {
+    transform: scale(0.86);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .navbar {
+    padding: 0 1.5rem;
+  }
+
+  .nav-links {
+    gap: 0.35rem;
+  }
+
+  .nav-links a {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.92rem;
+  }
+
+  .nav-user-group {
+    gap: 0.3rem;
+    padding: 0.2rem;
+  }
+
+  .nav-user-group .nav-icon-link {
+    padding: 0.55rem;
+  }
+
+  .nav-gamification {
+    transform: scale(0.92);
+  }
 }
 
 .nav-gamification {
