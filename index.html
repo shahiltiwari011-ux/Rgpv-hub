@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RGPV Diploma Study Hub – Free Notes, Syllabus & PYQ</title>
+    <meta name="description" content="Free Notes, Syllabus, and Previous Year Question Papers for RGPV Study Hub. CS, Mechanical, Electrical, Civil, Electronics – all branches, all semesters." />
+    <meta name="keywords" content="RGPV Study Hub, notes, syllabus, PYQ, diploma notes, diploma question papers" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="/" />
+    <meta property="og:title" content="RGPV Diploma Study Hub – Free Notes, Syllabus & PYQ" />
+    <meta property="og:description" content="Free Notes, Syllabus & PYQ for RGPV Study Hub." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_IN" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#4f6ef7" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Syne:wght@400..800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Syne:wght@400..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    
+    <script>
+      // Early Environment Check & Fallback
+      function showDiagError(title, msg) {
+        const root = document.getElementById('root');
+        if (root) {
+          root.style.display = 'block';
+          root.innerHTML = `
+            <div style="padding: 2rem; background: #fff1f2; color: #991b1b; border: 1px solid #fecaca; border-radius: 0.5rem; font-family: system-ui; max-width: 650px; margin: 2rem auto; line-height: 1.5;">
+              <h2 style="margin-top: 0;">⚠️ ${title}</h2>
+              <p>${msg}</p>
+              <hr style="border: none; border-top: 1px solid #fecaca; margin: 1.5rem 0;">
+              <p><strong>To fix this locally:</strong></p>
+              <ol>
+                <li>Stop any Live Server you are currently using.</li>
+                <li>In your terminal, run: <code style="background: #fee2e2; padding: 0.2rem 0.4rem; border-radius: 0.25rem;">npm run dev</code></li>
+                <li>Open the URL provided (usually <code>http://localhost:5173</code>) in your browser.</li>
+              </ol>
+              <p style="margin-top: 1rem;"><strong>If deploying to Vercel/Netlify:</strong></p>
+              <ul>
+                <li>Set "Build Command" to: <code>npm run build</code></li>
+                <li>Set "Output / Publish Directory" to: <code>dist</code></li>
+              </ul>
+            </div>`;
+        }
+      }
+
+      // 1. Detect direct file:// or incorrect static server port (Live Server)
+      const isLiveServer = window.location.port === '5500' || window.location.port === '5501' || window.location.port === '5502' || window.location.port === '5503';
+      if (window.location.protocol === 'file:' || isLiveServer) {
+        window.onload = function() {
+          const title = isLiveServer ? "Wrong Server Detected" : "Development Server Required";
+          const msg = isLiveServer 
+            ? `You are using <strong>Live Server</strong> (port ${window.location.port}). Vite apps do not work correctly on static servers. Please use <strong>port 5173</strong> instead.`
+            : "You are viewing this file directly from your computer (<code>file://</code>). Because this is a Vite/React app, it requires a development server to run properly.";
+          showDiagError(title, msg);
+        };
+      }
+
+      // 2. Detect script execution errors (e.g. Live Server JSX errors)
+      window.addEventListener('error', function(e) {
+        if (e.message && (e.message.includes('Unexpected token') || e.message.includes('Failed to load module script') || e.message.includes('import') || e.message.includes('export'))) {
+          showDiagError("JavaScript Processing Error", "Your browser couldn't process the JavaScript. This usually means you are running the source code through a static server (like Live Server) instead of Vite.");
+        }
+      }, true);
+
+      // 3. Failsafe for complete blank screens (React never mounted)
+      setTimeout(function() {
+        const root = document.getElementById('root');
+        // If the root is empty after 2.5 seconds, the app suffered a fatal, silent load failure
+        if (root && root.innerHTML.trim() === '') {
+          showDiagError("Application Failed to Load", "The React application failed to start. This happens if deployment directories are misconfigured, or if the server blocked the JavaScript files from loading.");
+        }
+      }, 8000);
+
+      // Early Theme Selection (Prevents FOUC)
+      (function() {
+        const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+
+      // Normalize metadata origin for production deploys
+      (function() {
+        const origin = window.location.origin;
+        const canonical = document.querySelector('link[rel="canonical"]');
+        const ogUrl = document.querySelector('meta[property="og:url"]');
+        if (canonical) canonical.setAttribute('href', `${origin}/`);
+        if (ogUrl) ogUrl.setAttribute('content', `${origin}/`);
+      })();
+    </script>
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Syne:wght@400..800&display=swap"></noscript>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://example.com/#website",
+          "url": "https://example.com/",
+          "name": "RGPV Diploma Study Hub",
+          "description": "Free Notes, Syllabus and PYQ for RGPV Study Hub"
+        },
+        {
+          "@type": "EducationalOrganization",
+          "@id": "https://example.com/#organization",
+          "name": "RGPV Diploma Study Hub",
+          "url": "https://example.com/"
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
