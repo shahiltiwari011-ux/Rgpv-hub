@@ -1,6 +1,10 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { supabase, isSupabaseReady } from '../services/supabaseClient'
+<<<<<<< HEAD
 import { fetchWithTimeout, getSafeSession } from '../services/api'
+=======
+import { fetchWithTimeout, getSafeSession, getSafeSessionData, isAuthLockError } from '../services/api'
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 
 const AuthContext = createContext(null)
 
@@ -55,8 +59,13 @@ export function AuthProvider ({ children }) {
         await fetchWithTimeout(supabase.rpc('award_xp', { xp_amount: 1 }).throwOnError(), 5000)
         console.log('✅ Daily XP awarded')
         localStorage.setItem(`last_check_in_${userId}`, localToday)
+<<<<<<< HEAD
         // Refresh profile after award
         await _fetchProfile(userId)
+=======
+        // Refresh profile after award without blocking the rest of the app
+        void _fetchProfile(userId)
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
       } catch (err) {
         console.warn('Failed to award daily XP:', err.message)
         checkInAttempted.current = false // Allow retry on failure
@@ -85,6 +94,7 @@ export function AuthProvider ({ children }) {
         const user = await getSafeSession(supabase)
         
         if (user) {
+<<<<<<< HEAD
           // If we have a user from safeSession, get the full session object
           const { data: { session } } = await supabase.auth.getSession()
           if (session?.user) {
@@ -92,11 +102,31 @@ export function AuthProvider ({ children }) {
             const p = await _fetchProfile(session.user.id)
             await _awardDailyXP(session.user.id, p.last_active)
             _subscribeToProfile(session.user.id)
+=======
+          const session = await getSafeSessionData(supabase)
+          const sessionUser = session?.user || user
+
+          if (sessionUser) {
+            setUser(sessionUser)
+            _subscribeToProfile(sessionUser.id)
+            setLoading(false)
+
+            _fetchProfile(sessionUser.id)
+              .then((p) => {
+                void _awardDailyXP(sessionUser.id, p.last_active)
+              })
+              .catch(() => {})
+            return
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
           }
         }
       } catch (err) {
         // Only log real errors, silence lock contention
+<<<<<<< HEAD
         if (!err.message?.includes('lock')) {
+=======
+        if (!isAuthLockError(err)) {
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
           console.error('Auth initialization error:', err)
         }
       } finally {
@@ -140,9 +170,18 @@ export function AuthProvider ({ children }) {
         }
       } else if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         setUser(session.user)
+<<<<<<< HEAD
         const p = await _fetchProfile(session.user.id)
         await _awardDailyXP(session.user.id, p.last_active)
         _subscribeToProfile(session.user.id)
+=======
+        _subscribeToProfile(session.user.id)
+        _fetchProfile(session.user.id)
+          .then((p) => {
+            void _awardDailyXP(session.user.id, p.last_active)
+          })
+          .catch(() => {})
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
       } else if (session?.user) {
         setUser(session.user)
       }

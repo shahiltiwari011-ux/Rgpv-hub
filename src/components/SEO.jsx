@@ -9,7 +9,11 @@ function getSiteUrl () {
 }
 
 export default function SEO ({ title, description, keywords, urlPath = '', noIndex = false }) {
+<<<<<<< HEAD
   const siteName = 'RGPV Study Hub'
+=======
+  const siteName = 'RGPV Diploma Study Hub'
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
   const fullTitle = title ? `${title} | ${siteName}` : siteName
   const fullDescription = description || 'Free Notes, Syllabus & PYQ for all RGPV Diploma branches. CS, Mechanical, Electrical, Civil, and Electronics.'
   const siteUrl = getSiteUrl()

@@ -106,6 +106,50 @@ export async function logout () {
 
 
 let _sessionPromise = null
+<<<<<<< HEAD
+=======
+const AUTH_LOCK_ERROR_PATTERNS = [
+  'lock:',
+  'navigatorlockmanager',
+  'another request stole it',
+  'was released because another request stole it'
+]
+
+export function isAuthLockError (error) {
+  const message = String(error?.message || error || '').toLowerCase()
+  return AUTH_LOCK_ERROR_PATTERNS.some(pattern => message.includes(pattern))
+}
+
+function delay (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function readSessionWithRetry (sb, attempts = 3) {
+  let lastError = null
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const { data, error } = await sb.auth.getSession()
+
+    if (!error) {
+      return data?.session || null
+    }
+
+    if (!isAuthLockError(error)) {
+      throw error
+    }
+
+    lastError = error
+    logger.warn('Transient auth lock detected while reading session', {
+      attempt: attempt + 1,
+      message: error.message
+    })
+
+    await delay(150 * (attempt + 1))
+  }
+
+  throw lastError
+}
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 
 export async function getSafeSession (sb) {
   // Concurrent Promise Caching: Prevent `navigator.locks` traffic jams
@@ -113,6 +157,7 @@ export async function getSafeSession (sb) {
 
   _sessionPromise = (async () => {
     try {
+<<<<<<< HEAD
       // Supabase internal retry logic usually handles this, 
       // but we add our own guard to catch leaks
       const { data, error } = await sb.auth.getSession()
@@ -131,6 +176,15 @@ export async function getSafeSession (sb) {
     } catch (err) {
       if (!err.message?.includes('lock')) {
         logger.error('Session check failed', { error: err.message })
+=======
+      const session = await readSessionWithRetry(sb)
+      return session?.user || null
+    } catch (err) {
+      if (!isAuthLockError(err)) {
+        logger.error('Session check failed', { error: err.message })
+      } else {
+        logger.warn('Suppressed Auth Lock Error', { error: err.message })
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
       }
       return null
     } finally {
@@ -142,6 +196,22 @@ export async function getSafeSession (sb) {
   return _sessionPromise
 }
 
+<<<<<<< HEAD
+=======
+export async function getSafeSessionData (sb) {
+  try {
+    return await readSessionWithRetry(sb)
+  } catch (err) {
+    if (!isAuthLockError(err)) {
+      logger.error('Session read failed', { error: err.message })
+    } else {
+      logger.warn('Returning null session after transient auth lock retries', { error: err.message })
+    }
+    return null
+  }
+}
+
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 /* ── Resource Fetching (Unified) ── */
 
 export async function getResources ({ type = '', search = '', branch = '', semester = '', subject = '', page = 1, limit = 12 } = {}) {

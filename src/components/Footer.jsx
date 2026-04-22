@@ -26,7 +26,11 @@ export default function Footer () {
     <footer>
       <div className='footer-inner' style={{ gridTemplateColumns: '1.5fr 1fr 1.2fr' }}>
         <div className='footer-brand'>
+<<<<<<< HEAD
           <Link to='/' className='nav-logo'>📚 StudyHub</Link>
+=======
+          <Link to='/' className='nav-logo'>📚 StudyHub RGPV</Link>
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
           <p>Free Notes, Syllabus &amp; PYQ for all RGPV Diploma students. Built with ❤️ for engineering students.</p>
           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
             <span className='footer-badge'>📍 RGPV Bhopal</span>

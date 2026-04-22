@@ -23,7 +23,11 @@ export default function Home () {
 
   return (
     <>
+<<<<<<< HEAD
       <SEO title='RGPV Study Hub' description='One-stop portal for RGPV Study Hub notes, pyq and syllabus.' urlPath="/" />
+=======
+      <SEO title='RGPV Study Hub' description='One-stop portal for RGPV Diploma notes, pyq and syllabus.' urlPath="/" />
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 
       {/* ── Hero ── */}
       <section className='hero' aria-label='Hero'>
@@ -34,8 +38,13 @@ export default function Home () {
           <div className='hero-grid' />
         </div>
         <div className='hero-content'>
+<<<<<<< HEAD
           <div className='hero-badge'><span aria-hidden='true'>🟢</span><span>Free for all RGPV Students</span></div>
           <h1 className='hero-title'>RGPV<br /><span className='gradient-text'>Study Hub</span></h1>
+=======
+          <div className='hero-badge'><span aria-hidden='true'>🟢</span><span>Free for all RGPV Diploma Students</span></div>
+          <h1 className='hero-title'>RGPV Diploma<br /><span className='gradient-text'>Study Hub</span></h1>
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
           <p className='hero-subtitle'>
             Your one-stop resource for <strong style={{ color: 'var(--accent-blue)' }}>all branches</strong>
             <br />Notes, Syllabus &amp; Previous Year Questions
@@ -76,7 +85,11 @@ export default function Home () {
         <div className='section-header fade-in-up'>
           <div className='section-label'>What We Offer</div>
           <h2 className='section-title' id='offers-heading'>Everything You Need to Ace Your Exams 🎯</h2>
+<<<<<<< HEAD
           <p className='section-desc'>Handpicked resources for RGPV — organized by branch and semester</p>
+=======
+          <p className='section-desc'>Handpicked resources for RGPV Diploma — organized by branch and semester</p>
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
         </div>
         <div className='feature-cards'>
           <Link to='/notes' className='feature-card notes fade-in-up'>
@@ -88,7 +101,11 @@ export default function Home () {
           <Link to='/syllabus' className='feature-card syllabus fade-in-up'>
             <div className='card-icon syllabus-icon' aria-hidden='true'>📋</div>
             <div className='card-title'>Syllabus</div>
+<<<<<<< HEAD
             <div className='card-desc'>Official RGPV syllabus with topic-wise breakdowns.</div>
+=======
+            <div className='card-desc'>Official RGPV Diploma syllabus with topic-wise breakdowns.</div>
+>>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
             <div className='card-meta'><span className='card-tag'>All Branches</span><div className='card-arrow' aria-hidden='true'>→</div></div>
           </Link>
           <Link to='/pyq' className='feature-card pyq fade-in-up'>
