@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import Layout from './components/Layout'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { LoadingSpinner } from './components/States'
@@ -67,6 +68,7 @@ export default function App () {
           </Route>
         </Routes>
       </Suspense>
+      <SpeedInsights />
     </ErrorBoundary>
   )
 }
