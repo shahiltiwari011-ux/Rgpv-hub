@@ -53,6 +53,11 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'online', timestamp: new Date().toISOString() });
 });
 
+// Test route
+app.get('/api/test', (req, res) => {
+    res.json({ message: "API is working ✅" });
+});
+
 app.post('/api/result', async (req, res) => {
     const { enroll, sem, captcha, sessionId } = req.body;
     const url = 'https://www.rgpvdiploma.in/exam/DiplomaIIIYrResult.aspx';
