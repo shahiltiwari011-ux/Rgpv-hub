@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react'
-import { supabase, isSupabaseReady } from '../services/supabaseClient'
+import { supabase, isSupabaseReady, checkSupabaseConnection } from '../services/supabaseClient'
 import { fetchWithTimeout, getSafeSession, getSafeSessionData, isAuthLockError } from '../services/api'
 
 const AuthContext = createContext(null)
@@ -9,6 +9,7 @@ export function AuthProvider ({ children }) {
   const [profile, setProfile] = useState(null)
   const [role, setRole] = useState('user')
   const [loading, setLoading] = useState(true)
+  const [isConnected, setIsConnected] = useState(true)
   const checkInAttempted = useRef(false)
   const initStarted = useRef(false)
 
@@ -134,6 +135,9 @@ export function AuthProvider ({ children }) {
     }
 
     _initAuth()
+    
+    // Initial connectivity check
+    checkSupabaseConnection().then(setIsConnected)
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || event === 'USER_DELETED' || !session) {
@@ -207,42 +211,12 @@ export function AuthProvider ({ children }) {
     logout,
     // SECURITY: isAdmin derived ONLY from database role — no email bypass
     isAdmin: role === 'admin',
+    isConnected,
     refreshProfile: () => user && _fetchProfile(user.id)
   }
 
-  if (!isSupabaseReady()) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '100vh', 
-        padding: '2rem',
-        textAlign: 'center',
-        background: 'var(--bg-primary)',
-        color: 'var(--text-primary)',
-        fontFamily: 'system-ui'
-      }}>
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>⚙️</div>
-        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>System Configuration Required</h1>
-        <p style={{ maxWidth: '500px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          The application setup is incomplete. Database connection keys are missing from the environment.
-        </p>
-        <div style={{ 
-          marginTop: '2rem', 
-          padding: '1rem', 
-          background: 'rgba(239, 68, 68, 0.1)', 
-          border: '1px solid rgba(239, 68, 68, 0.2)', 
-          borderRadius: '12px',
-          fontSize: '0.9rem',
-          color: '#ef4444'
-        }}>
-          <strong>Action Required:</strong> Please set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in your deployment dashboard or local <code>.env</code> file.
-        </div>
-      </div>
-    )
-  }
+  // Note: We no longer block the entire app if Supabase is missing.
+  // The app will gracefully fall back to mock data in Offline Mode.
 
   return (
     <AuthContext.Provider value={value}>

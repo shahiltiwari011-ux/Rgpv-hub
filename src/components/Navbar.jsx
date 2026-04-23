@@ -17,7 +17,7 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const { pathname } = useLocation();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, logout, isConnected } = useAuth();
   const { dark, toggle } = useDarkMode();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -58,6 +58,12 @@ export default function Navbar() {
         <div className="nav-actions">
           <div className="streak-wrap">
             <StreakBadge />
+          </div>
+
+          {/* Connectivity Indicator */}
+          <div className={`connectivity-status ${isConnected ? 'online' : 'offline'}`} title={isConnected ? 'Cloud Sync Active' : 'Offline Mode (Local Cache)'}>
+            <span className="status-dot"></span>
+            <span className="status-label desktop-only">{isConnected ? 'LIVE' : 'OFFLINE'}</span>
           </div>
 
           <button onClick={toggle} className="theme-toggle">
@@ -170,6 +176,28 @@ export default function Navbar() {
         .mobile-logout, .mobile-login { width: 100%; padding: 1rem; border-radius: 1rem; border: none; font-weight: 900; font-size: 1rem; cursor: pointer; text-align: center; text-decoration: none; display: block; }
         .mobile-logout { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
         .mobile-login { background: #fff; color: #000; }
+
+        /* Connectivity Indicator Styles */
+        .connectivity-status { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; transition: 0.3s; cursor: help; }
+        .connectivity-status:hover { background: rgba(255, 255, 255, 0.06); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; }
+        .status-dot::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; opacity: 0.4; animation: status-pulse 2s infinite; }
+        
+        .online .status-dot { background: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+        .online .status-dot::after { background: #10b981; }
+        .online .status-label { color: #10b981; }
+
+        .offline .status-dot { background: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+        .offline .status-dot::after { background: #f59e0b; }
+        .offline .status-label { color: #f59e0b; }
+
+        .status-label { font-size: 0.65rem; font-weight: 900; letter-spacing: 1px; }
+
+        @keyframes status-pulse {
+          0% { transform: scale(1); opacity: 0.4; }
+          70% { transform: scale(2.5); opacity: 0; }
+          100% { transform: scale(1); opacity: 0; }
+        }
       `}</style>
     </nav>
   );

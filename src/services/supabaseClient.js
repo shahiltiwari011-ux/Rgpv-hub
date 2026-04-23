@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim()
 const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
 
+console.log('DEBUG: Supabase URL:', supabaseUrl)
+console.log('DEBUG: Supabase Key Length:', supabaseAnonKey.length)
+
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error(
     '🚨 CONFIG ERROR: Supabase credentials are missing!\n' +
@@ -35,4 +38,26 @@ export const supabase =
     })
     : null
 
-export const isSupabaseReady = () => supabase !== null
+export const isSupabaseReady = () => {
+  return !!(supabase && supabaseUrl && supabaseAnonKey)
+}
+
+/**
+ * Checks if the Supabase project is reachable
+ * @returns {Promise<boolean>}
+ */
+export async function checkSupabaseConnection() {
+  if (!supabase) return false
+  try {
+    // Try a simple ping to a common table
+    const { error } = await supabase.from('notes').select('id', { count: 'exact', head: true }).limit(1)
+    if (error) {
+      console.warn('Supabase connectivity check failed:', error.message)
+      return false
+    }
+    return true
+  } catch (err) {
+    console.error('Supabase connection exception:', err.message)
+    return false
+  }
+}
