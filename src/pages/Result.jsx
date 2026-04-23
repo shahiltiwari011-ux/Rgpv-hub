@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { fetchProxyResult, getBackendHealth } from '../services/api';
 
 const Result = () => {
     const [enrollment, setEnrollment] = useState('');
@@ -12,21 +13,13 @@ const Result = () => {
     const [error, setError] = useState(null);
     const [serverStatus, setServerStatus] = useState('checking');
 
-    // Use hostname from window for mobile testing on same network
-    const API_BASE = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000`;
-
     useEffect(() => {
         const checkHealth = async () => {
-            try {
-                const res = await fetch(`${API_BASE}/api/health`);
-                if (res.ok) setServerStatus('online');
-                else setServerStatus('offline');
-            } catch (e) {
-                setServerStatus('offline');
-            }
+            const data = await getBackendHealth();
+            setServerStatus(data.status === 'online' ? 'online' : 'offline');
         };
         checkHealth();
-    }, [API_BASE]);
+    }, []);
 
     const checkResult = async (e, submittedCaptcha = '') => {
         if (e) e.preventDefault();
@@ -43,18 +36,8 @@ const Result = () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE}/api/result`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    enroll: enrollTrim, 
-                    sem: semester,
-                    captcha: submittedCaptcha,
-                    sessionId: sessionId
-                })
-            });
-
-            const data = await response.json();
+            const data = await fetchProxyResult(enrollTrim, semester, submittedCaptcha, sessionId);
+            
             if (data.success) {
                 setResult(data.data);
                 setCaptchaImg(null);

@@ -738,3 +738,48 @@ export async function logSystemError (message, metadata = {}) {
     // Never crash the app from logging
   }
 }
+
+/* ── Express Backend API (Railway) ── */
+
+const PROXY_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+export async function fetchProxyResult(enroll, sem, captcha = null, sessionId = null) {
+  try {
+    const response = await fetch(`${PROXY_API_URL}/api/result`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ enroll, sem, captcha, sessionId })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch result');
+    }
+
+    return data;
+  } catch (error) {
+    logger.error('Proxy result fetch failed', { error: error.message });
+    throw error;
+  }
+}
+
+export async function getBackendHealth() {
+  try {
+    const response = await fetch(`${PROXY_API_URL}/api/health`);
+    return await response.json();
+  } catch {
+    return { status: 'offline' };
+  }
+}
+
+export async function getBackendTest() {
+  try {
+    const response = await fetch(`${PROXY_API_URL}/api/test`);
+    return await response.json();
+  } catch {
+    return { message: 'Backend unreachable' };
+  }
+}
