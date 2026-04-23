@@ -58,7 +58,7 @@ export default function Profile () {
       </div>
 
       <section style={{ maxWidth: 1000, margin: '0 auto 6rem', padding: '0 1.5rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '2rem' }}>
 
           {/* Stats Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

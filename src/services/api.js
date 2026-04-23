@@ -741,7 +741,24 @@ export async function logSystemError (message, metadata = {}) {
 
 /* ── Express Backend API (Railway) ── */
 
-const PROXY_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const getApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && envUrl.startsWith('http')) return envUrl;
+  
+  // Intelligent local fallback
+  if (typeof window !== 'undefined') {
+    const { hostname } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:5000';
+    }
+  }
+  
+  // Production default (Railway)
+  return 'https://rgpv-hub-production.up.railway.app';
+};
+
+const PROXY_API_URL = getApiUrl();
+console.log('Final Proxy API URL:', PROXY_API_URL);
 
 export async function fetchProxyResult(enroll, sem, captcha = null, sessionId = null) {
   try {
@@ -769,8 +786,10 @@ export async function fetchProxyResult(enroll, sem, captcha = null, sessionId = 
 export async function getBackendHealth() {
   try {
     const response = await fetch(`${PROXY_API_URL}/api/health`);
-    return await response.json();
-  } catch {
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Health check failed:', err.message);
     return { status: 'offline' };
   }
 }

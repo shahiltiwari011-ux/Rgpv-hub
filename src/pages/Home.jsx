@@ -185,7 +185,7 @@ export default function Home() {
         .hero-badge span { font-size: clamp(0.6rem, 2.5vw, 0.75rem); font-weight: 900; letter-spacing: 3px; color: #3b82f6; }
         .hero-main-title { 
           font-family: 'Syne', sans-serif; 
-          font-size: clamp(3rem, 18vw, 10rem); 
+          font-size: clamp(2.5rem, 15vw, 10rem); 
           font-weight: 800; 
           line-height: 0.85; 
           margin: 0; 
@@ -194,14 +194,15 @@ export default function Home() {
           justify-content: center;
           align-items: center;
           width: 100%;
+          word-break: break-all;
         }
         .hero-main-title span { color: #3b82f6; text-shadow: 0 0 80px rgba(59, 130, 246, 0.4); }
-        .hero-lead { font-size: clamp(0.95rem, 4vw, 1.3rem); color: #94a3b8; margin: 1.5rem 0 2.5rem; line-height: 1.5; font-weight: 500; max-width: 700px; }
-        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%; }
+        .hero-lead { font-size: clamp(0.9rem, 4.5vw, 1.2rem); color: #94a3b8; margin: 1.5rem 0 2.5rem; line-height: 1.5; font-weight: 500; max-width: 700px; padding: 0 1rem; }
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%; padding: 0 1rem; }
 
-        .btn-glow-blue { padding: 1.1rem 2rem; background: #3b82f6; color: #fff; text-decoration: none; border-radius: 1.25rem; font-weight: 900; font-size: 0.95rem; transition: 0.3s; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3); white-space: nowrap; flex: 1; max-width: 280px; text-align: center; }
+        .btn-glow-blue { padding: 1.1rem 2rem; background: #3b82f6; color: #fff; text-decoration: none; border-radius: 1.25rem; font-weight: 900; font-size: 0.95rem; transition: 0.3s; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3); white-space: nowrap; flex: 1; min-width: 200px; max-width: 280px; text-align: center; }
         .btn-glow-blue:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(59, 130, 246, 0.4); }
-        .btn-glass { padding: 1.1rem 2rem; background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; border-radius: 1.25rem; font-weight: 900; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: 0.3s; white-space: nowrap; flex: 1; max-width: 280px; text-align: center; }
+        .btn-glass { padding: 1.1rem 2rem; background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; border-radius: 1.25rem; font-weight: 900; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: 0.3s; white-space: nowrap; flex: 1; min-width: 200px; max-width: 280px; text-align: center; }
         .btn-glass:hover { background: rgba(255,255,255,0.1); transform: translateY(-5px); }
 
         .global-metrics { max-width: 1200px; margin: 0 auto; padding: 0 var(--container-px); position: relative; z-index: 10; }

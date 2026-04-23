@@ -111,10 +111,11 @@ function ResourceCard ({
           marginTop: '1rem',
           paddingTop: '1rem',
           borderTop: '1px solid var(--border)',
-          marginBottom: '1rem'
+          marginBottom: '1rem',
+          flexWrap: 'wrap'
         }}
       >
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <HelpfulVote resourceId={item.id} />
           <button
             className={`vote-btn ${showComments ? 'active' : ''}`}
@@ -136,7 +137,7 @@ function ResourceCard ({
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto', background: 'rgba(251, 191, 36, 0.05)', padding: '0.4rem 0.6rem', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(251, 191, 36, 0.05)', padding: '0.4rem 0.6rem', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.1)', flexShrink: 0 }}>
           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fbbf24' }}>
             ★ {ratingInfo.average > 0 ? ratingInfo.average : '0.0'}
           </div>

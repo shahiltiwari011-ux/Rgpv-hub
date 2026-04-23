@@ -20,10 +20,10 @@ export function EmptyState ({ icon = '📭', title = 'Nothing here yet', message
       <h3 className='state-title'>{title}</h3>
       <p className='state-message'>{message}</p>
       <style jsx>{`
-        .state-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; background: rgba(255,255,255,0.02); border-radius: 2rem; margin: 2rem; border: 1px solid rgba(255,255,255,0.05); }
-        .state-icon { font-size: 4rem; margin-bottom: 1.5rem; filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.2)); }
-        .state-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; color: #fff; }
-        .state-message { color: #64748b; font-weight: 500; max-width: 400px; }
+        .state-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(3rem, 10vw, 5rem) 1.5rem; text-align: center; background: rgba(255,255,255,0.02); border-radius: 2rem; margin: 1rem 0; border: 1px solid rgba(255,255,255,0.05); }
+        .state-icon { font-size: clamp(3rem, 12vw, 4rem); margin-bottom: 1.5rem; filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.2)); }
+        .state-title { font-size: clamp(1.4rem, 6vw, 1.8rem); font-weight: 800; margin-bottom: 0.5rem; color: #fff; }
+        .state-message { color: #64748b; font-weight: 500; max-width: 400px; font-size: 0.95rem; }
       `}</style>
     </div>
   )
