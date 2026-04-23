@@ -122,7 +122,7 @@ export default function Navbar() {
         .projectx-nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 1.5rem 0; }
         .projectx-nav.scrolled { background: rgba(3, 4, 10, 0.8); backdrop-filter: blur(20px); padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         
-        .nav-container { max-width: 1300px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+        .nav-container { max-width: 1300px; margin: 0 auto; padding: 0 var(--container-px); display: flex; align-items: center; justify-content: space-between; }
 
         .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
         .brand-icon { width: 32px; height: 32px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; transform: rotate(10deg); transition: 0.3s; }
@@ -163,7 +163,7 @@ export default function Navbar() {
         .mobile-toggle.open span:nth-child(2) { opacity: 0; }
         .mobile-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-        .mobile-menu { position: fixed; top: 80px; left: 1rem; right: 1rem; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 999; }
+        .mobile-menu { position: fixed; top: calc(var(--nav-height) + 10px); left: 1rem; right: 1rem; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 999; }
         .mobile-link { display: flex; align-items: center; gap: 1rem; padding: 1.2rem; border-radius: 1.2rem; text-decoration: none; color: #94a3b8; font-weight: 700; transition: 0.3s; }
         .mobile-link.active { background: #3b82f615; color: #3b82f6; }
         .mobile-footer { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); }

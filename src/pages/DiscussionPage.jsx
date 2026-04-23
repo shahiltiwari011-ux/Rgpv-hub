@@ -70,9 +70,9 @@ export default function DiscussionPage () {
         </button>
       </div>
 
-      <div className='forum-container' style={{ padding: '0 var(--container-px) 5rem' }}>
+      <div className='forum-container selector-section' style={{ paddingBottom: '5rem' }}>
         {showNewPost && (
-          <form onSubmit={handleSubmit} className='forum-form-box' style={{ padding: 'clamp(1.5rem, 5vw, 2rem)' }}>
+          <form onSubmit={handleSubmit} className='forum-form-box' style={{ padding: 'var(--card-px)', marginBottom: '2rem' }}>
             <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontFamily: 'Syne, sans-serif' }}>Create New Post</h2>
             <div style={{ marginBottom: '1.25rem' }}>
               <input 
@@ -139,8 +139,8 @@ export default function DiscussionPage () {
         {loading ? <LoadingSpinner /> : error ? <ErrorState message={error} /> : posts.length === 0 ? <EmptyState icon='💬' title='No discussions yet' message='Be the first to ask a question!' /> : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {posts.map(post => (
-              <Link to={`/discussion/${post.id}`} key={post.id} className='forum-post-card' style={{ padding: 'clamp(1.25rem, 4vw, 1.75rem)' }}>
-                <h3 className='forum-title' style={{ fontSize: 'clamp(1.1rem, 4vw, 1.25rem)' }}>{post.title}</h3>
+              <Link to={`/discussion/${post.id}`} key={post.id} className='forum-post-card'>
+                <h3 className='forum-title'>{post.title}</h3>
                 <div className='forum-meta'>
                   <div className='forum-author-tag'>
                     <div className='forum-author-avatar'>

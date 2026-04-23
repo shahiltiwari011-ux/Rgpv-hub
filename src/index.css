@@ -59,6 +59,7 @@
   --gap-section: 2rem;
   --gap-grid: 1rem;
   --container-px: 1rem;
+  --card-px: clamp(1.25rem, 4vw, 1.75rem);
   --nav-height: 64px;
 }
 
@@ -1731,7 +1732,7 @@ footer {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 1.75rem;
+  padding: var(--card-px);
   margin-bottom: 1.25rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -1756,7 +1757,7 @@ footer {
 
 .forum-title {
   font-family: 'Syne', sans-serif;
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 5vw, 1.35rem);
   font-weight: 700;
   margin-bottom: 0.75rem;
   color: var(--text-primary);

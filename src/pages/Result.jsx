@@ -363,12 +363,21 @@ const Result = () => {
                 .print-button:hover { background: #3b82f6; color: #fff; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
 
                 @media (max-width: 768px) {
-                    .transcript-container { padding: 1.5rem; }
-                    th, td { padding: 0.75rem; font-size: 0.8rem; }
-                    .identity-table td:first-child { width: 40%; }
-                    .summary-table td { font-size: 1rem; }
-                    .summary-table .highlight-val { font-size: 1.4rem; }
-                    .transcript-footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+                    .portal-container { padding-top: 6rem; }
+                    .portal-logo { font-size: clamp(2.5rem, 12vw, 3.5rem); letter-spacing: -2px; }
+                    .search-panel { padding: 1.5rem; border-radius: 1.5rem; }
+                    .search-grid { gap: 1rem; }
+                    .action-button { height: 56px; font-size: 0.9rem; }
+                    .transcript-container { padding: 1.25rem; border-radius: 1.5rem; }
+                    th, td { padding: 0.6rem; font-size: 0.75rem; }
+                    .identity-table td:first-child { width: 35%; }
+                    .summary-table td { font-size: 0.9rem; }
+                    .summary-table .highlight-val { font-size: 1.25rem; }
+                    .transcript-footer { flex-direction: column; gap: 1.25rem; text-align: center; }
+                    .section-header-pill { font-size: 0.7rem; padding: 0.4rem 1rem; margin-bottom: 1rem; }
+                    .image-box { gap: 0.5rem; padding: 0.4rem; }
+                    .image-box img { height: 35px; }
+                    .input-box input { width: 120px; padding: 0.8rem; font-size: 1rem; }
                 }
 
                 .scanning-overlay { position: absolute; inset: 0; background: rgba(3, 4, 10, 0.8); backdrop-filter: blur(10px); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 2.5rem; overflow: hidden; }
