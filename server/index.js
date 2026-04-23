@@ -13,7 +13,6 @@ dotenv.config();
 
 const app = express();
 
-// Updated CORS to be more permissive for local development
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST'],
@@ -31,8 +30,20 @@ const sessionStore = new Map();
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
 
-// Health check for frontend
-app.get('/api/health', (req, res) => res.json({ status: 'online' }));
+// Clean up stale sessions every 10 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, session] of sessionStore.entries()) {
+        if (now - session.timestamp > 10 * 60 * 1000) {
+            sessionStore.delete(key);
+        }
+    }
+}, 10 * 60 * 1000);
+
+// Health check
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'online', timestamp: new Date().toISOString() });
+});
 
 app.post('/api/result', async (req, res) => {
     const { enroll, sem, captcha, sessionId } = req.body;
@@ -126,14 +137,13 @@ app.post('/api/result', async (req, res) => {
                         const tCredit = $res(cols[1]).text().trim();
                         const eCredit = $res(cols[2]).text().trim();
                         const grade = $res(cols[3]).text().trim();
-                        
-                        // Strict filtering for academic subjects
-                        const isSubjectRow = code && grade && 
-                                           !code.toLowerCase().includes('paper') && 
-                                           !code.toLowerCase().includes('roll') &&
-                                           !code.toLowerCase().includes('enroll') &&
-                                           !code.toLowerCase().includes('semester') &&
-                                           code.length < 15; // Subject codes are usually short
+
+                        const isSubjectRow = code && grade &&
+                            !code.toLowerCase().includes('paper') &&
+                            !code.toLowerCase().includes('roll') &&
+                            !code.toLowerCase().includes('enroll') &&
+                            !code.toLowerCase().includes('semester') &&
+                            code.length < 15;
 
                         if (isSubjectRow) {
                             subjects.push({ code, tCredit, eCredit, grade });
@@ -173,20 +183,31 @@ app.post('/api/result', async (req, res) => {
 
         const resultData = { ...studentInfo, semester: sem, subjects, summary, timestamp: new Date().toISOString() };
         sessionStore.delete(currentSessionId);
-        
+
         if (supabase) {
-            try { await supabase.from('results_cache').upsert({ enrollment: enroll, result_data: resultData, updated_at: new Date() }); } catch (e) {}
+            try {
+                await supabase.from('results_cache').upsert({
+                    enrollment: enroll,
+                    result_data: resultData,
+                    updated_at: new Date()
+                });
+            } catch (e) {
+                // Non-critical — don't fail the request if cache fails
+                console.warn('Cache write failed:', e.message);
+            }
         }
+
         res.json({ success: true, data: resultData });
 
     } catch (error) {
-        res.status(500).json({ success: false, type: 'server_error' });
+        console.error('Result fetch error:', error.message);
+        res.status(500).json({ success: false, type: 'server_error', message: error.message });
     }
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Local access: http://localhost:${PORT}`);
-    console.log(`Network access: http://0.0.0.0:${PORT}`);
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`   Local:   http://localhost:${PORT}`);
+    console.log(`   Network: http://0.0.0.0:${PORT}`);
 });
