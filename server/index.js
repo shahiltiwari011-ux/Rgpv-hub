@@ -43,6 +43,11 @@ setInterval(() => {
     }
 }, 10 * 60 * 1000);
 
+// Root route — required for Railway health check
+app.get('/', (req, res) => {
+    res.json({ status: 'RGPV Hub API is running', timestamp: new Date().toISOString() });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'online', timestamp: new Date().toISOString() });
