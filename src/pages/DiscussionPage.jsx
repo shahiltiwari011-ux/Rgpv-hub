@@ -70,9 +70,9 @@ export default function DiscussionPage () {
         </button>
       </div>
 
-      <div className='forum-container'>
+      <div className='forum-container' style={{ padding: '0 var(--container-px) 5rem' }}>
         {showNewPost && (
-          <form onSubmit={handleSubmit} className='forum-form-box'>
+          <form onSubmit={handleSubmit} className='forum-form-box' style={{ padding: 'clamp(1.5rem, 5vw, 2rem)' }}>
             <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontFamily: 'Syne, sans-serif' }}>Create New Post</h2>
             <div style={{ marginBottom: '1.25rem' }}>
               <input 
@@ -83,7 +83,7 @@ export default function DiscussionPage () {
                 required
               />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
               <select className='form-input' value={newPost.branch} onChange={e => setNewPost({...newPost, branch: e.target.value})}>
                 {BRANCHES.map(b => <option key={b} value={b}>{b} Branch</option>)}
               </select>
@@ -139,19 +139,21 @@ export default function DiscussionPage () {
         {loading ? <LoadingSpinner /> : error ? <ErrorState message={error} /> : posts.length === 0 ? <EmptyState icon='💬' title='No discussions yet' message='Be the first to ask a question!' /> : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {posts.map(post => (
-              <Link to={`/discussion/${post.id}`} key={post.id} className='forum-post-card'>
-                <h3 className='forum-title'>{post.title}</h3>
+              <Link to={`/discussion/${post.id}`} key={post.id} className='forum-post-card' style={{ padding: 'clamp(1.25rem, 4vw, 1.75rem)' }}>
+                <h3 className='forum-title' style={{ fontSize: 'clamp(1.1rem, 4vw, 1.25rem)' }}>{post.title}</h3>
                 <div className='forum-meta'>
                   <div className='forum-author-tag'>
                     <div className='forum-author-avatar'>
                       {(post.profiles?.full_name || post.profiles?.name || 'A').charAt(0).toUpperCase()}
                     </div>
-                    <span>{post.profiles?.full_name || post.profiles?.name || 'Anonymous'}</span>
+                    <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {post.profiles?.full_name || post.profiles?.name || 'Anonymous'}
+                    </span>
                   </div>
-                  <span>·</span>
-                  <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                  {post.branch && <span className='forum-badge'>{post.branch}</span>}
-                  {post.semester && <span className='forum-badge'>Sem {post.semester}</span>}
+                  <span className="desktop-only">·</span>
+                  <span style={{ fontSize: '0.75rem' }}>{new Date(post.created_at).toLocaleDateString()}</span>
+                  {post.branch && <span className='forum-badge' style={{ fontSize: '0.7rem' }}>{post.branch}</span>}
+                  {post.semester && <span className='forum-badge' style={{ fontSize: '0.7rem' }}>Sem {post.semester}</span>}
                 </div>
               </Link>
             ))}

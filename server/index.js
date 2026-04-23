@@ -156,10 +156,14 @@ app.post('/api/result', async (req, res) => {
                             !code.toLowerCase().includes('roll') &&
                             !code.toLowerCase().includes('enroll') &&
                             !code.toLowerCase().includes('semester') &&
+                            !code.toLowerCase().includes('subject') &&
                             code.length < 15;
 
                         if (isSubjectRow) {
-                            subjects.push({ code, tCredit, eCredit, grade });
+                            // De-duplicate: Ensure we only show one entry per subject code
+                            if (!subjects.some(s => s.code === code)) {
+                                subjects.push({ code, tCredit, eCredit, grade });
+                            }
                         }
                     }
                 });
@@ -167,27 +171,68 @@ app.post('/api/result', async (req, res) => {
         });
 
         $res('table').each((i, table) => {
-            const text = $res(table).text();
-            if (text.includes('SGPA') && text.includes('Result Des')) {
-                $res(table).find('tr').each((j, row) => {
-                    const cols = $res(row).find('td');
-                    const rText = $res(row).text();
-                    if (rText.includes('SGPA')) {
-                        summary.sgpa = $res(cols[1]).text().trim();
-                        summary.cgpa = $res(cols[2]).text().trim();
+            const rows = $res(table).find('tr');
+            rows.each((j, row) => {
+                const rText = $res(row).text().toUpperCase();
+                const cols = $res(row).find('td');
+
+                if (rText.includes('SGPA') && rText.includes('CGPA')) {
+                    // This is likely the header or the data row itself
+                    // Check if this row has numbers
+                    const v1 = $res(cols[1]).text().trim();
+                    const v2 = $res(cols[2]).text().trim();
+
+                    if (!isNaN(parseFloat(v1)) && v1 !== '0') {
+                        summary.sgpa = v1;
+                        summary.cgpa = v2;
+                    } else {
+                        const nextRow = rows.eq(j + 1);
+                        if (nextRow.length) {
+                            const nCols = nextRow.find('td');
+                            const nv1 = $res(nCols[1]).text().trim();
+                            const nv2 = $res(nCols[2]).text().trim();
+                            if (!isNaN(parseFloat(nv1))) {
+                                summary.sgpa = nv1;
+                                summary.cgpa = nv2;
+                            }
+                        }
                     }
-                    if (rText.includes('PASS') || rText.includes('FAIL')) {
-                        summary.resultDes = $res(cols[0]).text().trim();
+                }
+                
+                if (rText.includes('PASS') || rText.includes('FAIL')) {
+                    summary.resultDes = $res(cols[0]).text().trim();
+                }
+                
+                if (rText.includes('DIVISION') || rText.includes('REVALUATION DATE')) {
+                    const divText = $res(cols[cols.length - 1]).text().trim();
+                    if (divText && !divText.toUpperCase().includes('DIVISION')) {
+                        summary.division = divText;
                     }
-                    if (rText.includes('Revaluation Date')) {
-                        summary.division = $res(cols[2]).text().trim();
-                    }
-                    if (rText.match(/\d{2}\/\d{2}\/\d{4}/)) {
-                        summary.revalDate = $res(cols[0]).text().trim();
-                    }
-                });
-            }
+                }
+            });
         });
+
+        // Final fallback for SGPA/CGPA if still empty (aggressive regex search)
+        if (!summary.sgpa || summary.sgpa === 'SGPA') {
+            // Match things like "SGPA : 7.88" or "SGPA 7.88" or within a table cell
+            const sgpaMatch = postResponse.data.match(/SGPA[:\s\t]+([0-9\.]+)/i);
+            if (sgpaMatch && sgpaMatch[1] !== '0') summary.sgpa = sgpaMatch[1];
+        }
+        if (!summary.cgpa || summary.cgpa === 'CGPA') {
+            const cgpaMatch = postResponse.data.match(/CGPA[:\s\t]+([0-9\.]+)/i);
+            if (cgpaMatch && cgpaMatch[1] !== '0') summary.cgpa = cgpaMatch[1];
+        }
+
+        // Even more aggressive: search for any cell containing SGPA then get sibling text
+        if (!summary.sgpa) {
+            $res('td, span, div').each((i, el) => {
+                const text = $res(el).text().trim();
+                if (text === 'SGPA' || text.includes('SGPA:')) {
+                    const val = $res(el).next().text().trim() || $res(el).parent().find('td').eq(1).text().trim();
+                    if (!isNaN(parseFloat(val)) && val !== '0') summary.sgpa = val;
+                }
+            });
+        }
 
         if (subjects.length === 0) {
             sessionStore.delete(currentSessionId);

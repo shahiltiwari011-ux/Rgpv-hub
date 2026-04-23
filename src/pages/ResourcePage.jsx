@@ -51,7 +51,8 @@ export default function ResourcePage ({ type }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const initialBranch = searchParams.get('branch') || ''
-  const { data, isPending, error, filters, totalPages, count, updateFilter, refetch } = useResources(type, { branch: initialBranch })
+  const { data, isPending, error, filters, totalPages, count, updateFilter, refetch, isMock } = useResources(type, { branch: initialBranch })
+
   const { user, isAdmin } = useAuth()
   const [searchTerm, setSearchTerm] = useState(filters.search)
   const [ratingsByResource, setRatingsByResource] = useState({})
@@ -79,20 +80,24 @@ export default function ResourcePage ({ type }) {
   }, [filters.branch, searchParams, setSearchParams])
 
   const refreshRatings = useCallback(async () => {
-    if (!data.length) {
+    if (!data.length || isMock) {
       setRatingsByResource({})
       setUserRatingsByResource({})
       return
     }
 
-    const { ratingsByResource: nextRatings, userRatingsByResource: nextUserRatings } = await getResourceRatingsBatch(
-      data.map(item => item.id),
-      user?.id || null
-    )
+    try {
+      const { ratingsByResource: nextRatings, userRatingsByResource: nextUserRatings } = await getResourceRatingsBatch(
+        data.map(item => item.id),
+        user?.id || null
+      )
 
-    setRatingsByResource(nextRatings)
-    setUserRatingsByResource(nextUserRatings)
-  }, [data, user?.id])
+      setRatingsByResource(nextRatings)
+      setUserRatingsByResource(nextUserRatings)
+    } catch (err) {
+      console.warn('Ratings fetch failed in offline/error mode')
+    }
+  }, [data, user?.id, isMock])
 
   useEffect(() => {
     refreshRatings()
@@ -114,6 +119,27 @@ export default function ResourcePage ({ type }) {
         description={config.seoDescription}
         urlPath={`/${type === 'pyq' ? 'pyq' : type}`}
       />
+      
+      {isMock && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.15)',
+          color: '#fca5a5',
+          padding: '0.75rem 1rem',
+          textAlign: 'center',
+          fontSize: '0.85rem',
+          fontWeight: 600,
+          borderBottom: '1px solid rgba(239, 68, 68, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem'
+        }}>
+          <span>📡</span>
+          <span>Offline Mode: Using local fallback data. Database connection is down.</span>
+          <button onClick={refetch} style={{ background: 'white', color: 'black', border: 'none', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer', marginLeft: '1rem' }}>RETRY</button>
+        </div>
+      )}
+
       <div className='page-hero'>
         <span className='page-hero-icon'>{config.icon}</span>
         <h1 className='page-hero-title'>{config.title}</h1>

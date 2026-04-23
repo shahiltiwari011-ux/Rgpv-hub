@@ -52,26 +52,26 @@ export default function Dashboard () {
         <p className='page-hero-sub'>{user ? `Welcome back, ${user.email}` : 'Access your saved resources'}</p>
       </div>
 
-      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem 4rem' }}>
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 var(--container-px) 4rem' }}>
         {user ? (
           <div style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--border)',
-            borderRadius: 32,
-            padding: '4rem 2rem',
+            borderRadius: 'var(--radius-lg)',
+            padding: 'clamp(2rem, 8vw, 4rem) clamp(1rem, 5vw, 2rem)',
             textAlign: 'center',
             backdropFilter: 'blur(16px)',
             boxShadow: 'var(--shadow-xl)',
             marginTop: '2rem'
           }}>
             <div style={{
-              fontSize: '4rem',
+              fontSize: 'clamp(3rem, 10vw, 4rem)',
               marginBottom: '1.5rem',
               animation: 'bounce 2s infinite'
             }}>🚀</div>
             <h2 style={{
               fontFamily: 'Syne, sans-serif',
-              fontSize: '2.5rem',
+              fontSize: 'clamp(1.75rem, 6vw, 2.5rem)',
               fontWeight: 800,
               marginBottom: '1rem',
               background: 'linear-gradient(135deg, #fff, rgba(255,255,255,0.7))',
@@ -80,7 +80,7 @@ export default function Dashboard () {
             }}>Welcome to ProjectX!</h2>
             <p style={{
               color: 'var(--text-secondary)',
-              fontSize: '1.1rem',
+              fontSize: 'clamp(0.95rem, 3vw, 1.1rem)',
               maxWidth: '600px',
               margin: '0 auto',
               lineHeight: 1.6
@@ -90,6 +90,7 @@ export default function Dashboard () {
             <div style={{
               marginTop: '3rem',
               display: 'flex',
+              flexWrap: 'wrap',
               justifyContent: 'center',
               gap: '1rem'
             }}>
@@ -123,7 +124,7 @@ export default function Dashboard () {
               background: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
               borderRadius: 28,
-              padding: '3rem',
+              padding: 'clamp(1.5rem, 5vw, 3rem)',
               maxWidth: 440,
               width: '100%',
               margin: '0 auto',
@@ -133,7 +134,7 @@ export default function Dashboard () {
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '0.5rem',
+                gap: '0.4rem',
                 padding: '0.4rem',
                 marginBottom: '2rem',
                 background: 'rgba(255, 255, 255, 0.03)',
@@ -146,8 +147,9 @@ export default function Dashboard () {
                   style={{
                     border: 'none',
                     borderRadius: 999,
-                    padding: '0.8rem 1rem',
+                    padding: '0.75rem 0.5rem',
                     fontWeight: 700,
+                    fontSize: '0.9rem',
                     fontFamily: 'inherit',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     background: isSignUp ? 'transparent' : 'linear-gradient(135deg, var(--accent-blue), var(--accent-cyan))',
@@ -163,8 +165,9 @@ export default function Dashboard () {
                   style={{
                     border: 'none',
                     borderRadius: 999,
-                    padding: '0.8rem 1rem',
+                    padding: '0.75rem 0.5rem',
                     fontWeight: 700,
+                    fontSize: '0.9rem',
                     fontFamily: 'inherit',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     background: isSignUp ? 'linear-gradient(135deg, var(--accent-blue), var(--accent-cyan))' : 'transparent',
@@ -176,7 +179,7 @@ export default function Dashboard () {
                 </button>
               </div>
 
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(1.5rem, 5vw, 1.75rem)', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
                 {isSignUp ? 'Elite Registration' : 'Welcome Back'}
               </h3>
               <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '0.95rem' }}>
@@ -278,7 +281,7 @@ export default function Dashboard () {
                       color: 'var(--accent-blue)',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      marginLeft: '0.6rem',
+                      marginLeft: '0.4rem',
                       padding: '0.2rem 0.5rem',
                       borderRadius: 6,
                       transition: 'all 0.2s'

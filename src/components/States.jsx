@@ -34,8 +34,12 @@ export function ErrorState ({ message, onRetry }) {
     <div className='state-container error-style'>
       <div className='error-glow'></div>
       <div className='state-icon'>⚠️</div>
-      <h3 className='state-title'>Connection Error</h3>
-      <p className='state-message'>{message || 'Failed to sync with the cloud. Please check your internet connection.'}</p>
+      <h3 className='state-title'>{message === 'OFFLINE_MODE' ? 'Database is Asleep' : 'Connection Error'}</h3>
+      <p className='state-message'>
+        {message === 'OFFLINE_MODE' 
+          ? 'The database connection is currently down or paused. We have loaded local fallback data for you.' 
+          : (message || 'Failed to sync with the cloud. Please check your internet connection.')}
+      </p>
       {onRetry && <button className='retry-btn' onClick={onRetry}>RETRY CONNECTION</button>}
       <style jsx>{`
         .state-container { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; min-height: 50vh; overflow: hidden; }

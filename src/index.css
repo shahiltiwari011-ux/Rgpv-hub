@@ -4,7 +4,7 @@
    ================================== */
 
 /* ---------- Visibility Utilities ---------- */
-.mobile-only { display: block; }
+.mobile-only { display: block !important; }
 .desktop-only { display: none !important; }
 
 @media (min-width: 768px) {
@@ -12,6 +12,11 @@
   .desktop-only { display: block !important; }
   .desktop-only.nav-user-group { display: flex !important; }
   .desktop-only.nav-auth-btn { display: inline-flex !important; }
+}
+
+.flex-col-mobile { display: flex; flex-direction: column; }
+@media (min-width: 768px) {
+  .flex-col-mobile { flex-direction: row; }
 }
 
 /* ---------- CSS Variables ---------- */
@@ -51,10 +56,18 @@
 
   /* Global Spacing Grid */
   --gap-hero: 1.5rem;
-  --gap-section: 3rem;
+  --gap-section: 2rem;
   --gap-grid: 1rem;
-  --container-px: 1.25rem;
-  --nav-height: 70px;
+  --container-px: 1rem;
+  --nav-height: 64px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gap-section: 3rem;
+    --container-px: 2rem;
+    --nav-height: 70px;
+  }
 }
 
 [data-theme="dark"] {
@@ -859,17 +872,17 @@ input:-webkit-autofill:active {
 .howto-label { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; }
 
 /* ---------- Page Hero ---------- */
-.page-hero { padding: 7rem 1.5rem 2rem; text-align: center; max-width: 700px; margin: 0 auto; }
-.page-hero-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; animation: bounceIn 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.page-hero { padding: 6rem var(--container-px) 2rem; text-align: center; max-width: 800px; margin: 0 auto; }
+.page-hero-icon { font-size: clamp(2rem, 10vw, 3rem); margin-bottom: 0.75rem; display: block; animation: bounceIn 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 @keyframes bounceIn { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
 .page-hero-title { 
   font-family: 'Syne', sans-serif; 
-  font-size: clamp(1.5rem, 8vw, 3rem); 
+  font-size: clamp(1.75rem, 8vw, 3.5rem); 
   font-weight: 800; 
   letter-spacing: -0.03em; 
-  line-height: 1.2;
+  line-height: 1.1;
 }
-.page-hero-sub { color: var(--text-secondary); margin-top: 0.75rem; font-size: 0.9rem; padding: 0 1rem; }
+.page-hero-sub { color: var(--text-secondary); margin-top: 0.75rem; font-size: clamp(0.85rem, 4vw, 1rem); padding: 0 0.5rem; }
 
 /* ---------- Filter / Selector ---------- */
 .selector-section { max-width: 1200px; margin: 0 auto; padding: 0 1rem 1rem; }
@@ -1848,3 +1861,84 @@ footer {
 }
 [data-theme="light"] .comment-input-sticky { background: rgba(255, 255, 255, 0.95); box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
 
+/* ---------- Shared Responsive Utilities ---------- */
+.selector-section {
+  padding: 2rem var(--container-px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.tab-group {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to right, black 90%, transparent 100%);
+}
+
+.tab-group::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem var(--container-px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .subjects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.page-hero {
+  padding: clamp(4rem, 15vw, 6rem) var(--container-px) 3rem;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.page-hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.25rem, 8vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.page-hero-sub {
+  color: var(--text-secondary);
+  font-size: clamp(0.95rem, 4vw, 1.1rem);
+  font-weight: 500;
+}
