@@ -12,7 +12,14 @@ import { v4 as uuidv4 } from 'uuid';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// Updated CORS to be more permissive for local development
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
 let supabase = null;
@@ -24,12 +31,8 @@ const sessionStore = new Map();
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
 
-setInterval(() => {
-    const now = Date.now();
-    for (const [id, session] of sessionStore.entries()) {
-        if (now - session.timestamp > 10 * 60 * 1000) sessionStore.delete(id);
-    }
-}, 60000);
+// Health check for frontend
+app.get('/api/health', (req, res) => res.json({ status: 'online' }));
 
 app.post('/api/result', async (req, res) => {
     const { enroll, sem, captcha, sessionId } = req.body;
@@ -102,10 +105,8 @@ app.post('/api/result', async (req, res) => {
         let studentInfo = { name: '', enroll: '', branch: '', status: '' };
         let summary = { sgpa: '', cgpa: '', resultDes: '', revalDate: '', division: '' };
 
-        // 1. Student Info
         $res('table').each((i, table) => {
-            const text = $res(table).text();
-            if (text.includes('Name') && text.includes('Roll No')) {
+            if ($res(table).text().includes('Name') && $res(table).text().includes('Roll No')) {
                 $res(table).find('tr').each((j, row) => {
                     const rText = $res(row).text();
                     if (rText.includes('Name')) studentInfo.name = $res(row).find('td').last().text().trim();
@@ -116,7 +117,6 @@ app.post('/api/result', async (req, res) => {
             }
         });
 
-        // 2. Grading Table (Subjects)
         $res('table').each((i, table) => {
             if ($res(table).text().includes('Paper') && $res(table).text().includes('Total Credit')) {
                 $res(table).find('tr').each((j, row) => {
@@ -127,7 +127,15 @@ app.post('/api/result', async (req, res) => {
                         const eCredit = $res(cols[2]).text().trim();
                         const grade = $res(cols[3]).text().trim();
                         
-                        if (code && grade && !code.toLowerCase().includes('paper')) {
+                        // Strict filtering for academic subjects
+                        const isSubjectRow = code && grade && 
+                                           !code.toLowerCase().includes('paper') && 
+                                           !code.toLowerCase().includes('roll') &&
+                                           !code.toLowerCase().includes('enroll') &&
+                                           !code.toLowerCase().includes('semester') &&
+                                           code.length < 15; // Subject codes are usually short
+
+                        if (isSubjectRow) {
                             subjects.push({ code, tCredit, eCredit, grade });
                         }
                     }
@@ -135,7 +143,6 @@ app.post('/api/result', async (req, res) => {
             }
         });
 
-        // 3. Summary Table (SGPA/CGPA)
         $res('table').each((i, table) => {
             const text = $res(table).text();
             if (text.includes('SGPA') && text.includes('Result Des')) {
@@ -168,11 +175,8 @@ app.post('/api/result', async (req, res) => {
         sessionStore.delete(currentSessionId);
         
         if (supabase) {
-            try {
-                await supabase.from('results_cache').upsert({ enrollment: enroll, result_data: resultData, updated_at: new Date() });
-            } catch (e) {}
+            try { await supabase.from('results_cache').upsert({ enrollment: enroll, result_data: resultData, updated_at: new Date() }); } catch (e) {}
         }
-
         res.json({ success: true, data: resultData });
 
     } catch (error) {
@@ -181,4 +185,8 @@ app.post('/api/result', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Local access: http://localhost:${PORT}`);
+    console.log(`Network access: http://0.0.0.0:${PORT}`);
+});

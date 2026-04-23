@@ -61,7 +61,7 @@ export default function ThreadPage () {
 
   return (
     <>
-      <SEO title={post.title} description={post.content.substring(0, 160)} />
+      <SEO title={`${post.title} | PROJECTX Community`} description={post.content.substring(0, 160)} />
       
       <div className='forum-container' style={{ paddingTop: '2rem' }}>
         <button 

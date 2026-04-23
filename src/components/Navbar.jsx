@@ -1,223 +1,176 @@
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { useDarkMode } from '../hooks/useDarkMode'
-import { useState } from 'react'
-import StreakBadge from './StreakBadge'
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useDarkMode } from '../hooks/useDarkMode';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import StreakBadge from './StreakBadge';
 
 const NAV_LINKS = [
   { to: '/', icon: '🏠', label: 'Home' },
   { to: '/notes', icon: '📝', label: 'Notes' },
   { to: '/pyq', icon: '📄', label: 'PYQ' },
   { to: '/syllabus', icon: '📋', label: 'Syllabus' },
-<<<<<<< HEAD
   { to: '/result', icon: '📊', label: 'Results' },
-=======
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
   { to: '/discussions', icon: '💬', label: 'Forum' },
   { to: '/leaderboard', icon: '🏆', label: 'Ranking' }
-]
+];
 
-export default function Navbar () {
-  const { pathname } = useLocation()
-  const { user, isAdmin, logout } = useAuth()
-  const { dark, toggle } = useDarkMode()
-  const [mobileOpen, setMobileOpen] = useState(false)
+export default function Navbar() {
+  const { pathname } = useLocation();
+  const { user, isAdmin, logout } = useAuth();
+  const { dark, toggle } = useDarkMode();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className='navbar' role='navigation' aria-label='Main navigation'>
-      <Link to='/' className='nav-logo'>
-<<<<<<< HEAD
-        <span className='logo-icon' style={{ fontSize: '1.1rem', background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', flexShrink: 0 }}>🔷</span>
-        <span className='logo-text' style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>StudyHub<span style={{ color: 'var(--accent-blue)' }}>.</span></span>
-      </Link>
+    <nav className={`projectx-nav ${scrolled ? 'scrolled' : ''}`}>
+      <div className="nav-container">
+        {/* Logo */}
+        <Link to="/" className="nav-brand" onClick={() => setMobileOpen(false)}>
+          <div className="brand-icon">
+            <div className="icon-inner">X</div>
+          </div>
+          <span className="brand-text">PROJECT<span>X</span></span>
+        </Link>
 
-      <ul className={`nav-links ${mobileOpen ? 'open' : ''}`}>
-        {mobileOpen && (
-          <button className='mobile-close-btn mobile-only' onClick={() => setMobileOpen(false)} aria-label='Close menu'>
-            ✖
-          </button>
-        )}
-        {NAV_LINKS.map((l) => (
-          <li key={l.to}>
-            <Link to={l.to} className={pathname === l.to ? 'active' : ''} onClick={() => setMobileOpen(false)}>
-              {l.icon} <span>{l.label}</span>
-            </Link>
-          </li>
-        ))}
-        {user && (
-          <>
-            <li className='mobile-only'>
-              <Link to='/dashboard' className={pathname === '/dashboard' ? 'active' : ''} onClick={() => setMobileOpen(false)}>
-=======
-        <span
-          className='logo-icon'
-          style={{
-            fontSize: '1.1rem',
-            background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            flexShrink: 0
-          }}
-        >
-          🔷
-        </span>
-        <span className='logo-text' style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
-          StudyHub<span style={{ color: 'var(--accent-blue)' }}>.</span>
-        </span>
-      </Link>
-
-      <ul className={`nav-links ${mobileOpen ? 'open' : ''}`}>
-        {NAV_LINKS.map((link) => (
-          <li key={link.to}>
-            <Link
-              to={link.to}
-              className={pathname === link.to ? 'active' : ''}
-              onClick={() => setMobileOpen(false)}
+        {/* Desktop Links */}
+        <div className="nav-links-desktop">
+          {NAV_LINKS.map((link) => (
+            <Link 
+              key={link.to} 
+              to={link.to} 
+              className={`nav-link ${pathname === link.to ? 'active' : ''}`}
             >
-              {link.icon} <span>{link.label}</span>
+              <span className="link-icon">{link.icon}</span>
+              <span className="link-label">{link.label}</span>
+              {pathname === link.to && <motion.div layoutId="nav-glow" className="active-glow" />}
             </Link>
-          </li>
-        ))}
-
-        {!user && (
-          <li className='mobile-only mobile-nav-action'>
-            <Link
-              to='/dashboard?mode=signup'
-              className='nav-register-btn'
-              onClick={() => setMobileOpen(false)}
-            >
-              Register
-            </Link>
-          </li>
-        )}
-
-        {user && (
-          <>
-            <li className='mobile-only'>
-              <Link
-                to='/dashboard'
-                className={pathname === '/dashboard' ? 'active' : ''}
-                onClick={() => setMobileOpen(false)}
-              >
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
-                📊 <span>Dashboard</span>
-              </Link>
-            </li>
-            {isAdmin && (
-              <li className='mobile-only'>
-<<<<<<< HEAD
-                <Link to='/admin' className={pathname === '/admin' ? 'active' : ''} onClick={() => setMobileOpen(false)}>
-=======
-                <Link
-                  to='/admin'
-                  className={pathname === '/admin' ? 'active' : ''}
-                  onClick={() => setMobileOpen(false)}
-                >
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
-                  ⚙️ <span>Admin Panel</span>
-                </Link>
-              </li>
-            )}
-            <li className='mobile-only'>
-<<<<<<< HEAD
-              <Link to={`/profile/${user.id}`} className={pathname.startsWith('/profile') ? 'active' : ''} onClick={() => setMobileOpen(false)}>
-                👤 <span>My Profile</span>
-              </Link>
-            </li>
-          </>
-        )}
-        {/* Primary and secondary links separated by logic */}
-        <li className='mobile-only'>
-          {!user
-            ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                <Link to='/dashboard?mode=login' className='nav-toggle-btn' onClick={() => setMobileOpen(false)}>
-                  🔑 Sign In Account
-                </Link>
-                <Link to='/dashboard?mode=signup' className='nav-toggle-btn' style={{ color: 'var(--accent-blue)' }} onClick={() => setMobileOpen(false)}>
-                  ✨ Create New Account
-                </Link>
-              </div>
-              )
-            : (
-              <button className='nav-logout-btn' onClick={() => { logout(); setMobileOpen(false) }}>
-                🚪 Logout / Sign Out
-              </button>
-              )}
-        </li>
-=======
-              <Link
-                to={`/profile/${user.id}`}
-                className={pathname.startsWith('/profile') ? 'active' : ''}
-                onClick={() => setMobileOpen(false)}
-              >
-                👤 <span>My Profile</span>
-              </Link>
-            </li>
-            <li className='mobile-only mobile-nav-action'>
-              <button
-                className='nav-logout-btn'
-                onClick={() => {
-                  logout()
-                  setMobileOpen(false)
-                }}
-              >
-                🚪 Logout / Sign Out
-              </button>
-            </li>
-          </>
-        )}
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
-      </ul>
-
-      <div className='nav-right'>
-        <div className='nav-gamification'>
-          <StreakBadge />
-<<<<<<< HEAD
-
-=======
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
+          ))}
         </div>
 
-        {user && (
-          <div className='nav-user-group desktop-only'>
-            <Link to='/dashboard' title='Dashboard' className={`nav-icon-link ${pathname === '/dashboard' ? 'active' : ''}`}>📊</Link>
-            {isAdmin && <Link to='/admin' title='Admin Panel' className={`nav-icon-link ${pathname === '/admin' ? 'active' : ''}`}>⚙️</Link>}
-            <Link to={`/profile/${user.id}`} title='My Profile' className={`nav-icon-link ${pathname.startsWith('/profile') ? 'active' : ''}`}>👤</Link>
+        {/* Right Actions */}
+        <div className="nav-actions">
+          <div className="streak-wrap">
+            <StreakBadge />
           </div>
-        )}
 
-        <button type='button' className={`dark-toggle ${dark ? 'active' : ''}`} onClick={toggle} role='switch' aria-checked={dark} aria-label='Toggle dark mode'>
-          <div className='dark-toggle-knob'>{dark ? '🌙' : '☀️'}</div>
-        </button>
+          <button onClick={toggle} className="theme-toggle">
+            {dark ? '🌙' : '☀️'}
+          </button>
 
-<<<<<<< HEAD
-        {!user
-          ? (
-            <div className='desktop-only' style={{ display: 'flex', gap: '0.6rem' }}>
-              <Link to='/dashboard?mode=login' className='btn-secondary nav-auth-btn'>Sign In</Link>
-              <Link to='/dashboard?mode=signup' className='btn-primary nav-auth-btn'>Sign Up</Link>
+          {user ? (
+            <div className="user-group">
+              <Link to="/dashboard" className="avatar-link">
+                <div className="avatar-mini">{user.email[0].toUpperCase()}</div>
+              </Link>
+              <button onClick={logout} className="logout-btn desktop-only">LOGOUT</button>
             </div>
-            )
-          : (
-            <button className='btn-secondary nav-auth-btn desktop-only' onClick={logout}>Sign Out</button>
-            )}
+          ) : (
+            <div className="auth-group desktop-only">
+              <Link to="/dashboard?mode=login" className="btn-sign">SIGN IN</Link>
+            </div>
+          )}
 
-        <button type='button' className={`hamburger ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(!mobileOpen)} aria-label='Toggle menu'>
-=======
-        {user
-          ? (
-            <button className='btn-secondary nav-auth-btn desktop-only' onClick={logout}>Sign Out</button>
-            )
-          : (
-            <Link to='/dashboard?mode=signup' className='btn-primary nav-auth-btn desktop-only'>Register</Link>
-            )}
-
-        <button type='button' className={`hamburger ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(!mobileOpen)} aria-label='Toggle menu' aria-expanded={mobileOpen}>
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
-          <span /><span /><span />
-        </button>
+          {/* Mobile Menu Toggle */}
+          <button 
+            className={`mobile-toggle ${mobileOpen ? 'open' : ''}`} 
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            <span></span><span></span><span></span>
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mobile-menu"
+          >
+            {NAV_LINKS.map((link) => (
+              <Link 
+                key={link.to} 
+                to={link.to} 
+                className={`mobile-link ${pathname === link.to ? 'active' : ''}`}
+                onClick={() => setMobileOpen(false)}
+              >
+                <span className="icon">{link.icon}</span>
+                <span className="label">{link.label}</span>
+              </Link>
+            ))}
+            <div className="mobile-footer">
+              {user ? (
+                <button onClick={() => { logout(); setMobileOpen(false); }} className="mobile-logout">SIGN OUT</button>
+              ) : (
+                <Link to="/dashboard?mode=login" onClick={() => setMobileOpen(false)} className="mobile-login">GET STARTED</Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style jsx>{`
+        .projectx-nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 1.5rem 0; }
+        .projectx-nav.scrolled { background: rgba(3, 4, 10, 0.8); backdrop-filter: blur(20px); padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        .nav-container { max-width: 1300px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+
+        .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+        .brand-icon { width: 32px; height: 32px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; transform: rotate(10deg); transition: 0.3s; }
+        .nav-brand:hover .brand-icon { transform: rotate(0deg) scale(1.1); }
+        .icon-inner { font-weight: 900; color: #fff; font-size: 1.1rem; }
+        .brand-text { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -1px; }
+        .brand-text span { color: #3b82f6; }
+
+        .nav-links-desktop { display: flex; align-items: center; gap: 0.25rem; background: rgba(255, 255, 255, 0.03); padding: 0.4rem; border-radius: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.05); }
+        @media (max-width: 1080px) { .nav-links-desktop { display: none; } }
+        
+        .nav-link { text-decoration: none; padding: 0.5rem 0.8rem; border-radius: 1rem; color: #94a3b8; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem; transition: 0.3s; position: relative; white-space: nowrap; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-link.active { color: #fff; }
+        .active-glow { position: absolute; inset: 0; background: #3b82f615; border: 1px solid #3b82f630; border-radius: 1rem; z-index: -1; }
+
+        @media (max-width: 1280px) {
+          .nav-link .link-label { display: none; }
+          .nav-link { padding: 0.5rem; justify-content: center; border-radius: 50%; width: 40px; height: 40px; }
+          .active-glow { border-radius: 50%; }
+        }
+
+        .nav-actions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+        .theme-toggle { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); width: 40px; height: 40px; border-radius: 12px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .theme-toggle:hover { background: #3b82f615; border-color: #3b82f640; }
+
+        .avatar-mini { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 0.9rem; border: 2px solid rgba(255,255,255,0.1); }
+        .logout-btn { background: none; border: 1px solid rgba(255,255,255,0.1); color: #64748b; padding: 0.5rem 1rem; border-radius: 0.75rem; font-weight: 800; font-size: 0.7rem; cursor: pointer; transition: 0.3s; }
+        .logout-btn:hover { color: #f43f5e; border-color: #f43f5e40; background: #f43f5e10; }
+        
+        .btn-sign { text-decoration: none; background: #fff; color: #000; padding: 0.6rem 1.2rem; border-radius: 0.8rem; font-weight: 900; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; }
+        .btn-sign:hover { background: #3b82f6; color: #fff; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
+
+        .mobile-toggle { width: 40px; height: 40px; display: none; flex-direction: column; justify-content: center; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; }
+        @media (max-width: 1080px) { .mobile-toggle { display: flex; } }
+        .mobile-toggle span { width: 20px; height: 2px; background: #fff; border-radius: 2px; transition: 0.3s; }
+        .mobile-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+        .mobile-toggle.open span:nth-child(2) { opacity: 0; }
+        .mobile-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+        .mobile-menu { position: fixed; top: 80px; left: 1rem; right: 1rem; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 999; }
+        .mobile-link { display: flex; align-items: center; gap: 1rem; padding: 1.2rem; border-radius: 1.2rem; text-decoration: none; color: #94a3b8; font-weight: 700; transition: 0.3s; }
+        .mobile-link.active { background: #3b82f615; color: #3b82f6; }
+        .mobile-footer { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); }
+        .mobile-logout, .mobile-login { width: 100%; padding: 1rem; border-radius: 1rem; border: none; font-weight: 900; font-size: 1rem; cursor: pointer; text-align: center; text-decoration: none; display: block; }
+        .mobile-logout { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+        .mobile-login { background: #fff; color: #000; }
+      `}</style>
     </nav>
-  )
+  );
 }

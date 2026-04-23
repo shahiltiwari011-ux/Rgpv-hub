@@ -12,10 +12,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.3",
-<<<<<<< HEAD
     "framer-motion": "^12.38.0",
-=======
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.6.0",

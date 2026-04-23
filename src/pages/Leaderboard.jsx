@@ -13,7 +13,7 @@ export default function Leaderboard () {
 
   return (
     <>
-      <SEO title="Leaderboard" description="Top learners by weekly XP contribution on RGPV Study Hub" urlPath="/leaderboard" />
+      <SEO title="Leaderboard" description="Top performers on the PROJECTX elite academic leaderboard. Track your rank and earn XP through learning." urlPath="/leaderboard" />
       <div className='page-hero'>
         <span className='page-hero-icon'>🏆</span>
         <h1 className='page-hero-title'>Leaderboard</h1>

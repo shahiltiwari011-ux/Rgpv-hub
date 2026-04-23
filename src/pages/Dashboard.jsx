@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-<<<<<<< HEAD
 import { LoadingSpinner, EmptyState } from '../components/States'
-=======
-import { LoadingSpinner } from '../components/States'
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 import SEO from '../components/SEO'
 
 export default function Dashboard () {
@@ -24,21 +20,14 @@ export default function Dashboard () {
     }
   }, [])
 
-<<<<<<< HEAD
   if (authLoading) return <LoadingSpinner text='Checking authentication…' />
-=======
-  if (authLoading) return <LoadingSpinner text='Checking authentication...' />
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 
   const handleAuth = async (e) => {
     e.preventDefault()
     setIsActionLoading(true)
     setAuthError('')
     setAuthSuccess('')
-<<<<<<< HEAD
-=======
 
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
     try {
       if (isSignUp) {
         await signup(authForm.email, authForm.password)
@@ -56,51 +45,101 @@ export default function Dashboard () {
 
   return (
     <>
-<<<<<<< HEAD
       <SEO title="Dashboard" description="Manage your bookmarks and view your study progress." urlPath="/dashboard" noIndex />
       <div className='page-hero'>
         <span className='page-hero-icon'>{user ? '📊' : (isSignUp ? '📝' : '🔐')}</span>
         <h1 className='page-hero-title'>{user ? 'Dashboard' : (isSignUp ? 'Sign Up' : 'Sign In')}</h1>
         <p className='page-hero-sub'>{user ? `Welcome back, ${user.email}` : 'Access your saved resources'}</p>
-=======
-      <SEO title='Dashboard' description='Manage your bookmarks and view your study progress.' urlPath='/dashboard' noIndex />
-
-      <div className='page-hero'>
-        <h1 className='page-hero-title'>{user ? 'Dashboard' : 'Account Access'}</h1>
-        <p className='page-hero-sub'>
-          {user
-            ? `Welcome back, ${user.email}`
-            : 'Sign in or create an account from the same place.'}
-        </p>
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
       </div>
 
       <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem 4rem' }}>
         {user ? (
-          <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-<<<<<<< HEAD
-            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to your Dashboard! 🚀</h2>
-            <p style={{ color: 'var(--text-muted)' }}>We are building new features for you. Stay tuned for personalized learning analytics.</p>
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 32,
+            padding: '4rem 2rem',
+            textAlign: 'center',
+            backdropFilter: 'blur(16px)',
+            boxShadow: 'var(--shadow-xl)',
+            marginTop: '2rem'
+          }}>
+            <div style={{
+              fontSize: '4rem',
+              marginBottom: '1.5rem',
+              animation: 'bounce 2s infinite'
+            }}>🚀</div>
+            <h2 style={{
+              fontFamily: 'Syne, sans-serif',
+              fontSize: '2.5rem',
+              fontWeight: 800,
+              marginBottom: '1rem',
+              background: 'linear-gradient(135deg, #fff, rgba(255,255,255,0.7))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>Welcome to ProjectX!</h2>
+            <p style={{
+              color: 'var(--text-secondary)',
+              fontSize: '1.1rem',
+              maxWidth: '600px',
+              margin: '0 auto',
+              lineHeight: 1.6
+            }}>
+              Your elite academic command center is being prepared. Soon you'll be able to track your grades, set study goals, and manage your academic library with real-time analytics.
+            </p>
+            <div style={{
+              marginTop: '3rem',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '1rem'
+            }}>
+              <div className="status-pill" style={{
+                background: 'rgba(99, 120, 255, 0.1)',
+                padding: '0.5rem 1rem',
+                borderRadius: 99,
+                fontSize: '0.8rem',
+                border: '1px solid rgba(99, 120, 255, 0.2)',
+                color: 'var(--accent-blue)'
+              }}>Account Active</div>
+              <div className="status-pill" style={{
+                background: 'rgba(34, 197, 94, 0.1)',
+                padding: '0.5rem 1rem',
+                borderRadius: 99,
+                fontSize: '0.8rem',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                color: '#22c55e'
+              }}>Synchronized</div>
+            </div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2rem' }}>
             <EmptyState
               icon='🔐'
-              title={isSignUp ? 'Join the Study Hub' : 'Welcome back'}
-              message={isSignUp ? 'Create an account to save and sync your study materials.' : 'Sign in to access your saved resources.'}
+              title={isSignUp ? 'Join PROJECTX' : 'Secure Entry'}
+              message={isSignUp ? 'Create your elite academic profile to synchronize your library.' : 'Enter your credentials to access your personalized command center.'}
             />
-
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 24, padding: '2.5rem', maxWidth: 420, width: '100%', margin: '0 auto', backdropFilter: 'blur(10px)', boxShadow: 'var(--shadow-md)' }}>
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.4rem' }}>{isSignUp ? 'Create Account' : 'Sign In'}</h3>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{isSignUp ? 'Enter your details below' : 'Account required for dashboard'}</p>
-=======
-            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to your dashboard</h2>
-            <p style={{ color: 'var(--text-muted)' }}>We are building new features for you. Stay tuned for personalized learning analytics.</p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 24, padding: '2.5rem', maxWidth: 420, width: '100%', margin: '0 auto', backdropFilter: 'blur(10px)', boxShadow: 'var(--shadow-md)' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', padding: '0.35rem', marginBottom: '1.25rem', background: 'rgba(99, 120, 255, 0.08)', border: '1px solid var(--border)', borderRadius: 999 }}>
+            
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: 28,
+              padding: '3rem',
+              maxWidth: 440,
+              width: '100%',
+              margin: '0 auto',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
+            }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '0.5rem',
+                padding: '0.4rem',
+                marginBottom: '2rem',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                borderRadius: 999
+              }}>
                 <button
                   type='button'
                   onClick={() => { setIsSignUp(false); setAuthError(''); setAuthSuccess('') }}
@@ -110,9 +149,10 @@ export default function Dashboard () {
                     padding: '0.8rem 1rem',
                     fontWeight: 700,
                     fontFamily: 'inherit',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     background: isSignUp ? 'transparent' : 'linear-gradient(135deg, var(--accent-blue), var(--accent-cyan))',
                     color: isSignUp ? 'var(--text-secondary)' : '#fff',
-                    boxShadow: isSignUp ? 'none' : '0 8px 24px rgba(59, 130, 246, 0.25)'
+                    boxShadow: isSignUp ? 'none' : '0 10px 20px rgba(59, 130, 246, 0.3)'
                   }}
                 >
                   Sign In
@@ -126,72 +166,123 @@ export default function Dashboard () {
                     padding: '0.8rem 1rem',
                     fontWeight: 700,
                     fontFamily: 'inherit',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     background: isSignUp ? 'linear-gradient(135deg, var(--accent-blue), var(--accent-cyan))' : 'transparent',
                     color: isSignUp ? '#fff' : 'var(--text-secondary)',
-                    boxShadow: isSignUp ? '0 8px 24px rgba(59, 130, 246, 0.25)' : 'none'
+                    boxShadow: isSignUp ? '0 10px 20px rgba(59, 130, 246, 0.3)' : 'none'
                   }}
                 >
                   Sign Up
                 </button>
               </div>
 
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.4rem' }}>{isSignUp ? 'Create your account' : 'Welcome back'}</h3>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{isSignUp ? 'Use your email and password to get started.' : 'Use your email and password to continue.'}</p>
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
+              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+                {isSignUp ? 'Elite Registration' : 'Welcome Back'}
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '0.95rem' }}>
+                {isSignUp ? 'Join the next generation of academic excellence.' : 'Resume your journey with ProjectX.'}
+              </p>
 
-              {authError && <div style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', padding: '0.75rem', borderRadius: 8, marginBottom: '1rem', fontSize: '0.85rem' }}>{authError}</div>}
-              {authSuccess && <div style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981', padding: '0.75rem', borderRadius: 8, marginBottom: '1rem', fontSize: '0.85rem' }}>{authSuccess}</div>}
+              {authError && (
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  color: '#f87171',
+                  padding: '1rem',
+                  borderRadius: 16,
+                  marginBottom: '1.5rem',
+                  fontSize: '0.85rem',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem'
+                }}>
+                  <span>⚠️</span> {authError}
+                </div>
+              )}
+              {authSuccess && (
+                <div style={{
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  color: '#34d399',
+                  padding: '1rem',
+                  borderRadius: 16,
+                  marginBottom: '1.5rem',
+                  fontSize: '0.85rem',
+                  border: '1px solid rgba(16, 185, 129, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem'
+                }}>
+                  <span>✅</span> {authSuccess}
+                </div>
+              )}
 
-              <form onSubmit={handleAuth}>
-                <div style={{ marginBottom: '0.75rem', width: '100%' }}>
+              <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ position: 'relative' }}>
                   <input
-<<<<<<< HEAD
-                    type='email' placeholder='Email' value={authForm.email} onChange={(e) => setAuthForm((p) => ({ ...p, email: e.target.value }))}
-                    required className='form-input'
-=======
-                    type='email'
-                    placeholder='Email'
-                    value={authForm.email}
+                    type='email' placeholder='Email Address' value={authForm.email}
                     onChange={(e) => setAuthForm((p) => ({ ...p, email: e.target.value }))}
-                    required
-                    className='form-input'
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
-                  />
-                </div>
-                <div style={{ marginBottom: '1.25rem', width: '100%' }}>
-                  <input
-<<<<<<< HEAD
-                    type='password' placeholder='Password' value={authForm.password} onChange={(e) => setAuthForm((p) => ({ ...p, password: e.target.value }))}
                     required className='form-input'
+                    style={{
+                      width: '100%',
+                      padding: '1rem 1.25rem',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 16,
+                      color: '#fff',
+                      fontSize: '1rem'
+                    }}
                   />
                 </div>
-                <button type='submit' className='btn-primary' disabled={isActionLoading} style={{ width: '100%', justifyContent: 'center' }}>
-                  {isActionLoading ? 'Please wait…' : (isSignUp ? 'Create Account' : 'Sign In')}
-=======
-                    type='password'
-                    placeholder='Password'
-                    value={authForm.password}
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type='password' placeholder='Password' value={authForm.password}
                     onChange={(e) => setAuthForm((p) => ({ ...p, password: e.target.value }))}
-                    required
-                    className='form-input'
+                    required className='form-input'
+                    style={{
+                      width: '100%',
+                      padding: '1rem 1.25rem',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 16,
+                      color: '#fff',
+                      fontSize: '1rem'
+                    }}
                   />
                 </div>
-                <button type='submit' className='btn-primary' disabled={isActionLoading} style={{ width: '100%', justifyContent: 'center' }}>
-                  {isActionLoading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
+                <button
+                  type='submit'
+                  className='btn-primary'
+                  disabled={isActionLoading}
+                  style={{
+                    width: '100%',
+                    justifyContent: 'center',
+                    padding: '1.1rem',
+                    borderRadius: 16,
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    marginTop: '0.5rem'
+                  }}
+                >
+                  {isActionLoading ? 'Authenticating...' : (isSignUp ? 'Create Profile' : 'Access Dashboard')}
                 </button>
               </form>
 
-              <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem' }}>
+              <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.95rem' }}>
                 <p style={{ color: 'var(--text-muted)' }}>
-<<<<<<< HEAD
-                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-=======
-                  {isSignUp ? 'Already have an account?' : "Need a new account?"}
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
+                  {isSignUp ? 'Already have a profile?' : "New to ProjectX?"}
                   <button
                     onClick={() => { setIsSignUp(!isSignUp); setAuthError(''); setAuthSuccess('') }}
-                    style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontWeight: 600, cursor: 'pointer', marginLeft: '0.5rem' }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--accent-blue)',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      marginLeft: '0.6rem',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: 6,
+                      transition: 'all 0.2s'
+                    }}
                   >
                     {isSignUp ? 'Sign In' : 'Sign Up'}
                   </button>

@@ -106,8 +106,6 @@ export async function logout () {
 
 
 let _sessionPromise = null
-<<<<<<< HEAD
-=======
 const AUTH_LOCK_ERROR_PATTERNS = [
   'lock:',
   'navigatorlockmanager',
@@ -149,7 +147,6 @@ async function readSessionWithRetry (sb, attempts = 3) {
 
   throw lastError
 }
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 
 export async function getSafeSession (sb) {
   // Concurrent Promise Caching: Prevent `navigator.locks` traffic jams
@@ -157,26 +154,6 @@ export async function getSafeSession (sb) {
 
   _sessionPromise = (async () => {
     try {
-<<<<<<< HEAD
-      // Supabase internal retry logic usually handles this, 
-      // but we add our own guard to catch leaks
-      const { data, error } = await sb.auth.getSession()
-      
-      if (error) {
-        // Harmless lock errors should not be propagated to UI
-        if (error.message?.includes('lock')) {
-          logger.warn('Suppressed Auth Lock Error:', error.message)
-          // Try to return local user as fallback if available
-          const { data: localUser } = await sb.auth.getUser()
-          return localUser?.user || null
-        }
-        throw error
-      }
-      return data?.session?.user || null
-    } catch (err) {
-      if (!err.message?.includes('lock')) {
-        logger.error('Session check failed', { error: err.message })
-=======
       const session = await readSessionWithRetry(sb)
       return session?.user || null
     } catch (err) {
@@ -184,7 +161,6 @@ export async function getSafeSession (sb) {
         logger.error('Session check failed', { error: err.message })
       } else {
         logger.warn('Suppressed Auth Lock Error', { error: err.message })
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
       }
       return null
     } finally {
@@ -196,8 +172,6 @@ export async function getSafeSession (sb) {
   return _sessionPromise
 }
 
-<<<<<<< HEAD
-=======
 export async function getSafeSessionData (sb) {
   try {
     return await readSessionWithRetry(sb)
@@ -210,8 +184,6 @@ export async function getSafeSessionData (sb) {
     return null
   }
 }
-
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 /* ── Resource Fetching (Unified) ── */
 
 export async function getResources ({ type = '', search = '', branch = '', semester = '', subject = '', page = 1, limit = 12 } = {}) {

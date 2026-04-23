@@ -15,10 +15,7 @@ const Leaderboard = lazy(() => import('./pages/Leaderboard'))
 const Profile = lazy(() => import('./pages/Profile'))
 const DiscussionPage = lazy(() => import('./pages/DiscussionPage'))
 const ThreadPage = lazy(() => import('./pages/ThreadPage'))
-<<<<<<< HEAD
 const Result = lazy(() => import('./pages/Result'))
-=======
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 
 // Admin pages
 const Admin = lazy(() => import('./pages/Admin'))
@@ -41,10 +38,7 @@ export default function App () {
             <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/discussions' element={<DiscussionPage />} />
             <Route path='/discussion/:id' element={<ThreadPage />} />
-<<<<<<< HEAD
             <Route path='/result' element={<Result />} />
-=======
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 
             {/* Admin routes protected by adminOnly flag */}
             <Route

@@ -54,12 +54,12 @@ export default function DiscussionPage () {
 
   return (
     <>
-      <SEO title="Discussions" description="Ask questions, share knowledge, and discuss with other students." />
+      <SEO title="Elite Discussions - PROJECTX" description="Collaborate with top students on PROJECTX. Ask questions, share knowledge, and solve academic challenges." />
       
       <div className='page-hero'>
-        <span className='page-hero-icon'>💬</span>
-        <h1 className='page-hero-title'>Discussion Forum</h1>
-        <p className='page-hero-sub'>Ask anything about your diploma subjects</p>
+        <span className='page-hero-icon'>🤝</span>
+        <h1 className='page-hero-title'>Community Forum</h1>
+        <p className='page-hero-sub'>Collaborate with the PROJECTX elite network</p>
         
         <button 
           className={`btn-primary ${showNewPost ? 'btn-secondary' : ''}`}

@@ -36,11 +36,7 @@
 
 ## File Structure
 ```
-<<<<<<< HEAD
-project-x/
-=======
 rgpv-study-hub/
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 ├── index.html
 ├── notes.html
 ├── syllabus.html
@@ -61,8 +57,4 @@ rgpv-study-hub/
 ```
 
 ## Deployment
-<<<<<<< HEAD
-Deploy with Netlify (drag & drop the project-x folder) or push to GitHub + enable GitHub Pages.
-=======
 Deploy with Netlify (drag & drop the rgpv-study-hub folder) or push to GitHub + enable GitHub Pages.
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2

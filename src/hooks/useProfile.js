@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react'
-<<<<<<< HEAD
-import { getUserProfile, getUserBadges } from '../services/api'
-=======
 import { getUserProfile, getUserBadges, isAuthLockError } from '../services/api'
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
 
 export function useProfile (userId) {
   const [profile, setProfile] = useState(null)
@@ -29,11 +25,7 @@ export function useProfile (userId) {
         setError(null)
       } catch (err) {
         // Ignore transient lock-related auth errors to prevent UI crash
-<<<<<<< HEAD
-        if (!err.message?.includes('lock')) {
-=======
         if (!isAuthLockError(err)) {
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
           console.error('Profile fetch error:', err)
           setError(err.message || 'Failed to load profile')
         } else {

@@ -2,12 +2,6 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-<<<<<<< HEAD
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-=======
   "routes": [
     {
       "handle": "filesystem"
@@ -15,7 +9,6 @@
     {
       "src": "/(.*)",
       "dest": "/index.html"
->>>>>>> ad11b44fc234b13ed695f73fce199db7d659a2e2
     }
   ],
   "headers": [

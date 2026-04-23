@@ -38,7 +38,7 @@ export default function AdminAnalytics () {
       <div className='page-hero'>
         <span className='page-hero-icon'>📊</span>
         <h1 className='page-hero-title'>Platform Analytics</h1>
-        <p className='page-hero-sub'>Real-time insights for RGPV Study Hub</p>
+        <p className='page-hero-sub'>Real-time insights for PROJECTX</p>
         <Link to='/admin' style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginTop: '1rem', fontSize: '0.9rem' }}>← Back to Resources</Link>
       </div>
 
