@@ -185,16 +185,15 @@ export default function Home() {
         .hero-badge span { font-size: clamp(0.6rem, 2.5vw, 0.75rem); font-weight: 900; letter-spacing: 3px; color: #3b82f6; }
         .hero-main-title { 
           font-family: 'Syne', sans-serif; 
-          font-size: clamp(2.5rem, 15vw, 10rem); 
+          font-size: clamp(2rem, 12vw, 8rem); 
           font-weight: 800; 
-          line-height: 0.85; 
+          line-height: 1; 
           margin: 0; 
-          letter-spacing: -0.05em;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+          letter-spacing: -0.04em;
+          display: block;
+          text-align: center;
           width: 100%;
-          word-break: break-all;
+          white-space: nowrap;
         }
         .hero-main-title span { color: #3b82f6; text-shadow: 0 0 80px rgba(59, 130, 246, 0.4); }
         .hero-lead { font-size: clamp(0.9rem, 4.5vw, 1.2rem); color: #94a3b8; margin: 1.5rem 0 2.5rem; line-height: 1.5; font-weight: 500; max-width: 700px; padding: 0 1rem; }

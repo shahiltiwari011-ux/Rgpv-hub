@@ -113,6 +113,17 @@ export default function Navbar() {
                 <span className="label">{link.label}</span>
               </Link>
             ))}
+
+            <div className="mobile-actions-row">
+              <StreakBadge />
+              <div className={`connectivity-status ${isConnected ? 'online' : 'offline'}`}>
+                <span className="status-dot"></span>
+                <span className="status-label">{isConnected ? 'LIVE' : 'OFFLINE'}</span>
+              </div>
+              <button onClick={toggle} className="theme-toggle-mobile">
+                {dark ? '🌙 Dark' : '☀️ Light'}
+              </button>
+            </div>
             <div className="mobile-footer">
               {user ? (
                 <button onClick={() => { logout(); setMobileOpen(false); }} className="mobile-logout">SIGN OUT</button>
@@ -164,6 +175,39 @@ export default function Navbar() {
         .btn-sign { text-decoration: none; background: #fff; color: #000; padding: 0.5rem 1rem; border-radius: 0.8rem; font-weight: 900; font-size: 0.75rem; transition: 0.3s; white-space: nowrap; }
         @media (min-width: 768px) { .btn-sign { padding: 0.6rem 1.2rem; font-size: 0.8rem; } }
         .btn-sign:hover { background: #3b82f6; color: #fff; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
+
+        .nav-actions .streak-wrap, 
+        .nav-actions .connectivity-status, 
+        .nav-actions .theme-toggle { display: none; }
+        
+        @media (min-width: 992px) {
+          .nav-actions .streak-wrap, 
+          .nav-actions .connectivity-status, 
+          .nav-actions .theme-toggle { display: flex; }
+        }
+
+        .mobile-actions-row { 
+          display: flex; 
+          flex-wrap: wrap; 
+          gap: 0.75rem; 
+          padding: 1rem 0; 
+          margin-top: 1rem; 
+          border-top: 1px solid rgba(255,255,255,0.05); 
+          align-items: center;
+        }
+        
+        .theme-toggle-mobile { 
+          background: rgba(255,255,255,0.05); 
+          border: 1px solid rgba(255,255,255,0.1); 
+          color: #fff; 
+          padding: 0.6rem 1.2rem; 
+          border-radius: 12px; 
+          font-weight: 700; 
+          font-size: 0.85rem; 
+          cursor: pointer; 
+          transition: 0.3s;
+        }
+        .theme-toggle-mobile:hover { background: rgba(255,255,255,0.1); }
 
         .mobile-toggle { width: 36px; height: 36px; display: none; flex-direction: column; justify-content: center; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; }
         @media (max-width: 1080px) { .mobile-toggle { display: flex; } }
