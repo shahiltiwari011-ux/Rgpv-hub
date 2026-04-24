@@ -1,5 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
@@ -16,8 +19,17 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
+// Production Middleware
+app.set('trust proxy', 1); // Trust first proxy (Railway/Vercel)
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP if frontend is separate, or configure properly
+}));
+app.use(compression());
+app.use(morgan('combined'));
+
+const frontendUrl = process.env.FRONTEND_URL || '*';
 app.use(cors({
-    origin: '*',
+    origin: frontendUrl,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
@@ -259,7 +271,12 @@ app.post('/api/result', async (req, res) => {
 
     } catch (error) {
         console.error('Result fetch error:', error.message);
-        res.status(500).json({ success: false, type: 'server_error', message: error.message });
+        const isProduction = process.env.NODE_ENV === 'production';
+        res.status(500).json({ 
+            success: false, 
+            type: 'server_error', 
+            message: isProduction ? 'Internal server error' : error.message 
+        });
     }
 });
 
