@@ -3,16 +3,13 @@ import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import StreakBadge from './StreakBadge';
-
 const NAV_LINKS = [
   { to: '/', icon: '🏠', label: 'Home' },
   { to: '/notes', icon: '📝', label: 'Notes' },
   { to: '/pyq', icon: '📄', label: 'PYQ' },
   { to: '/syllabus', icon: '📋', label: 'Syllabus' },
   { to: '/result', icon: '📊', label: 'Results' },
-  { to: '/discussions', icon: '💬', label: 'Forum' },
-  { to: '/leaderboard', icon: '🏆', label: 'Ranking' }
+  { to: '/discussions', icon: '💬', label: 'Forum' }
 ];
 
 export default function Navbar() {
@@ -56,9 +53,6 @@ export default function Navbar() {
 
         {/* Right Actions */}
         <div className="nav-actions">
-          <div className="streak-wrap">
-            <StreakBadge />
-          </div>
 
           {/* Connectivity Indicator */}
           <div className={`connectivity-status ${isConnected ? 'online' : 'offline'}`} title={isConnected ? 'Cloud Sync Active' : 'Offline Mode (Local Cache)'}>
@@ -70,16 +64,12 @@ export default function Navbar() {
             {dark ? '🌙' : '☀️'}
           </button>
 
-          {user ? (
+          {isAdmin && (
             <div className="user-group">
-              <Link to="/dashboard" className="avatar-link">
-                <div className="avatar-mini">{user.email[0].toUpperCase()}</div>
+              <Link to="/admin" className="avatar-link">
+                <div className="avatar-mini">A</div>
               </Link>
               <button onClick={logout} className="logout-btn desktop-only">LOGOUT</button>
-            </div>
-          ) : (
-            <div className="auth-group desktop-only">
-              <Link to="/dashboard?mode=login" className="btn-sign">SIGN IN</Link>
             </div>
           )}
 
@@ -115,7 +105,6 @@ export default function Navbar() {
             ))}
 
             <div className="mobile-actions-row">
-              <StreakBadge />
               <div className={`connectivity-status ${isConnected ? 'online' : 'offline'}`}>
                 <span className="status-dot"></span>
                 <span className="status-label">{isConnected ? 'LIVE' : 'OFFLINE'}</span>
@@ -124,13 +113,11 @@ export default function Navbar() {
                 {dark ? '🌙 Dark' : '☀️ Light'}
               </button>
             </div>
-            <div className="mobile-footer">
-              {user ? (
+            {isAdmin && (
+              <div className="mobile-footer">
                 <button onClick={() => { logout(); setMobileOpen(false); }} className="mobile-logout">SIGN OUT</button>
-              ) : (
-                <Link to="/dashboard?mode=login" onClick={() => setMobileOpen(false)} className="mobile-login">GET STARTED</Link>
-              )}
-            </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

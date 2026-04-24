@@ -11,7 +11,6 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 const Home = lazy(() => import('./pages/Home'))
 const ResourcePage = lazy(() => import('./pages/ResourcePage'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
-const Leaderboard = lazy(() => import('./pages/Leaderboard'))
 const Profile = lazy(() => import('./pages/Profile'))
 const DiscussionPage = lazy(() => import('./pages/DiscussionPage'))
 const ThreadPage = lazy(() => import('./pages/ThreadPage'))
@@ -33,7 +32,6 @@ export default function App () {
             <Route path='/notes' element={<ResourcePage type='notes' />} />
             <Route path='/syllabus' element={<ResourcePage type='syllabus' />} />
             <Route path='/pyq' element={<ResourcePage type='pyq' />} />
-            <Route path='/leaderboard' element={<Leaderboard />} />
             <Route path='/profile/:id' element={<Profile />} />
             <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/discussions' element={<DiscussionPage />} />
@@ -63,8 +61,9 @@ export default function App () {
               }
             />
 
-            <Route path='/login' element={<Navigate to='/dashboard' replace />} />
-            <Route path='/auth' element={<Navigate to='/dashboard' replace />} />
+            <Route path='/login' element={<Navigate to='/' replace />} />
+            <Route path='/auth' element={<Navigate to='/' replace />} />
+            <Route path='/leaderboard' element={<Navigate to='/' replace />} />
             <Route path='*' element={<Navigate to='/' replace />} />
           </Route>
         </Routes>

@@ -3,7 +3,6 @@ import { submitRating, trackDownload } from '../services/api'
 import RatingPicker from './RatingPicker'
 import { useAuth } from '../context/AuthContext'
 import { useContinueLearning } from '../hooks/useContinueLearning'
-import { useGamification } from '../hooks/useGamification'
 import ShareButton from './ShareButton'
 import HelpfulVote from './HelpfulVote'
 import Comments from './Comments'
@@ -25,7 +24,6 @@ function ResourceCard ({
   const meta = TYPE_META[type] || TYPE_META.notes
   const { user } = useAuth()
   const { trackView } = useContinueLearning({ skipFetch: true })
-  const { awardXP } = useGamification()
   const [showComments, setShowComments] = useState(false)
   const [isSubmittingRating, setIsSubmittingRating] = useState(false)
   const resourceUrl = typeof item.file_url === 'string' ? item.file_url.trim() : ''
@@ -69,7 +67,6 @@ function ResourceCard ({
     if (!hasDownload) return
     trackDownload(item.id).catch(() => {})
     trackView(item.id)
-    awardXP(5)
     openResource(resourceUrl)
   }
 

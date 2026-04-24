@@ -5,8 +5,6 @@ import { useTrending } from '../hooks/useTrending';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../components/SEO';
 import TrendingSection from '../components/TrendingSection';
-import ContinueLearning from '../components/ContinueLearning';
-import XPBar from '../components/XPBar';
 
 const BRANCHES = [
   { name: 'Computer Science', icon: '🖥️', param: 'Computer Science', color: '#3b82f6' },
@@ -67,15 +65,6 @@ export default function Home() {
             <Link to="/result" className="btn-glass">RESULT PROXY</Link>
           </motion.div>
 
-          {user && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="user-pulse-wrap"
-            >
-              <XPBar />
-            </motion.div>
-          )}
         </div>
       </section>
 
@@ -104,7 +93,6 @@ export default function Home() {
       </section>
 
       <div className="sections-container">
-        <ContinueLearning />
         
         <div className="content-matrix">
           <TrendingSection title="TRENDING ASSETS" icon="🔥" items={trending} sectionId="trending" loading={trendingLoading} />
