@@ -155,9 +155,10 @@ export default function AdminUpload () {
       <SEO title='Admin - Upload Resource' description='Admin upload interface.' urlPath='/admin/upload' />
 
       <div className='page-hero'>
-        <span className='page-hero-icon'>🛡️</span>
-        <h1 className='page-hero-title'>Upload Resource</h1>
-        <p className='page-hero-sub'>Upload study materials for students</p>
+        <span className='page-hero-icon'>📤</span>
+        <h1 className='page-hero-title'>Contribute Material</h1>
+        <p className='page-hero-sub'>Adding elite academic resources to the PROJECTX database</p>
+        <Link to='/admin' style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginTop: '1.25rem', fontSize: '0.9rem', fontWeight: 600 }}>← Back to Dashboard</Link>
       </div>
 
       <section style={{ maxWidth: 800, margin: '0 auto 6rem', padding: '0 1.5rem' }}>

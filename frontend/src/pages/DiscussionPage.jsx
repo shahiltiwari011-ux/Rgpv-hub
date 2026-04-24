@@ -1,42 +1,32 @@
 import { useState, useEffect } from 'react'
-import { getForumPosts, createForumPost } from '../services/api'
+import { createForumPost } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { LoadingSpinner, EmptyState, ErrorState } from '../components/States'
 import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
 import { toast } from 'react-hot-toast'
+import { useForum } from '../hooks/useForum'
+import OfflineBanner from '../components/OfflineBanner'
 
 const BRANCHES = ['All', 'Computer Science', 'Mechanical', 'Electrical', 'Civil', 'Electronics']
 const SEMESTERS = ['All', '1', '2', '3', '4', '5', '6']
 
 export default function DiscussionPage () {
   const { user } = useAuth()
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { posts, isPending, error, isMock, loadPosts } = useForum()
   const [filters, setFilters] = useState({ branch: 'All', semester: 'All' })
   const [showNewPost, setShowNewPost] = useState(false)
   const [newPost, setNewPost] = useState({ title: '', content: '', branch: 'All', semester: 'All' })
 
   useEffect(() => {
-    loadPosts()
-  }, [filters])
-
-  const loadPosts = async () => {
-    setLoading(true)
-    try {
-      const { data } = await getForumPosts(filters)
-      setPosts(data)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+    loadPosts(filters)
+  }, [filters, loadPosts])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!user) return toast.error('Login to post!')
+    if (isMock) return toast.error('Posting is disabled in Offline Mode. Connection to database lost.')
+    
     try {
       await createForumPost({
         ...newPost,
@@ -46,7 +36,7 @@ export default function DiscussionPage () {
       toast.success('Post created! 🚀')
       setShowNewPost(false)
       setNewPost({ title: '', content: '', branch: 'All', semester: 'All' })
-      loadPosts()
+      loadPosts(filters)
     } catch (err) {
       toast.error(err.message)
     }
@@ -56,6 +46,8 @@ export default function DiscussionPage () {
     <>
       <SEO title="Elite Discussions - PROJECTX" description="Collaborate with top students on PROJECTX. Ask questions, share knowledge, and solve academic challenges." />
       
+      <OfflineBanner isMock={isMock} onRetry={() => loadPosts(filters)} />
+
       <div className='page-hero'>
         <span className='page-hero-icon'>🤝</span>
         <h1 className='page-hero-title'>Community Forum</h1>
@@ -136,7 +128,7 @@ export default function DiscussionPage () {
           </div>
         </div>
 
-        {loading ? <LoadingSpinner /> : error ? <ErrorState message={error} /> : posts.length === 0 ? <EmptyState icon='💬' title='No discussions yet' message='Be the first to ask a question!' /> : (
+        {isPending ? <LoadingSpinner /> : (error && !isMock) ? <ErrorState message={error} onRetry={() => loadPosts(filters)} /> : posts.length === 0 ? <EmptyState icon='💬' title='No discussions yet' message='Be the first to ask a question!' /> : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {posts.map(post => (
               <Link to={`/discussion/${post.id}`} key={post.id} className='forum-post-card'>

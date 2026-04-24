@@ -46,10 +46,11 @@ export default function AdminAnalytics () {
         {loading ? <LoadingSpinner /> : error ? <ErrorState message={error} onRetry={loadStats} /> : (
           stats && (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-              <StatCard title="Total Resources" value={stats.totalResources} icon="📚" color="var(--accent-blue)" />
-              <StatCard title="Total Downloads" value={stats.totalDownloads} icon="📥" color="var(--accent-green)" />
-              <StatCard title="Total Users" value={stats.totalUsers} icon="👥" color="var(--accent-purple)" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '3rem' }}>
+              <StatCard title="Resources" value={stats.totalResources} icon="📚" color="#3b82f6" />
+              <StatCard title="Downloads" value={stats.totalDownloads} icon="📥" color="#10b981" />
+              <StatCard title="Discussions" value={stats.totalForumPosts} icon="💬" color="#f59e0b" />
+              <StatCard title="Total Users" value={stats.totalUsers} icon="👥" color="#8b5cf6" />
             </div>
 
             <div style={{ background: 'var(--bg-card)', padding: '2.5rem', borderRadius: 24, border: '1px solid var(--border)' }}>

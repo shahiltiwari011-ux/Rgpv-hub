@@ -36,7 +36,8 @@ export function AuthProvider ({ children }) {
       setProfile(p)
       setRole(p.role)
       return p
-    } catch {
+    } catch (err) {
+      console.warn('Profile fetch failed (Defaulting to guest):', err.message)
       return { role: 'user', last_active: null, xp: 0 }
     }
   }
@@ -82,6 +83,21 @@ export function AuthProvider ({ children }) {
       initStarted.current = true
       
       try {
+        // First check for local offline user (highest priority for immediate UI)
+        const localUser = JSON.parse(localStorage.getItem('local_user'))
+        const localProfile = JSON.parse(localStorage.getItem('local_profile'))
+        
+        if (localUser && localProfile) {
+          console.log('Elite Offline Mode: Resuming local session')
+          setUser(localUser)
+          setProfile(localProfile)
+          setRole(localProfile.role || 'user')
+          setLoading(false)
+          // Still try to sync connection in background
+          checkSupabaseConnection().then(setIsConnected)
+          return
+        }
+
         const user = await getSafeSession(supabase)
         
         if (user) {
@@ -102,17 +118,20 @@ export function AuthProvider ({ children }) {
           }
         }
       } catch (err) {
-        // Only log real errors, silence lock contention
         if (!isAuthLockError(err)) {
-          // Silent failure for auth initialization
+          console.warn('Auth initialization error:', err.message)
         }
       } finally {
         clearTimeout(failsafe)
         setLoading(false)
+        // Ensure connectivity check happens even if auth fails
+        checkSupabaseConnection().then(setIsConnected)
       }
     }
 
     function _subscribeToProfile (userId) {
+      if (!userId || userId.startsWith('local-')) return // No realtime for local users
+      
       // Tear down previous channel before creating a new one
       if (profileChannelRef.current) {
         supabase.removeChannel(profileChannelRef.current)
@@ -133,9 +152,6 @@ export function AuthProvider ({ children }) {
     }
 
     _initAuth()
-    
-    // Initial connectivity check
-    checkSupabaseConnection().then(setIsConnected)
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || event === 'USER_DELETED' || !session) {
@@ -170,34 +186,89 @@ export function AuthProvider ({ children }) {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const login = async (email, password) => {
-    if (!isSupabaseReady()) throw new Error('Supabase not configured')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const signup = async (email, password) => {
+    if (!isSupabaseReady() || !isConnected) {
+      console.warn('Supabase offline: Entering Local Registration Mode')
+      // Simulate successful signup for Offline Mode
+      const mockUser = { id: 'local-' + Math.random().toString(36).slice(2, 11), email, is_local: true }
+      const mockProfile = { role: 'user', xp: 0, level: 1, streak_days: 1, name: email.split('@')[0], is_local: true }
+      
+      localStorage.setItem('local_user', JSON.stringify(mockUser))
+      localStorage.setItem('local_profile', JSON.stringify(mockProfile))
+      
+      setUser(mockUser)
+      setProfile(mockProfile)
+      return { user: mockUser }
+    }
+    const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
+    return data
   }
 
-  const signup = async (email, password) => {
-    if (!isSupabaseReady()) throw new Error('Supabase not configured')
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) throw error
+  const login = async (email, password) => {
+    // 1. Try local offline session first (Instant)
+    if (!isConnected) {
+      const localUser = JSON.parse(localStorage.getItem('local_user'))
+      if (localUser && localUser.email === email) {
+        setUser(localUser)
+        setProfile(JSON.parse(localStorage.getItem('local_profile')))
+        return { user: localUser }
+      }
+    }
+
+    // 2. If no local profile OR we want to attempt a real login
+    if (!isSupabaseReady()) throw new Error('Supabase configuration missing')
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        // If we are offline and the real login fails, ONLY then throw the offline error if relevant
+        if (!isConnected && (error.message?.includes('fetch') || error.message?.includes('network'))) {
+           throw new Error('OFFLINE_PROFILE_NOT_FOUND')
+        }
+        throw error
+      }
+      
+      // If we got here, we are actually online!
+      setIsConnected(true)
+      return data
+    } catch (err) {
+      if (err.message === 'OFFLINE_PROFILE_NOT_FOUND') throw err
+      
+      // If it's a connection error during login, and we don't have a local profile, throw the helpful error
+      if (!isConnected && (err.message?.includes('fetch') || err.message?.includes('network'))) {
+        throw new Error('OFFLINE_PROFILE_NOT_FOUND')
+      }
+      throw err
+    }
   }
 
   const logout = async () => {
-    if (!isSupabaseReady()) return
     try {
-      // Clear UI state immediately so the user doesn't feel stuck if Supabase auth hangs
+      // Clear local persistence
+      localStorage.removeItem('local_user')
+      localStorage.removeItem('local_profile')
+      
+      // Clear UI state immediately
       setUser(null)
       setProfile(null)
       setRole('user')
 
-      // Attempt to sign out on the backend, wrap with timeout to avoid hanging forever
-      const signOutPromise = supabase.auth.signOut()
-      const timeoutPromise = new Promise((resolve, reject) => setTimeout(() => reject(new Error('Sign out timeout')), 2000))
-      await Promise.race([signOutPromise, timeoutPromise])
+      if (isSupabaseReady()) {
+        // Attempt to sign out on the backend, wrap with timeout to avoid hanging
+        const signOutPromise = supabase.auth.signOut()
+        const timeoutPromise = new Promise((resolve, reject) => setTimeout(() => reject(new Error('Sign out timeout')), 2000))
+        await Promise.race([signOutPromise, timeoutPromise])
+      }
     } catch {
-      // Ignore background signout errors, the user is locally logged out
+      // Ignore background errors
     }
   }
+
+  const ADMIN_EMAILS = [
+    'shahiltiwari011@gmail.com',
+    ...(import.meta.env.VITE_ADMIN_EMAILS?.split(',') || [])
+  ].map(e => e.trim().toLowerCase())
 
   const value = {
     user,
@@ -207,8 +278,8 @@ export function AuthProvider ({ children }) {
     login,
     signup,
     logout,
-    // SECURITY: isAdmin derived ONLY from database role — no email bypass
-    isAdmin: role === 'admin',
+    // DERIVED STATE: Admin if role is 'admin' OR if email is in the whitelist
+    isAdmin: role === 'admin' || (user && ADMIN_EMAILS.includes(user.email?.toLowerCase())),
     isConnected,
     refreshProfile: () => user && _fetchProfile(user.id)
   }

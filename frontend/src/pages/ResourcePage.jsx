@@ -9,6 +9,7 @@ import SEO from '../components/SEO'
 import { useAuth } from '../context/AuthContext'
 import ResourceCard from '../components/ResourceCard'
 import { buildResourceListLink } from '../utils/resourceLinks'
+import OfflineBanner from '../components/OfflineBanner'
 
 const PAGE_CONFIG = {
   notes: {
@@ -69,15 +70,25 @@ export default function ResourcePage ({ type }) {
   }, [searchTerm, updateFilter, filters.search])
 
   useEffect(() => {
-    const nextParams = new URLSearchParams()
+    const nextParams = new URLSearchParams(searchParams)
+    
+    // Sync filters to URL
     if (filters.branch) nextParams.set('branch', filters.branch)
+    else nextParams.delete('branch')
+    
+    if (filters.semester) nextParams.set('semester', filters.semester)
+    else nextParams.delete('semester')
+    
+    if (filters.page > 1) nextParams.set('page', filters.page)
+    else nextParams.delete('page')
+
     const current = searchParams.toString()
     const next = nextParams.toString()
 
     if (current !== next) {
       setSearchParams(nextParams, { replace: true })
     }
-  }, [filters.branch, searchParams, setSearchParams])
+  }, [filters, searchParams, setSearchParams])
 
   const refreshRatings = useCallback(async () => {
     if (!data.length || isMock) {
@@ -120,25 +131,7 @@ export default function ResourcePage ({ type }) {
         urlPath={`/${type === 'pyq' ? 'pyq' : type}`}
       />
       
-      {isMock && (
-        <div style={{
-          background: 'rgba(239, 68, 68, 0.15)',
-          color: '#fca5a5',
-          padding: '0.75rem 1rem',
-          textAlign: 'center',
-          fontSize: '0.85rem',
-          fontWeight: 600,
-          borderBottom: '1px solid rgba(239, 68, 68, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem'
-        }}>
-          <span>📡</span>
-          <span>Offline Mode: Using local fallback data. Database connection is down.</span>
-          <button onClick={refetch} style={{ background: 'white', color: 'black', border: 'none', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer', marginLeft: '1rem' }}>RETRY</button>
-        </div>
-      )}
+      <OfflineBanner isMock={isMock} onRetry={refetch} />
 
       <div className='page-hero'>
         <span className='page-hero-icon'>{config.icon}</span>

@@ -698,12 +698,14 @@ export async function getAnalytics () {
       { count: totalResources },
       { count: totalDownloads },
       { data: branchStats },
-      { count: totalUsers }
+      { count: totalUsers },
+      { count: totalForumPosts }
     ] = await Promise.all([
       fetchWithTimeout(sb.from('resources').select('*', { count: 'exact', head: true }).throwOnError()),
       fetchWithTimeout(sb.from('downloads').select('*', { count: 'exact', head: true }).throwOnError()),
       fetchWithTimeout(sb.from('resources').select('branch').throwOnError()),
-      fetchWithTimeout(sb.from('profiles').select('*', { count: 'exact', head: true }).throwOnError())
+      fetchWithTimeout(sb.from('profiles').select('*', { count: 'exact', head: true }).throwOnError()),
+      fetchWithTimeout(sb.from('forum_posts').select('*', { count: 'exact', head: true }).throwOnError())
     ])
 
     const branchCounts = (branchStats || []).reduce((acc, r) => {
@@ -715,6 +717,7 @@ export async function getAnalytics () {
       totalResources: totalResources || 0,
       totalDownloads: totalDownloads || 0,
       totalUsers: totalUsers || 0,
+      totalForumPosts: totalForumPosts || 0,
       branches: branchCounts
     }
   } catch (err) {

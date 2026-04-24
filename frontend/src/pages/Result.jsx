@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import html2pdf from 'html2pdf.js';
 import { fetchProxyResult, getBackendHealth } from '../services/api';
 
 const Result = () => {
@@ -85,36 +84,42 @@ const Result = () => {
         return '#f43f5e';
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         setIsDownloading(true);
-        const element = document.querySelector('.transcript-container');
-        
-        // Apply high-contrast mode for better PDF visibility
-        element.classList.add('export-mode');
-        
-        const opt = {
-            margin:       [10, 5],
-            filename:     `ProjectX_Result_${result.enroll}_Sem_${result.semester || semester}.pdf`,
-            image:        { type: 'jpeg', quality: 1.0 },
-            html2canvas:  { 
-                scale: 4, 
-                useCORS: true, 
-                backgroundColor: '#03040a',
-                logging: false,
-                letterRendering: true,
-                allowTaint: true
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+        try {
+            // Dynamically import the heavy PDF library only on-demand
+            const { default: html2pdf } = await import('html2pdf.js');
+            
+            const element = document.querySelector('.transcript-container');
+            if (!element) throw new Error("Result container not found");
+            
+            // Apply high-contrast mode for better PDF visibility
+            element.classList.add('export-mode');
+            
+            const opt = {
+                margin:       [10, 5],
+                filename:     `ProjectX_Result_${result.enroll}_Sem_${result.semester || semester}.pdf`,
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { 
+                    scale: 4, 
+                    useCORS: true, 
+                    backgroundColor: '#03040a',
+                    logging: false,
+                    letterRendering: true,
+                    allowTaint: true
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
 
-        html2pdf().set(opt).from(element).save().then(() => {
+            await html2pdf().set(opt).from(element).save();
             element.classList.remove('export-mode');
-            setIsDownloading(false);
-        }).catch(err => {
+        } catch (err) {
             console.error("PDF Export Error:", err);
-            element.classList.remove('export-mode');
+            const element = document.querySelector('.transcript-container');
+            if (element) element.classList.remove('export-mode');
+        } finally {
             setIsDownloading(false);
-        });
+        }
     };
 
     return (

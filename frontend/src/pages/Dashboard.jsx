@@ -4,7 +4,7 @@ import { LoadingSpinner, EmptyState } from '../components/States'
 import SEO from '../components/SEO'
 
 export default function Dashboard () {
-  const { user, loading: authLoading, login, signup } = useAuth()
+  const { user, loading: authLoading, login, signup, isConnected } = useAuth()
   const [isSignUp, setIsSignUp] = useState(false)
   const [authForm, setAuthForm] = useState({ email: '', password: '' })
   const [authError, setAuthError] = useState('')
@@ -40,7 +40,9 @@ export default function Dashboard () {
       console.error('Auth Error:', err)
       const msg = err.message || ''
       
-      if (msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('timeout') || msg.toLowerCase().includes('abort')) {
+      if (msg.includes('OFFLINE_PROFILE_NOT_FOUND') || msg.includes('Profile not found locally')) {
+        setAuthError('No offline profile found for this email. Since you are currently offline, you need to create a local session first.')
+      } else if (msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('timeout') || msg.toLowerCase().includes('abort')) {
         setAuthError('Connection failed. Your Supabase project may be paused or starting up. Please check your database status and try again in 30 seconds.')
       } else if (msg.includes('rate limit')) {
         setAuthError('Too many attempts. Please wait a few minutes.')
@@ -197,18 +199,86 @@ export default function Dashboard () {
 
               {authError && (
                 <div style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
+                  background: 'rgba(239, 68, 68, 0.05)',
                   color: '#f87171',
-                  padding: '1rem',
-                  borderRadius: 16,
+                  padding: '1.25rem',
+                  borderRadius: 20,
                   marginBottom: '1.5rem',
                   fontSize: '0.85rem',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  border: '1px solid rgba(239, 68, 68, 0.15)',
                   display: 'flex',
-                  alignItems: 'center',
+                  flexDirection: 'column',
                   gap: '0.75rem'
                 }}>
-                  <span>⚠️</span> {authError}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.1rem' }}>⚠️</span>
+                    <div style={{ flex: 1 }}>
+                      <strong style={{ display: 'block', color: '#fff', marginBottom: '0.25rem' }}>Authentication Issue</strong>
+                      {authError}
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {authError.includes('No offline profile found') && (
+                      <button 
+                        onClick={() => setIsSignUp(true)}
+                        style={{
+                          background: 'var(--accent-blue)',
+                          border: 'none',
+                          color: '#fff',
+                          padding: '0.6rem 1rem',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          marginTop: '0.5rem',
+                          transition: '0.2s',
+                          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                        }}
+                      >
+                        ✨ Create Offline Session
+                      </button>
+                    )}
+
+                    <button 
+                      onClick={async () => {
+                        const { checkSupabaseConnection } = await import('../services/supabaseClient');
+                        const connected = await checkSupabaseConnection();
+                        if (connected) {
+                          window.location.reload(); // Refresh to exit offline mode properly
+                        } else {
+                          toast.error('Still unable to connect to Cloud.');
+                        }
+                      }}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#fff',
+                        padding: '0.6rem 1rem',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        marginTop: '0.5rem',
+                        transition: '0.2s'
+                      }}
+                    >
+                      🔄 Retry Connection
+                    </button>
+                  </div>
+
+                  {!isConnected && !authError.includes('No offline profile found') && (
+                    <div style={{ 
+                      marginTop: '0.5rem', 
+                      paddingTop: '0.75rem', 
+                      borderTop: '1px solid rgba(255,255,255,0.05)',
+                      color: 'var(--text-secondary)',
+                      lineHeight: 1.4
+                    }}>
+                      <strong style={{ color: '#fff', display: 'block', marginBottom: '0.2rem' }}>Elite Offline Mode Active</strong>
+                      You can still create an offline profile to save your progress locally. It will automatically sync once the connection is restored.
+                    </div>
+                  )}
                 </div>
               )}
               {authSuccess && (
@@ -272,10 +342,12 @@ export default function Dashboard () {
                     borderRadius: 16,
                     fontSize: '1.1rem',
                     fontWeight: 700,
-                    marginTop: '0.5rem'
+                    marginTop: '0.5rem',
+                    background: !isConnected ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' : undefined,
+                    boxShadow: !isConnected ? '0 10px 20px rgba(59, 130, 246, 0.2)' : undefined
                   }}
                 >
-                  {isActionLoading ? 'Authenticating...' : (isSignUp ? 'Create Profile' : 'Access Dashboard')}
+                  {isActionLoading ? 'Authenticating...' : (isSignUp ? (isConnected ? 'Create Profile' : 'Register Locally') : (isConnected ? 'Access Dashboard' : 'Attempt Online Access'))}
                 </button>
               </form>
 

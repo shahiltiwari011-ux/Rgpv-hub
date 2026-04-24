@@ -1,53 +1,38 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getForumPost, getForumComments, addForumComment } from '../services/api'
+import { addForumComment } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { LoadingSpinner, ErrorState } from '../components/States'
 import SEO from '../components/SEO'
 import { toast } from 'react-hot-toast'
+import { useForum } from '../hooks/useForum'
+import OfflineBanner from '../components/OfflineBanner'
 
 export default function ThreadPage () {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [post, setPost] = useState(null)
-  const [comments, setComments] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { post, comments, isPending, error, isMock, loadPost, loadComments } = useForum()
   const [newComment, setNewComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    loadThread()
-  }, [id])
-
-  const loadThread = async () => {
-    try {
-      setLoading(true)
-      const [postData, commentsData] = await Promise.all([
-        getForumPost(id),
-        getForumComments(id)
-      ])
-      setPost(postData)
-      setComments(commentsData)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+    loadPost(id)
+    loadComments(id)
+  }, [id, loadPost, loadComments])
 
   const handleSubmitComment = async (e) => {
     e.preventDefault()
     if (!user) return toast.error('Login to reply!')
     if (!newComment.trim()) return
+    if (isMock) return toast.error('Commenting is disabled in Offline Mode.')
     
     setSubmitting(true)
     try {
       await addForumComment(id, newComment)
       setNewComment('')
       toast.success('Reply added! 💬')
-      loadThread()
+      loadComments(id)
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -55,14 +40,16 @@ export default function ThreadPage () {
     }
   }
 
-  if (loading) return <LoadingSpinner text='Loading discussion…' />
-  if (error) return <ErrorState message={error} onRetry={loadThread} />
-  if (!post) return <ErrorState message='Post not found' />
+  if (isPending && !post) return <LoadingSpinner text='Loading discussion…' />
+  if (error && !isMock) return <ErrorState message={error} onRetry={() => { loadPost(id); loadComments(id); }} />
+  if (!post && !isPending) return <ErrorState message='Post not found' />
 
   return (
     <>
-      <SEO title={`${post.title} | PROJECTX Community`} description={post.content.substring(0, 160)} />
+      <SEO title={`${post?.title || 'Discussion'} | PROJECTX Community`} description={post?.content?.substring(0, 160) || ''} />
       
+      <OfflineBanner isMock={isMock} onRetry={() => { loadPost(id); loadComments(id); }} />
+
       <div className='forum-container' style={{ paddingTop: '2rem' }}>
         <button 
           onClick={() => navigate('/discussions')}
@@ -71,22 +58,24 @@ export default function ThreadPage () {
           ← Back to Forum
         </button>
 
-        <div className='thread-header-card'>
-          <div className='forum-meta' style={{ marginBottom: '1.25rem' }}>
-            {post.branch && <span className='forum-badge'>{post.branch}</span>}
-            {post.semester && <span className='forum-badge'>Sem {post.semester}</span>}
-            <div className='forum-author-tag'>
-              <div className='forum-author-avatar'>
-                {(post.profiles?.full_name || post.profiles?.name || 'A').charAt(0).toUpperCase()}
+        {post && (
+          <div className='thread-header-card'>
+            <div className='forum-meta' style={{ marginBottom: '1.25rem' }}>
+              {post.branch && <span className='forum-badge'>{post.branch}</span>}
+              {post.semester && <span className='forum-badge'>Sem {post.semester}</span>}
+              <div className='forum-author-tag'>
+                <div className='forum-author-avatar'>
+                  {(post.profiles?.full_name || post.profiles?.name || 'A').charAt(0).toUpperCase()}
+                </div>
+                <span>{post.profiles?.full_name || post.profiles?.name || 'Anonymous'}</span>
               </div>
-              <span>{post.profiles?.full_name || post.profiles?.name || 'Anonymous'}</span>
+              <span>·</span>
+              <span>{new Date(post.created_at).toLocaleDateString()}</span>
             </div>
-            <span>·</span>
-            <span>{new Date(post.created_at).toLocaleDateString()}</span>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.25rem)', marginBottom: '1.5rem', fontFamily: 'Syne, sans-serif', fontWeight: 800, lineHeight: 1.2 }}>{post.title}</h1>
+            <div className='thread-content-text'>{post.content}</div>
           </div>
-          <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.25rem)', marginBottom: '1.5rem', fontFamily: 'Syne, sans-serif', fontWeight: 800, lineHeight: 1.2 }}>{post.title}</h1>
-          <div className='thread-content-text'>{post.content}</div>
-        </div>
+        )}
 
         <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontFamily: 'Syne, sans-serif', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <span>Replies</span>
@@ -123,13 +112,13 @@ export default function ThreadPage () {
             </div>
             <input 
               className='form-input' 
-              placeholder={user ? 'Type your helpful reply...' : 'Login to reply...'}
+              placeholder={isMock ? 'Replying disabled in Offline Mode' : user ? 'Type your helpful reply...' : 'Login to reply...'}
               value={newComment}
               onChange={e => setNewComment(e.target.value)}
-              disabled={submitting || !user}
+              disabled={submitting || !user || isMock}
               style={{ borderRadius: '14px' }}
             />
-            <button type='submit' className='btn-primary' disabled={submitting || !newComment.trim() || !user} style={{ borderRadius: '14px', whiteSpace: 'nowrap' }}>
+            <button type='submit' className='btn-primary' disabled={submitting || !newComment.trim() || !user || isMock} style={{ borderRadius: '14px', whiteSpace: 'nowrap' }}>
               {submitting ? '...' : '🚀 Reply'}
             </button>
           </form>

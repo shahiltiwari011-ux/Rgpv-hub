@@ -9,7 +9,7 @@ import ContinueLearning from '../components/ContinueLearning';
 import XPBar from '../components/XPBar';
 
 const BRANCHES = [
-  { name: 'Computer Science', icon: '🖥️', param: 'Computer+Science', color: '#3b82f6' },
+  { name: 'Computer Science', icon: '🖥️', param: 'Computer Science', color: '#3b82f6' },
   { name: 'Mechanical', icon: '⚙️', param: 'Mechanical', color: '#ef4444' },
   { name: 'Electrical', icon: '⚡', param: 'Electrical', color: '#f59e0b' },
   { name: 'Civil', icon: '🏗️', param: 'Civil', color: '#10b981' },
