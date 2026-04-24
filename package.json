@@ -7,5 +7,8 @@
     "build": "npm install --prefix frontend && npm run build --prefix frontend",
     "start": "npm start --prefix backend",
     "install:all": "npm install --prefix frontend && npm install --prefix backend"
+  },
+  "dependencies": {
+    "vite": "^8.0.10"
   }
 }
