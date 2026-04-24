@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import html2pdf from 'html2pdf.js';
 import { fetchProxyResult, getBackendHealth } from '../services/api';
 
 const Result = () => {
@@ -12,6 +13,7 @@ const Result = () => {
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
     const [serverStatus, setServerStatus] = useState('checking');
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
         const checkHealth = async () => {
@@ -81,6 +83,38 @@ const Result = () => {
         if (g.includes('B')) return '#6366f1';
         if (g.includes('C')) return '#f59e0b';
         return '#f43f5e';
+    };
+
+    const handleDownload = () => {
+        setIsDownloading(true);
+        const element = document.querySelector('.transcript-container');
+        
+        // Apply high-contrast mode for better PDF visibility
+        element.classList.add('export-mode');
+        
+        const opt = {
+            margin:       [10, 5],
+            filename:     `ProjectX_Result_${result.enroll}_Sem_${result.semester || semester}.pdf`,
+            image:        { type: 'jpeg', quality: 1.0 },
+            html2canvas:  { 
+                scale: 4, 
+                useCORS: true, 
+                backgroundColor: '#03040a',
+                logging: false,
+                letterRendering: true,
+                allowTaint: true
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            element.classList.remove('export-mode');
+            setIsDownloading(false);
+        }).catch(err => {
+            console.error("PDF Export Error:", err);
+            element.classList.remove('export-mode');
+            setIsDownloading(false);
+        });
     };
 
     return (
@@ -194,10 +228,10 @@ const Result = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="result-dashboard official-style"
                         >
-                            {loading && (
+                            {(loading || isDownloading) && (
                                 <div className="scanning-overlay">
                                     <div className="scan-line"></div>
-                                    <p>REFRESHING TRANSCRIPT...</p>
+                                    <p>{isDownloading ? 'GENERATING DIGITAL PDF...' : 'REFRESHING TRANSCRIPT...'}</p>
                                 </div>
                             )}
 
@@ -280,8 +314,13 @@ const Result = () => {
 
                                 <div className="transcript-footer">
                                     <p>© {new Date().getFullYear()} ProjectX Verified Digital Transcript</p>
-                                    <button onClick={() => window.print()} className="print-button">
-                                        <span>🖨️ EXPORT PDF</span>
+                                    <button onClick={handleDownload} className="download-button" data-html2canvas-ignore="true">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
+                                            <polyline points="7 10 12 15 17 10" />
+                                            <line x1="12" y1="15" x2="12" y2="3" />
+                                        </svg>
+                                        <span>DOWNLOAD RESULT</span>
                                     </button>
                                 </div>
                             </div>
@@ -361,8 +400,25 @@ const Result = () => {
                 .transcript-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 1rem; }
                 .transcript-footer p { color: #475569; font-size: 0.8rem; font-weight: 700; }
                 
-                .print-button { background: #fff; color: #000; border: none; padding: 1rem 2rem; border-radius: 1.25rem; font-weight: 900; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 0.5rem; }
-                .print-button:hover { background: #3b82f6; color: #fff; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
+                .download-button { background: #fff; color: #000; border: none; padding: 1rem 2rem; border-radius: 1.25rem; font-weight: 900; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+                .download-button:hover { background: #3b82f6; color: #fff; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4); }
+                .download-button svg { transition: transform 0.3s; }
+                .download-button:hover svg { transform: translateY(2px); }
+
+                /* Export High-Contrast Mode */
+                .transcript-container.export-mode { 
+                    background: #03040a !important; 
+                    border: 2px solid rgba(59, 130, 246, 0.3) !important;
+                    padding: 40px !important;
+                    border-radius: 0 !important;
+                }
+                .export-mode .identity-table td:first-child { color: #94a3b8 !important; background: rgba(255,255,255,0.02) !important; }
+                .export-mode .identity-table strong { color: #fff !important; font-size: 1.2rem !important; }
+                .export-mode .section-header-pill { background: #3b82f6 !important; color: #fff !important; border: none !important; }
+                .export-mode .subjects-table thead th { background: #1e293b !important; color: #3b82f6 !important; border-color: #334155 !important; }
+                .export-mode th, .export-mode td { border-color: #1e293b !important; }
+                .export-mode .summary-table .highlight-val { color: #60a5fa !important; font-weight: 900 !important; }
+                .export-mode .transcript-footer p { color: #64748b !important; }
 
                 @media (max-width: 768px) {
                     .portal-container { padding-top: 6rem; }
@@ -383,14 +439,15 @@ const Result = () => {
                 @keyframes spin { to { transform: rotate(360deg); } }
 
                 @media print {
-                    body { background: #fff !important; }
+                    @page { margin: 1cm; }
+                    body { background: #fff !important; color: #000 !important; }
                     .portal-container { padding: 0; background: #fff !important; }
                     .content-wrapper { max-width: 100%; }
                     .transcript-container { border: none !important; box-shadow: none !important; background: #fff !important; padding: 0 !important; color: #000 !important; }
                     table, th, td { border-color: #000 !important; color: #000 !important; }
                     .subjects-table thead th { background: #f0f0f0 !important; color: #000 !important; }
                     .section-header-pill { border: 1px solid #000 !important; color: #000 !important; }
-                    .print-button, .portal-top, .search-engine-wrap, .ambient-background { display: none !important; }
+                    .download-button, .portal-top, .search-engine-wrap, .ambient-background, .projectx-nav, .projectx-footer { display: none !important; }
                     .identity-table strong, .summary-table .highlight-val { color: #000 !important; }
                 }
             `}</style>

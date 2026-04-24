@@ -37,7 +37,16 @@ export default function Dashboard () {
         await login(authForm.email, authForm.password)
       }
     } catch (err) {
-      setAuthError(err.message)
+      console.error('Auth Error:', err)
+      const msg = err.message || ''
+      
+      if (msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('timeout') || msg.toLowerCase().includes('abort')) {
+        setAuthError('Connection failed. Your Supabase project may be paused or starting up. Please check your database status and try again in 30 seconds.')
+      } else if (msg.includes('rate limit')) {
+        setAuthError('Too many attempts. Please wait a few minutes.')
+      } else {
+        setAuthError(msg)
+      }
     } finally {
       setIsActionLoading(false)
     }

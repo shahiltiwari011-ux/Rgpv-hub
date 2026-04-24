@@ -25,10 +25,10 @@ export const supabase =
         detectSessionInUrl: true
       },
       global: {
-        // Hard 20-second ceiling on all Supabase fetch calls
+        // High 60-second ceiling to allow for paused free-tier projects to wake up
         fetch: (url, options = {}) => {
           const controller = new AbortController()
-          const id = setTimeout(() => controller.abort(), 20000)
+          const id = setTimeout(() => controller.abort(), 60000)
           return fetch(url, { ...options, signal: controller.signal })
             .finally(() => clearTimeout(id))
         }
@@ -47,9 +47,13 @@ export const isSupabaseReady = () => {
 export async function checkSupabaseConnection() {
   if (!supabase) return false
   try {
-    // Try a simple ping to a common table
-    const { error } = await supabase.from('notes').select('id', { count: 'exact', head: true }).limit(1)
+    // Try a simple ping to the resources table (most reliable in schema v5)
+    // We wrap this specifically to avoid hanging the entire auth initialization
+    const { error } = await supabase.from('resources').select('id', { count: 'exact', head: true }).limit(1)
+    
     if (error) {
+      // "relation does not exist" means we connected but the schema is wrong - still "connected" technically
+      if (error.code === 'PGRST116' || error.message?.includes('not found')) return true
       console.warn('Supabase connectivity check failed:', error.message)
       return false
     }
