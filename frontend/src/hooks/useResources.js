@@ -44,7 +44,7 @@ export function useResources (type, initialFilters = {}) {
       setIsMock(true)
       
       // Still set error if it's a real connection failure so UI can show a warning
-      if (err.message.includes('fetch failed') || err.message.includes('timeout')) {
+      if (err.message.includes('fetch failed') || err.message.includes('timeout') || err.message.includes('resolve host')) {
         setError('OFFLINE_MODE')
       } else {
         setError(err.message)

@@ -177,10 +177,10 @@ export default function ResourcePage ({ type }) {
       />
 
       {isPending && <LoadingSpinner text={config.loadingText} />}
-      {error && <ErrorState message={error} onRetry={refetch} />}
-      {!isPending && !error && data.length === 0 && <EmptyState icon={config.icon} title={config.emptyTitle} message={config.emptyMessage} />}
+      {error && !isMock && <ErrorState message={error} onRetry={refetch} />}
+      {!isPending && !isMock && !error && data.length === 0 && <EmptyState icon={config.icon} title={config.emptyTitle} message={config.emptyMessage} />}
 
-      {!isPending && !error && data.length > 0 && (
+      {!isPending && (data.length > 0 || isMock) && (!error || isMock) && (
         <>
           <div className='subjects-grid'>
             {data.map((item) => (

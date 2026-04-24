@@ -38,7 +38,9 @@ export function ErrorState ({ message, onRetry }) {
       <p className='state-message'>
         {message === 'OFFLINE_MODE' 
           ? 'The database connection is currently down or paused. We have loaded local fallback data for you.' 
-          : (message || 'Failed to sync with the cloud. Please check your internet connection.')}
+          : (message?.includes('resolve host') 
+              ? 'DNS Error: The Supabase URL is incorrect or unreachable. Please check your .env configuration.' 
+              : (message || 'Failed to sync with the cloud. Please check your internet connection.'))}
       </p>
       {onRetry && <button className='retry-btn' onClick={onRetry}>RETRY CONNECTION</button>}
       <style jsx>{`

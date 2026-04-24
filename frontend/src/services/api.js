@@ -77,7 +77,7 @@ function setCacheEntry (cache, key, value) {
 /* ── Centralized API Layer ── */
 
 function _ensureSupabase () {
-  if (!isSupabaseReady()) throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+  if (!isSupabaseReady()) throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env.local file.')
   return supabase
 }
 
