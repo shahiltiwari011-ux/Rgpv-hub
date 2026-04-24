@@ -714,8 +714,8 @@ const getApiUrl = () => {
     }
   }
   
-  // Production default (Railway)
-  return 'https://rgpv-hub-production.up.railway.app';
+  // Production default (Render)
+  return 'https://rgpv-hub.onrender.com';
 };
 
 const PROXY_API_URL = getApiUrl();
