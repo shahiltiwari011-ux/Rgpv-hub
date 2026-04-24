@@ -2,7 +2,6 @@ import { memo, useState } from 'react'
 import { submitRating, trackDownload } from '../services/api'
 import RatingPicker from './RatingPicker'
 import { useAuth } from '../context/AuthContext'
-import { useContinueLearning } from '../hooks/useContinueLearning'
 import ShareButton from './ShareButton'
 import HelpfulVote from './HelpfulVote'
 import Comments from './Comments'
@@ -23,7 +22,6 @@ function ResourceCard ({
 }) {
   const meta = TYPE_META[type] || TYPE_META.notes
   const { user } = useAuth()
-  const { trackView } = useContinueLearning({ skipFetch: true })
   const [showComments, setShowComments] = useState(false)
   const [isSubmittingRating, setIsSubmittingRating] = useState(false)
   const resourceUrl = typeof item.file_url === 'string' ? item.file_url.trim() : ''
@@ -66,7 +64,6 @@ function ResourceCard ({
   const handleDownload = () => {
     if (!hasDownload) return
     trackDownload(item.id).catch(() => {})
-    trackView(item.id)
     openResource(resourceUrl)
   }
 

@@ -43,6 +43,8 @@ export function useResources (type, initialFilters = {}) {
       setTotalPages(1)
       setIsMock(true)
       
+      console.error('Resource fetch failed. Falling back to mock data.', err)
+      
       // Still set error if it's a real connection failure so UI can show a warning
       if (err.message.includes('fetch failed') || err.message.includes('timeout') || err.message.includes('resolve host')) {
         setError('OFFLINE_MODE')

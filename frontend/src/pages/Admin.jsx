@@ -5,6 +5,8 @@ import { getResources, deleteResource } from '../services/api'
 import { LoadingSpinner, EmptyState } from '../components/States'
 import { RESOURCE_TYPES } from '../utils/constants'
 import SEO from '../components/SEO'
+import OfflineBanner from '../components/OfflineBanner'
+import { MOCK_RESOURCES } from '../data/mockResources'
 
 export default function Admin () {
   const { user, isAdmin, loading: authLoading } = useAuth()
@@ -12,6 +14,7 @@ export default function Admin () {
   const [items, setItems] = useState([])
   const [isPending, setIsPending] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [isMock, setIsMock] = useState(false)
 
   useEffect(() => { fetchItems() }, [activeTab])
 
@@ -20,9 +23,11 @@ export default function Admin () {
     try {
       const result = await getResources({ type: activeTab, limit: 100 })
       setItems(result.data)
+      setIsMock(false)
     } catch (err) {
-      console.error('Admin fetch error:', err)
-      setItems([])
+      console.warn('Admin fetch failed, using mock data')
+      setItems(MOCK_RESOURCES.filter(r => r.type === activeTab))
+      setIsMock(true)
     } finally {
       setIsPending(false)
     }
@@ -59,6 +64,9 @@ export default function Admin () {
         description='Manage study hub resources safely via the secure Admin Panel.'
         urlPath='/admin'
       />
+      
+      <OfflineBanner isMock={isMock} onRetry={fetchItems} />
+
       <div className='page-hero'>
         <span className='page-hero-icon'>🛡️</span>
         <h1 className='page-hero-title'>Admin Panel</h1>
@@ -165,13 +173,14 @@ export default function Admin () {
                   </a>
                   <button
                     onClick={() => handleDelete(item.id)}
+                    disabled={isMock}
                     style={{
-                      background: 'rgba(239, 68, 68, 0.05)',
-                      color: '#f87171',
-                      border: '1px solid rgba(239, 68, 68, 0.15)',
+                      background: isMock ? 'rgba(255,255,255,0.05)' : 'rgba(239, 68, 68, 0.05)',
+                      color: isMock ? 'var(--text-muted)' : '#f87171',
+                      border: isMock ? '1px solid var(--border)' : '1px solid rgba(239, 68, 68, 0.15)',
                       borderRadius: '8px',
                       padding: '0.4rem 0.8rem',
-                      cursor: 'pointer',
+                      cursor: isMock ? 'not-allowed' : 'pointer',
                       fontWeight: 600,
                       fontSize: '0.8rem'
                     }}

@@ -1,15 +1,29 @@
 import { useAuth } from '../context/AuthContext'
 import { LoadingSpinner, EmptyState } from '../components/States'
 import SEO from '../components/SEO'
+import OfflineBanner from '../components/OfflineBanner'
+import { useState, useEffect } from 'react'
+import { checkSupabaseConnection } from '../services/supabaseClient'
 
 export default function Dashboard () {
   const { user, loading: authLoading } = useAuth()
+  const [isMock, setIsMock] = useState(false)
+
+  useEffect(() => {
+    checkSupabaseConnection().then(connected => setIsMock(!connected))
+  }, [])
 
   if (authLoading) return <LoadingSpinner text='Checking authentication…' />
 
   return (
     <>
       <SEO title="Dashboard" description="Manage your bookmarks and view your study progress." urlPath="/dashboard" noIndex />
+      
+      <OfflineBanner isMock={isMock} onRetry={() => {
+        setIsMock(false)
+        checkSupabaseConnection().then(connected => setIsMock(!connected))
+      }} />
+
       <div className='page-hero'>
         <span className='page-hero-icon'>{user ? '📊' : '🔐'}</span>
         <h1 className='page-hero-title'>Dashboard</h1>

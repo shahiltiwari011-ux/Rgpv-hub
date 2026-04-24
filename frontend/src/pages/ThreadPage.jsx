@@ -99,7 +99,7 @@ export default function ThreadPage () {
             </div>
           ))}
           {comments.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(255,255,255,0.02)', borderRadius: 20, border: '1px dashed var(--border)' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--bg-secondary)', borderRadius: 20, border: '1px dashed var(--border)' }}>
               <p style={{ color: 'var(--text-muted)' }}>No replies yet. Be the first to answer! ✨</p>
             </div>
           )}

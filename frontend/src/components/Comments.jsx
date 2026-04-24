@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
 import { supabase, isSupabaseReady } from '../services/supabaseClient'
 import { useAuth } from '../context/AuthContext'
-import { useGamification } from '../hooks/useGamification'
 
 export default function Comments ({ resourceId }) {
   const { user, isAdmin } = useAuth()
-  const { awardXP } = useGamification()
   const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(true)
@@ -46,7 +44,6 @@ export default function Comments ({ resourceId }) {
       if (!error && data) {
         setComments([data, ...comments])
         setNewComment('')
-        awardXP(3) // Award 3 XP for commenting
       }
     } catch { /* silent */ } finally { setSubmitting(false) }
   }

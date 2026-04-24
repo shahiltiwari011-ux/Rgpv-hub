@@ -7,8 +7,11 @@ const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error(
     '🚨 CONFIG ERROR: Supabase credentials are missing!\n' +
-    'Please verify .env.local contains VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+    'Please verify .env.local contains VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.\n' +
+    'IMPORTANT: You MUST restart your Vite development server (npm run dev) after creating or editing .env.local for changes to take effect.'
   )
+} else {
+  console.log('✅ Supabase initialized with project:', supabaseUrl.split('//')[1]?.split('.')[0])
 }
 
 export const supabase =
@@ -47,14 +50,22 @@ export const isSupabaseReady = () => {
 export async function checkSupabaseConnection() {
   if (!supabase) return false
   try {
-    // Try a simple ping to the resources table (most reliable in schema v5)
-    // We wrap this specifically to avoid hanging the entire auth initialization
-    const { error } = await supabase.from('resources').select('id', { count: 'exact', head: true }).limit(1)
+    // Try a simple ping to the resources table
+    const { error } = await supabase.from('resources').select('id', { head: true }).limit(1)
     
     if (error) {
-      // "relation does not exist" means we connected but the schema is wrong - still "connected" technically
-      if (error.code === 'PGRST116' || error.message?.includes('not found')) return true
-      console.warn('Supabase connectivity check failed:', error.message)
+      // PGRST116: Result not found (Table exists but empty)
+      // 42P01: relation "resources" does not exist (Connected but schema missing)
+      if (
+        error.code === 'PGRST116' || 
+        error.code === '42P01' || 
+        error.message?.includes('not found') ||
+        error.message?.includes('exist')
+      ) {
+        console.log('📡 Connected to Supabase (Database ready or initialization pending)')
+        return true
+      }
+      console.warn('Supabase connectivity check failed:', error.code, error.message)
       return false
     }
     return true

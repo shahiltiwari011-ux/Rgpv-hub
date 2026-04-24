@@ -643,6 +643,10 @@ export async function getUserProfile (userId) {
   }
 }
 
+export async function getUserBadges (_userId) {
+  // Gamification removed — returns empty array for compatibility
+  return []
+}
 
 /* ── Analytics ── */
 export async function getAnalytics () {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase, isSupabaseReady } from '../services/supabaseClient'
-
 import { fetchWithTimeout } from '../services/api'
+import { MOCK_RESOURCES } from '../data/mockResources'
 
 const TRENDING_RESOURCE_FIELDS = 'id, type, title, branch, semester, download_count, icon, created_at'
 const TRENDING_CACHE_KEY = 'studyhub:trending:v1'
@@ -14,7 +14,6 @@ function readTrendingCache () {
   if (trendingMemoryCache && (Date.now() - trendingMemoryCache.timestamp) < TRENDING_CACHE_TTL) {
     return trendingMemoryCache
   }
-
   try {
     const raw = sessionStorage.getItem(TRENDING_CACHE_KEY)
     if (!raw) return null
@@ -33,6 +32,17 @@ function writeTrendingCache (value) {
   try {
     sessionStorage.setItem(TRENDING_CACHE_KEY, JSON.stringify(entry))
   } catch {}
+}
+
+function getMockTrendingPayload () {
+  const sorted = [...MOCK_RESOURCES].sort((a, b) => (b.download_count || 0) - (a.download_count || 0))
+  const recent = [...MOCK_RESOURCES].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  return {
+    trending: sorted.slice(0, 8),
+    mostDownloaded: sorted.slice(0, 8),
+    recentlyAdded: recent.slice(0, 8),
+    isMock: true
+  }
 }
 
 async function fetchTrendingPayload () {
@@ -61,7 +71,8 @@ async function fetchTrendingPayload () {
     const payload = {
       trending: trendData || [],
       mostDownloaded: trendData || [],
-      recentlyAdded: recentData || []
+      recentlyAdded: recentData || [],
+      isMock: false
     }
     writeTrendingCache(payload)
     return payload
@@ -79,15 +90,26 @@ export function useTrending () {
   const [mostDownloaded, setMostDownloaded] = useState([])
   const [recentlyAdded, setRecentlyAdded] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isMock, setIsMock] = useState(false)
 
   useEffect(() => {
-    if (!isSupabaseReady()) { setLoading(false); return }
+    // If Supabase isn't configured, immediately use mock data
+    if (!isSupabaseReady()) {
+      const mock = getMockTrendingPayload()
+      setTrending(mock.trending)
+      setMostDownloaded(mock.mostDownloaded)
+      setRecentlyAdded(mock.recentlyAdded)
+      setIsMock(true)
+      setLoading(false)
+      return
+    }
 
     const cached = readTrendingCache()
     if (cached) {
       setTrending(cached.trending || [])
       setMostDownloaded(cached.mostDownloaded || [])
       setRecentlyAdded(cached.recentlyAdded || [])
+      setIsMock(!!cached.isMock)
       setLoading(false)
     }
 
@@ -97,12 +119,15 @@ export function useTrending () {
         setTrending(payload.trending)
         setMostDownloaded(payload.mostDownloaded)
         setRecentlyAdded(payload.recentlyAdded)
+        setIsMock(false)
       } catch (err) {
-        console.warn('Trending fetch failed/timed out:', err.message)
+        console.warn('Trending fetch failed/timed out — using mock data:', err.message)
         if (!cached) {
-          setTrending([])
-          setMostDownloaded([])
-          setRecentlyAdded([])
+          const mock = getMockTrendingPayload()
+          setTrending(mock.trending)
+          setMostDownloaded(mock.mostDownloaded)
+          setRecentlyAdded(mock.recentlyAdded)
+          setIsMock(true)
         }
       } finally {
         setLoading(false)
@@ -111,6 +136,7 @@ export function useTrending () {
 
     void fetchAll()
 
+    // Only subscribe when supabase is available
     const channel = supabase.channel('public:resources:trending')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'resources' }, () => {
         void fetchAll()
@@ -122,5 +148,5 @@ export function useTrending () {
     }
   }, [])
 
-  return { trending, mostDownloaded, recentlyAdded, loading }
+  return { trending, mostDownloaded, recentlyAdded, loading, isMock }
 }

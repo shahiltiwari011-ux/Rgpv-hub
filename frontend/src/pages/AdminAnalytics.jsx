@@ -4,12 +4,15 @@ import { useAuth } from '../context/AuthContext'
 import { Navigate, Link } from 'react-router-dom'
 import { LoadingSpinner, ErrorState } from '../components/States'
 import SEO from '../components/SEO'
+import OfflineBanner from '../components/OfflineBanner'
+import { MOCK_STATS } from '../data/mockResources'
 
 export default function AdminAnalytics () {
   const { user, isAdmin, loading: authLoading } = useAuth()
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isMock, setIsMock] = useState(false)
 
   useEffect(() => {
     if (isAdmin) {
@@ -22,8 +25,24 @@ export default function AdminAnalytics () {
     try {
       const data = await getAnalytics()
       setStats(data)
+      setIsMock(false)
+      setError(null)
     } catch (err) {
-      setError(err.message)
+      console.warn('Analytics fetch failed, using mock data')
+      setStats({
+        totalResources: MOCK_STATS.total_notes + MOCK_STATS.total_pyq + MOCK_STATS.total_syllabus,
+        totalDownloads: 1250, // Mock value
+        totalForumPosts: 42,   // Mock value
+        totalUsers: 156,       // Mock value
+        branches: {
+          'Computer Science': MOCK_STATS.total_notes,
+          'Mechanical': 5,
+          'Electrical': 4,
+          'Civil': 3,
+          'Electronics': 2
+        }
+      })
+      setIsMock(true)
     } finally {
       setLoading(false)
     }
@@ -35,6 +54,7 @@ export default function AdminAnalytics () {
   return (
     <>
       <SEO title="Admin Analytics" />
+      <OfflineBanner isMock={isMock} onRetry={loadStats} />
       <div className='page-hero'>
         <span className='page-hero-icon'>📊</span>
         <h1 className='page-hero-title'>Platform Analytics</h1>

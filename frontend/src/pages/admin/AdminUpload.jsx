@@ -7,6 +7,9 @@ import { BRANCHES, SEMESTERS, RESOURCE_TYPES, MAX_FILE_SIZE } from '../../utils/
 import SEO from '../../components/SEO'
 import logger from '../../utils/logger'
 import { toast } from 'react-hot-toast'
+import OfflineBanner from '../../components/OfflineBanner'
+import { checkSupabaseConnection } from '../../services/supabaseClient'
+import { Link } from 'react-router-dom'
 
 // PDF magic bytes: %PDF (hex: 25 50 44 46)
 async function validatePdfMagicBytes (file) {
@@ -40,6 +43,11 @@ export default function AdminUpload () {
   const [file, setFile] = useState(null)
   const [fileKey, setFileKey] = useState(Date.now())
   const [isUploading, setIsUploading] = useState(false)
+  const [isMock, setIsMock] = useState(false)
+
+  useEffect(() => {
+    checkSupabaseConnection().then(connected => setIsMock(!connected))
+  }, [])
 
   if (authLoading) return <LoadingSpinner text='Authenticating...' />
   if (!user || !isAdmin) return <Navigate to='/' replace />
@@ -153,6 +161,11 @@ export default function AdminUpload () {
   return (
     <>
       <SEO title='Admin - Upload Resource' description='Admin upload interface.' urlPath='/admin/upload' />
+      
+      <OfflineBanner isMock={isMock} onRetry={() => {
+        setIsMock(false)
+        checkSupabaseConnection().then(connected => setIsMock(!connected))
+      }} />
 
       <div className='page-hero'>
         <span className='page-hero-icon'>📤</span>
@@ -221,8 +234,8 @@ export default function AdminUpload () {
             {file && <p style={{ fontSize: '0.75rem', color: 'var(--accent-blue)', marginTop: '0.5rem' }}>📎 {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</p>}
           </div>
 
-          <button type='submit' className='btn-primary' disabled={isUploading} style={{ width: '100%', justifyContent: 'center', height: '52px', marginTop: '1rem' }}>
-            {isUploading ? <><div className='spinner' style={{ width: '20px', height: '20px' }} /> Uploading...</> : '🚀 Upload Resource'}
+          <button type='submit' className='btn-primary' disabled={isUploading || isMock} style={{ width: '100%', justifyContent: 'center', height: '52px', marginTop: '1rem', opacity: isMock ? 0.6 : 1 }}>
+            {isUploading ? <><div className='spinner' style={{ width: '20px', height: '20px' }} /> Uploading...</> : isMock ? '❌ Offline Mode Active' : '🚀 Upload Resource'}
           </button>
         </form>
       </section>
