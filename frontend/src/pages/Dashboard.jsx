@@ -1,65 +1,18 @@
-import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { LoadingSpinner, EmptyState } from '../components/States'
 import SEO from '../components/SEO'
 
 export default function Dashboard () {
-  const { user, loading: authLoading, login, signup, isConnected } = useAuth()
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [authForm, setAuthForm] = useState({ email: '', password: '' })
-  const [authError, setAuthError] = useState('')
-  const [isActionLoading, setIsActionLoading] = useState(false)
-  const [authSuccess, setAuthSuccess] = useState('')
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('mode') === 'signup') {
-      setIsSignUp(true)
-    } else if (params.get('mode') === 'login') {
-      setIsSignUp(false)
-    }
-  }, [])
+  const { user, loading: authLoading } = useAuth()
 
   if (authLoading) return <LoadingSpinner text='Checking authentication…' />
-
-  const handleAuth = async (e) => {
-    e.preventDefault()
-    setIsActionLoading(true)
-    setAuthError('')
-    setAuthSuccess('')
-
-    try {
-      if (isSignUp) {
-        await signup(authForm.email, authForm.password)
-        setAuthSuccess('Registration successful! Please sign in.')
-        setIsSignUp(false)
-      } else {
-        await login(authForm.email, authForm.password)
-      }
-    } catch (err) {
-      console.error('Auth Error:', err)
-      const msg = err.message || ''
-      
-      if (msg.includes('OFFLINE_PROFILE_NOT_FOUND') || msg.includes('Profile not found locally')) {
-        setAuthError('No offline profile found for this email. Since you are currently offline, you need to create a local session first.')
-      } else if (msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('timeout') || msg.toLowerCase().includes('abort')) {
-        setAuthError('Connection failed. Your Supabase project may be paused or starting up. Please check your database status and try again in 30 seconds.')
-      } else if (msg.includes('rate limit')) {
-        setAuthError('Too many attempts. Please wait a few minutes.')
-      } else {
-        setAuthError(msg)
-      }
-    } finally {
-      setIsActionLoading(false)
-    }
-  }
 
   return (
     <>
       <SEO title="Dashboard" description="Manage your bookmarks and view your study progress." urlPath="/dashboard" noIndex />
       <div className='page-hero'>
-        <span className='page-hero-icon'>{user ? '📊' : (isSignUp ? '📝' : '🔐')}</span>
-        <h1 className='page-hero-title'>{user ? 'Dashboard' : (isSignUp ? 'Sign Up' : 'Sign In')}</h1>
+        <span className='page-hero-icon'>{user ? '📊' : '🔐'}</span>
+        <h1 className='page-hero-title'>Dashboard</h1>
         <p className='page-hero-sub'>{user ? `Welcome back, ${user.email}` : 'Access your saved resources'}</p>
       </div>
 
@@ -136,3 +89,4 @@ export default function Dashboard () {
     </>
   )
 }
+

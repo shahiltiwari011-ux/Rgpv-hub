@@ -584,35 +584,6 @@ export async function uploadFile (bucket, path, file) {
 
 /* ── Leaderboard & Profiles ── */
 
-export async function getLeaderboard () {
-  const sb = _ensureSupabase()
-
-  try {
-    const query = sb
-      .from('profiles')
-      .select('id, name, email, xp, level, streak_days, created_at')
-      .order('xp', { ascending: false })
-      .order('streak_days', { ascending: false })
-      .order('created_at', { ascending: true })
-      .limit(100)
-      .throwOnError()
-
-    const { data } = await fetchWithTimeout(query)
-    if (!data) return []
-
-    // Map properties to match what Leaderboard.jsx expects
-    return data.map((p, index) => ({
-      user_id: p.id,
-      email: p.email,
-      xp: p.xp,
-      rank: index + 1,
-      profiles: { name: p.name }
-    }))
-  } catch (error) {
-    console.warn('Leaderboard fetch issue:', error.message)
-    return []
-  }
-}
 
 export async function getUserProfile (userId) {
   const sb = _ensureSupabase()
@@ -672,23 +643,6 @@ export async function getUserProfile (userId) {
   }
 }
 
-export async function getUserBadges (userId) {
-  const sb = _ensureSupabase()
-  try {
-    const { data } = await fetchWithTimeout(
-      sb.from('user_badges')
-        .select('*')
-        .eq('user_id', userId)
-        .order('awarded_at', { ascending: false })
-        .throwOnError()
-    )
-    return data || []
-  } catch (error) {
-    // Graceful fallback for timeouts, missing table or permission denied
-    logger.warn('user_badges fetch failed or timed out', { error: error.message })
-    return []
-  }
-}
 
 /* ── Analytics ── */
 export async function getAnalytics () {

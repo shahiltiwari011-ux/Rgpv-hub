@@ -105,24 +105,26 @@ export default function ThreadPage () {
           )}
         </div>
 
-        <div className='comment-input-sticky'>
-          <form onSubmit={handleSubmitComment} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <div className='forum-author-avatar desktop-only'>
-               {user ? (user.email?.charAt(0).toUpperCase() || 'U') : '?'}
-            </div>
-            <input 
-              className='form-input' 
-              placeholder={isMock ? 'Replying disabled in Offline Mode' : user ? 'Type your helpful reply...' : 'Login to reply...'}
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              disabled={submitting || !user || isMock}
-              style={{ borderRadius: '14px' }}
-            />
-            <button type='submit' className='btn-primary' disabled={submitting || !newComment.trim() || !user || isMock} style={{ borderRadius: '14px', whiteSpace: 'nowrap' }}>
-              {submitting ? '...' : '🚀 Reply'}
-            </button>
-          </form>
-        </div>
+        {user && (
+          <div className='comment-input-sticky'>
+            <form onSubmit={handleSubmitComment} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <div className='forum-author-avatar desktop-only'>
+                 {user.email?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <input 
+                className='form-input' 
+                placeholder={isMock ? 'Replying disabled in Offline Mode' : 'Type your helpful reply...'}
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                disabled={submitting || isMock}
+                style={{ borderRadius: '14px' }}
+              />
+              <button type='submit' className='btn-primary' disabled={submitting || !newComment.trim() || isMock} style={{ borderRadius: '14px', whiteSpace: 'nowrap' }}>
+                {submitting ? '...' : '🚀 Reply'}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </>
   )

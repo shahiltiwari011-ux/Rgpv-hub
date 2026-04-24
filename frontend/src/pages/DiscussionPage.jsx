@@ -53,48 +53,9 @@ export default function DiscussionPage () {
         <h1 className='page-hero-title'>Community Forum</h1>
         <p className='page-hero-sub'>Collaborate with the PROJECTX elite network</p>
         
-        <button 
-          className={`btn-primary ${showNewPost ? 'btn-secondary' : ''}`}
-          onClick={() => setShowNewPost(!showNewPost)}
-          style={{ marginTop: '1.5rem', minWidth: '180px' }}
-        >
-          {showNewPost ? '✕ Close Form' : '➕ Ask a Question'}
-        </button>
       </div>
 
       <div className='forum-container selector-section' style={{ paddingBottom: '5rem' }}>
-        {showNewPost && (
-          <form onSubmit={handleSubmit} className='forum-form-box' style={{ padding: 'var(--card-px)', marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontFamily: 'Syne, sans-serif' }}>Create New Post</h2>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <input 
-                className='form-input'
-                placeholder='Question Title (e.g. How to solve Integration?)'
-                value={newPost.title}
-                onChange={e => setNewPost({...newPost, title: e.target.value})}
-                required
-              />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-              <select className='form-input' value={newPost.branch} onChange={e => setNewPost({...newPost, branch: e.target.value})}>
-                {BRANCHES.map(b => <option key={b} value={b}>{b} Branch</option>)}
-              </select>
-              <select className='form-input' value={newPost.semester} onChange={e => setNewPost({...newPost, semester: e.target.value})}>
-                {SEMESTERS.map(s => <option key={s} value={s}>{s === 'All' ? 'All Semesters' : `Sem ${s}`}</option>)}
-              </select>
-            </div>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <textarea 
-                className='form-input forum-textarea'
-                placeholder='Describe your problem in detail...'
-                value={newPost.content}
-                onChange={e => setNewPost({...newPost, content: e.target.value})}
-                required
-              />
-            </div>
-            <button type='submit' className='btn-primary' style={{ width: '100%', justifyContent: 'center', height: '3.5rem' }}>🚀 Post Question</button>
-          </form>
-        )}
 
         <div style={{ marginBottom: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
