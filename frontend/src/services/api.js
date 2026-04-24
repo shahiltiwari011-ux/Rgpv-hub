@@ -758,7 +758,6 @@ const getApiUrl = () => {
 };
 
 const PROXY_API_URL = getApiUrl();
-console.log('Final Proxy API URL:', PROXY_API_URL);
 
 export async function fetchProxyResult(enroll, sem, captcha = null, sessionId = null) {
   try {
@@ -789,7 +788,6 @@ export async function getBackendHealth() {
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error('Health check failed:', err.message);
     return { status: 'offline' };
   }
 }

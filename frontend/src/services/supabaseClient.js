@@ -3,8 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim()
 const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
 
-console.log('DEBUG: Supabase URL:', supabaseUrl)
-console.log('DEBUG: Supabase Key Length:', supabaseAnonKey.length)
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error(

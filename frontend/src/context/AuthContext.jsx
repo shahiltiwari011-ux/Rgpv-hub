@@ -54,7 +54,6 @@ export function AuthProvider ({ children }) {
     if (storedCheckIn !== localToday) {
       try {
         await fetchWithTimeout(supabase.rpc('award_xp', { xp_amount: 1 }).throwOnError(), 5000)
-        console.log('✅ Daily XP awarded')
         localStorage.setItem(`last_check_in_${userId}`, localToday)
         // Refresh profile after award without blocking the rest of the app
         void _fetchProfile(userId)
@@ -105,7 +104,7 @@ export function AuthProvider ({ children }) {
       } catch (err) {
         // Only log real errors, silence lock contention
         if (!isAuthLockError(err)) {
-          console.error('Auth initialization error:', err)
+          // Silent failure for auth initialization
         }
       } finally {
         clearTimeout(failsafe)
@@ -127,7 +126,6 @@ export function AuthProvider ({ children }) {
           table: 'profiles',
           filter: `id=eq.${userId}`
         }, (payload) => {
-          console.log('🔄 Profile update received via Realtime:', payload.new)
           setProfile(prev => ({ ...prev, ...payload.new }))
           if (payload.new.role) setRole(payload.new.role)
         })
