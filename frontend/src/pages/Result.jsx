@@ -135,10 +135,6 @@ const Result = () => {
                 >
                     <div className="branding">
                         <h1 className="portal-logo">PROJECT<span>X</span></h1>
-                        <div className={`status-badge ${serverStatus}`}>
-                            <span className="indicator"></span>
-                            {serverStatus === 'online' ? 'PROXY ACTIVE' : 'PROXY OFFLINE'}
-                        </div>
                     </div>
                 </motion.header>
 
@@ -343,14 +339,9 @@ const Result = () => {
                 .ambient-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%); pointer-events: none; }
                 .content-wrapper { max-width: 1100px; margin: 0 auto; position: relative; z-index: 10; }
 
-                .portal-top { display: flex; flex-direction: column; align-items: center; margin-bottom: clamp(2rem, 10vw, 4rem); }
-                .portal-logo { font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 12vw, 4rem); font-weight: 800; letter-spacing: -2px; margin: 0; position: relative; text-align: center; color: var(--text-primary); }
+                .portal-top { display: flex; flex-direction: column; align-items: center; margin-bottom: clamp(1.5rem, 8vw, 3rem); }
+                .portal-logo { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 10vw, 5rem); font-weight: 800; letter-spacing: -2px; margin: 0; position: relative; text-align: center; color: var(--text-primary); line-height: 1; }
                 .portal-logo span { color: var(--accent-blue); text-shadow: 0 0 50px rgba(59, 130, 246, 0.5); }
-                .status-badge { display: flex; align-items: center; gap: 0.6rem; font-size: 0.7rem; font-weight: 900; color: var(--text-muted); background: var(--bg-card); padding: 0.4rem 1.2rem; border-radius: 2rem; border: 1px solid var(--border); margin-top: 0.5rem; width: fit-content; letter-spacing: 1px; }
-                .status-badge.online { color: var(--accent-green); border-color: rgba(16, 185, 129, 0.2); }
-                .status-badge .indicator { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-                .online .indicator { box-shadow: 0 0 10px var(--accent-green); animation: pulse 2s infinite; }
-                @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
 
                 .glass-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 2.5rem; backdrop-filter: blur(25px); box-shadow: var(--shadow-lg); }
                 
@@ -432,6 +423,8 @@ const Result = () => {
 
                 @media (max-width: 768px) {
                     .portal-container { padding-top: 6rem; padding-left: 0.75rem; padding-right: 0.75rem; }
+                    .portal-top { margin-bottom: 2rem; }
+                    .portal-logo { font-size: 3rem; }
                     .search-panel { border-radius: 1.5rem; }
                     .glass-panel { border-radius: 1.5rem; }
                     .transcript-container { padding: 1rem 0.75rem; border-radius: 1.5rem; }
