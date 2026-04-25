@@ -54,10 +54,10 @@
             <div class="space-y-4">
                 <div class="text-left">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Secret Key</label>
-                    <input type="password" id="admin-pass" placeholder="••••••••" class="input-field text-center text-xl tracking-[0.5em]">
+                    <input type="password" id="admin-pass" placeholder="••••••••" class="input-field text-center text-xl tracking-[0.5em]" onkeyup="if(event.key === 'Enter') window.handleLogin()">
                 </div>
                 <p id="auth-error" class="text-red-400 text-xs font-bold hidden">Invalid security key. Access denied.</p>
-                <button onclick="handleLogin()" class="w-full btn-primary py-4 rounded-xl font-bold text-sm tracking-widest uppercase">Verify Identity</button>
+                <button onclick="window.handleLogin()" id="login-btn" class="w-full btn-primary py-4 rounded-xl font-bold text-sm tracking-widest uppercase">Verify Identity</button>
             </div>
         </div>
     </div>

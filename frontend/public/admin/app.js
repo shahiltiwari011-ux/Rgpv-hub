@@ -28,19 +28,30 @@ function checkAuth() {
 function handleLogin() {
     const passInput = document.getElementById('admin-pass');
     const errorMsg = document.getElementById('auth-error');
+    const loginBtn = document.getElementById('login-btn');
     
-    if (passInput.value === ADMIN_PASSWORD_HASH) {
+    // Trim whitespace to avoid accidental space issues
+    const password = passInput.value.trim();
+
+    if (password === ADMIN_PASSWORD_HASH) {
         localStorage.setItem('projectx_admin_session', 'active');
+        
+        // Visual feedback
+        loginBtn.innerHTML = "Access Granted...";
         document.getElementById('auth-gate').classList.add('fade-out');
+        
         setTimeout(() => {
             document.getElementById('auth-gate').classList.add('hidden');
             document.getElementById('dashboard-ui').classList.remove('hidden');
             showToast("Authenticated Successfully", "✅");
-        }, 300);
+            // If we are on manage tab, fetch notes
+            if (currentTab === 'manage') fetchNotes();
+        }, 400);
     } else {
         errorMsg.classList.remove('hidden');
         passInput.classList.add('border-red-500');
-        setTimeout(() => passInput.classList.remove('border-red-500'), 2000);
+        passInput.value = ''; // Clear for retry
+        setTimeout(() => passInput.classList.remove('border-red-500'), 1000);
     }
 }
 window.handleLogin = handleLogin;
