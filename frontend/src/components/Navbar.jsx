@@ -31,9 +31,9 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="nav-brand" onClick={() => setMobileOpen(false)}>
           <div className="brand-icon">
-            <div className="icon-inner">R</div>
+            <div className="icon-inner">X</div>
           </div>
-          <span className="brand-text">RGPV<span>HUB</span></span>
+          <span className="brand-text">PROJECT<span>X</span></span>
         </Link>
 
         {/* Desktop Links */}

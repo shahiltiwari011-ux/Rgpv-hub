@@ -134,7 +134,7 @@ const Result = () => {
                     className="portal-top"
                 >
                     <div className="branding">
-                        <h1 className="portal-logo">RGPV<span>HUB</span></h1>
+                        <h1 className="portal-logo">PROJECT<span>X</span></h1>
                         <div className={`status-badge ${serverStatus}`}>
                             <span className="indicator"></span>
                             {serverStatus === 'online' ? 'PROXY ACTIVE' : 'PROXY OFFLINE'}
@@ -322,7 +322,7 @@ const Result = () => {
                                 </div>
 
                                 <div className="transcript-footer">
-                                    <p>© {new Date().getFullYear()} RGPV HUB Verified Digital Transcript</p>
+                                    <p>© {new Date().getFullYear()} ProjectX Verified Digital Transcript</p>
                                     <button onClick={handleDownload} className="download-button" data-html2canvas-ignore="true">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
