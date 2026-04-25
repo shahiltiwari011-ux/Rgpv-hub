@@ -97,21 +97,29 @@ const Result = () => {
             element.classList.add('export-mode');
             
             const opt = {
-                margin:       [10, 5],
+                margin:       0,
                 filename:     `ProjectX_Result_${result.enroll}_Sem_${result.semester || semester}.pdf`,
                 image:        { type: 'jpeg', quality: 1.0 },
                 html2canvas:  { 
-                    scale: 4, 
+                    scale: 2, 
                     useCORS: true, 
                     backgroundColor: '#03040a',
                     logging: false,
-                    letterRendering: true,
-                    allowTaint: true
+                    scrollY: 0,
+                    windowWidth: 1200
                 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            await html2pdf().set(opt).from(element).save();
+            // Nuclear Option: Explicitly limit to 1 page by deleting extra pages if they exist
+            const worker = html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = totalPages; i > 1; i--) {
+                    pdf.deletePage(i);
+                }
+            }).save();
+
+            await worker;
             element.classList.remove('export-mode');
         } catch (err) {
             console.error("PDF Export Error:", err);
@@ -237,6 +245,13 @@ const Result = () => {
                             )}
 
                             <div className="glass-panel transcript-container">
+                                {/* Only visible in PDF */}
+                                <div className="pdf-header-premium">
+                                    <div className="pdf-logo">PROJECT<span>X</span></div>
+                                    <div className="pdf-title">OFFICIAL DIGITAL TRANSCRIPT</div>
+                                    <div className="pdf-subtitle">RAJIV GANDHI PROUDYOGIKI VISHWAVIDYALAYA, BHOPAL</div>
+                                </div>
+
                                 {/* Header / Identity */}
                                 <div className="transcript-section">
                                     <table className="identity-table">
@@ -287,34 +302,22 @@ const Result = () => {
                                                     <th>Result Des.</th>
                                                     <th>SGPA</th>
                                                     <th>CGPA</th>
+                                                    <th>Reval Date</th>
+                                                    <th>Division</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
                                                     <td className={result.summary.resultDes.toLowerCase()}>{result.summary.resultDes}</td>
                                                     <td className="highlight-val">{result.summary.sgpa || '---'}</td>
-                                                    <td>{result.summary.cgpa || '---'}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <div className="table-responsive">
-                                        <table className="summary-table secondary" style={{ marginTop: '-1px' }}>
-                                            <thead>
-                                                <tr>
-                                                    <th>Revaluation Date</th>
-                                                    <th>Division</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
+                                                    <td className="highlight-val">{result.summary.cgpa || '---'}</td>
                                                     <td>{result.summary.revalDate || '---'}</td>
                                                     <td>{result.summary.division || '---'}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
+
                                 </div>
 
                                 <div className="transcript-footer">
@@ -402,24 +405,56 @@ const Result = () => {
                 
                 .download-button { background: var(--text-primary); color: var(--bg-primary); border: none; padding: 1rem 2rem; border-radius: 1.25rem; font-weight: 900; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
                 .download-button:hover { background: var(--accent-blue); color: #fff; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4); }
-                .download-button svg { transition: transform 0.3s; }
                 .download-button:hover svg { transform: translateY(2px); }
 
-                /* Export High-Contrast Mode */
+                /* Export High-Contrast Mode - Premium certificate style */
+                .pdf-header-premium { display: none; }
                 .transcript-container.export-mode { 
                     background: #03040a !important; 
-                    border: 2px solid rgba(59, 130, 246, 0.3) !important;
+                    border: 15px solid #111827 !important;
                     padding: 40px !important;
+                    margin: 0 !important;
                     border-radius: 0 !important;
                     color: #fff !important;
+                    width: 210mm !important;
+                    height: 296mm !important; /* Slightly less than A4 to prevent spillover */
+                    display: flex !important;
+                    flex-direction: column !important;
+                    justify-content: space-between !important;
+                    position: relative;
+                    box-sizing: border-box !important;
+                    overflow: hidden !important;
                 }
-                .export-mode .identity-table td:first-child { color: #94a3b8 !important; background: rgba(255,255,255,0.02) !important; }
-                .export-mode .identity-table strong { color: #fff !important; font-size: 1.2rem !important; }
-                .export-mode .section-header-pill { background: #3b82f6 !important; color: #fff !important; border: none !important; }
-                .export-mode .subjects-table thead th { background: #1e293b !important; color: #3b82f6 !important; border-color: #334155 !important; }
-                .export-mode th, .export-mode td { border-color: #1e293b !important; }
-                .export-mode .summary-table .highlight-val { color: #60a5fa !important; font-weight: 900 !important; }
-                .export-mode .transcript-footer p { color: #64748b !important; }
+                .export-mode::before {
+                    content: 'PROJECTX';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 8rem;
+                    font-weight: 900;
+                    color: rgba(255,255,255,0.03);
+                    pointer-events: none;
+                    z-index: 0;
+                }
+                .export-mode .pdf-header-premium { display: flex !important; flex-direction: column; align-items: center; margin-bottom: 30px; border-bottom: 2px solid rgba(59, 130, 246, 0.2); padding-bottom: 20px; }
+                .export-mode .pdf-logo { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; letter-spacing: -2px; }
+                .export-mode .pdf-logo span { color: #3b82f6; }
+                .export-mode .pdf-title { font-size: 0.9rem; font-weight: 900; letter-spacing: 4px; color: #60a5fa; margin-top: 5px; }
+                .export-mode .pdf-subtitle { font-size: 0.7rem; font-weight: 700; color: #94a3b8; margin-top: 5px; opacity: 0.8; }
+
+                .export-mode .transcript-section { margin-bottom: 25px !important; position: relative; z-index: 1; }
+                .export-mode .identity-table td { padding: 8px 12px !important; font-size: 0.9rem !important; }
+                .export-mode .identity-table strong { color: #fff !important; font-size: 1.1rem !important; }
+                .export-mode .subjects-table th, .export-mode .subjects-table td { padding: 10px 15px !important; font-size: 0.9rem !important; }
+                .export-mode .section-header-pill { padding: 5px 15px !important; font-size: 0.75rem !important; margin-bottom: 12px !important; background: #3b82f6 !important; }
+                .export-mode .summary-table th, .export-mode .summary-table td { padding: 12px !important; font-size: 1rem !important; }
+                .export-mode .summary-table .highlight-val { font-size: 1.4rem !important; color: #60a5fa !important; font-weight: 900 !important; }
+                .export-mode .transcript-footer { padding-top: 20px !important; margin-top: auto !important; border-top: 1px solid rgba(59, 130, 246, 0.2) !important; }
+                .export-mode .transcript-footer p { font-size: 0.8rem !important; color: #94a3b8 !important; }
+                .export-mode .download-button { display: none !important; }
+                .export-mode .subjects-table thead th { background: #111827 !important; color: #3b82f6 !important; border-bottom: 2px solid #3b82f6 !important; }
+                .export-mode th, .export-mode td { border-color: #1f2937 !important; }
 
                 @media (max-width: 768px) {
                     .portal-container { padding-top: 6rem; padding-left: 0.75rem; padding-right: 0.75rem; }
