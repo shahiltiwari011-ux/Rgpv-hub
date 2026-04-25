@@ -1,7 +1,6 @@
 import { memo, useState } from 'react'
 import { submitRating, trackDownload } from '../services/api'
 import { useAuth } from '../context/AuthContext'
-import ShareButton from './ShareButton'
 import { toast } from 'react-hot-toast'
 
 const TYPE_META = {
@@ -91,23 +90,6 @@ function ResourceCard ({
         </div>
       )}
 
-      <div
-        className='resource-engagement'
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: '0.75rem',
-          marginTop: '1rem',
-          paddingTop: '1rem',
-          borderTop: '1px solid var(--border)',
-          marginBottom: '1rem'
-        }}
-      >
-        <div className='share-buttons'>
-          <ShareButton title={item.title} url={hasDownload ? resourceUrl : undefined} />
-        </div>
-      </div>
 
 
       {hasDownload
