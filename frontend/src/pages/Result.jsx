@@ -134,7 +134,7 @@ const Result = () => {
                     className="portal-top"
                 >
                     <div className="branding">
-                        <h1 className="portal-logo">PROJECT<span>X</span></h1>
+                        <h1 className="portal-logo">RGPV<span>HUB</span></h1>
                         <div className={`status-badge ${serverStatus}`}>
                             <span className="indicator"></span>
                             {serverStatus === 'online' ? 'PROXY ACTIVE' : 'PROXY OFFLINE'}
@@ -284,41 +284,45 @@ const Result = () => {
 
                                 {/* Summary Table */}
                                 <div className="transcript-section">
-                                    <table className="summary-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Result Des.</th>
-                                                <th>SGPA</th>
-                                                <th>CGPA</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td className={result.summary.resultDes.toLowerCase()}>{result.summary.resultDes}</td>
-                                                <td className="highlight-val">{result.summary.sgpa || '---'}</td>
-                                                <td>{result.summary.cgpa || '---'}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <div className="table-responsive">
+                                        <table className="summary-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Result Des.</th>
+                                                    <th>SGPA</th>
+                                                    <th>CGPA</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td className={result.summary.resultDes.toLowerCase()}>{result.summary.resultDes}</td>
+                                                    <td className="highlight-val">{result.summary.sgpa || '---'}</td>
+                                                    <td>{result.summary.cgpa || '---'}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
 
-                                    <table className="summary-table secondary" style={{ marginTop: '-1px' }}>
-                                        <thead>
-                                            <tr>
-                                                <th>Revaluation Date</th>
-                                                <th>Division</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>{result.summary.revalDate || '---'}</td>
-                                                <td>{result.summary.division || '---'}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <div className="table-responsive">
+                                        <table className="summary-table secondary" style={{ marginTop: '-1px' }}>
+                                            <thead>
+                                                <tr>
+                                                    <th>Revaluation Date</th>
+                                                    <th>Division</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>{result.summary.revalDate || '---'}</td>
+                                                    <td>{result.summary.division || '---'}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
 
                                 <div className="transcript-footer">
-                                    <p>© {new Date().getFullYear()} ProjectX Verified Digital Transcript</p>
+                                    <p>© {new Date().getFullYear()} RGPV HUB Verified Digital Transcript</p>
                                     <button onClick={handleDownload} className="download-button" data-html2canvas-ignore="true">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
@@ -427,13 +431,30 @@ const Result = () => {
                 .export-mode .transcript-footer p { color: #64748b !important; }
 
                 @media (max-width: 768px) {
-                    .portal-container { padding-top: 6rem; }
+                    .portal-container { padding-top: 6rem; padding-left: 0.75rem; padding-right: 0.75rem; }
                     .search-panel { border-radius: 1.5rem; }
-                    th, td { padding: 0.75rem 1rem; font-size: 0.8rem; }
-                    .identity-table td:first-child { width: 35%; }
-                    .transcript-footer { flex-direction: column; gap: 1.25rem; text-align: center; }
+                    .glass-panel { border-radius: 1.5rem; }
+                    .transcript-container { padding: 1rem 0.75rem; border-radius: 1.5rem; }
+                    table { min-width: unset; width: 100%; }
+                    .subjects-table { min-width: 360px; }
+                    .summary-table { min-width: unset; }
+                    th, td { padding: 0.65rem 0.75rem; font-size: 0.78rem; }
+                    .identity-table td:first-child { width: 35%; font-size: 0.78rem; }
+                    .identity-table strong { font-size: 0.95rem; }
+                    .summary-table td { font-size: 1rem; }
+                    .summary-table .highlight-val { font-size: 1.2rem; }
+                    .transcript-footer { flex-direction: column; gap: 1rem; text-align: center; }
+                    .transcript-footer p { font-size: 0.7rem; }
+                    .download-button { width: 100%; justify-content: center; padding: 0.85rem 1.25rem; font-size: 0.85rem; }
                     .image-box img { height: 35px; }
                     .input-box input { width: 110px; padding: 0.8rem; font-size: 1rem; }
+                    .section-header-pill { font-size: 0.7rem; padding: 0.4rem 1rem; }
+                }
+
+                @media (max-width: 400px) {
+                    th, td { padding: 0.5rem 0.5rem; font-size: 0.72rem; }
+                    .subjects-table { min-width: 300px; }
+                    .identity-table strong { font-size: 0.85rem; }
                 }
 
                 .scanning-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 2.5rem; overflow: hidden; }
