@@ -1,5 +1,5 @@
 import { memo, useState } from 'react'
-import { submitRating, trackDownload } from '../services/api'
+import { submitRating, trackDownload, getProxiedPdfUrl } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { toast } from 'react-hot-toast'
 
@@ -18,7 +18,7 @@ function ResourceCard ({
 }) {
   const meta = TYPE_META[type] || TYPE_META.notes
   const { user } = useAuth()
-  const resourceUrl = typeof item.file_url === 'string' ? item.file_url.trim() : ''
+  const resourceUrl = typeof item.file_url === 'string' ? getProxiedPdfUrl(item.file_url.trim()) : ''
   const hasDownload = Boolean(resourceUrl && resourceUrl !== '#')
 
   const openResource = (url) => {

@@ -743,6 +743,26 @@ export async function fetchProxyResult(enroll, sem, captcha = null, sessionId = 
   }
 }
 
+/**
+ * Converts a Supabase URL to a proxied URL to hide the Supabase domain.
+ * Example: https://xyz.supabase.co/storage/v1/object/public/study-materials/notes/file.pdf
+ * Becomes: https://your-backend.com/api/pdf?path=notes/file.pdf
+ */
+export function getProxiedPdfUrl(originalUrl) {
+  if (!originalUrl || !originalUrl.includes('supabase.co')) return originalUrl;
+  
+  try {
+    // Extract the path after 'study-materials/'
+    const urlParts = originalUrl.split('study-materials/');
+    if (urlParts.length < 2) return originalUrl;
+    
+    const filePath = urlParts[1];
+    return `${PROXY_API_URL}/api/pdf?path=${encodeURIComponent(filePath)}`;
+  } catch (err) {
+    return originalUrl;
+  }
+}
+
 export async function getBackendHealth() {
   try {
     const response = await fetch(`${PROXY_API_URL}/api/health`);

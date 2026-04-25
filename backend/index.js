@@ -70,6 +70,33 @@ app.get('/api/test', (req, res) => {
     res.json({ message: "API is working ✅" });
 });
 
+// PDF Proxy — Hides Supabase URL from users
+app.get('/api/pdf', async (req, res) => {
+    const { path: filePath } = req.query;
+    if (!filePath) return res.status(400).json({ error: 'Path required' });
+    if (!supabase) return res.status(500).json({ error: 'Supabase not configured' });
+
+    try {
+        // Download file from Supabase Storage
+        const { data, error } = await supabase.storage.from('study-materials').download(filePath);
+        
+        if (error) {
+            console.error('Supabase download error:', error.message);
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        // Stream PDF to browser
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename="document.pdf"');
+        
+        const buffer = Buffer.from(await data.arrayBuffer());
+        res.send(buffer);
+    } catch (err) {
+        console.error('PDF Proxy general error:', err.message);
+        res.status(500).json({ error: 'Proxy failed to fetch file' });
+    }
+});
+
 app.post('/api/result', async (req, res) => {
     const { enroll, sem, captcha, sessionId } = req.body;
     const url = 'https://www.rgpvdiploma.in/exam/DiplomaIIIYrResult.aspx';
