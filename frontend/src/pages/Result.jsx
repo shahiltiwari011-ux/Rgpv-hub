@@ -458,8 +458,8 @@ const Result = () => {
 
                 @media (max-width: 768px) {
                     .portal-container { padding-top: 6rem; padding-left: 0.75rem; padding-right: 0.75rem; }
-                    .portal-top { margin-bottom: 2rem; }
-                    .portal-logo { font-size: 3rem; }
+                    .portal-top { margin-bottom: 1.5rem; }
+                    .portal-logo { font-size: clamp(2rem, 10.5vw, 3rem); letter-spacing: -1px; width: 100%; }
                     .search-panel { border-radius: 1.5rem; }
                     .glass-panel { border-radius: 1.5rem; }
                     .transcript-container { padding: 1rem 0.75rem; border-radius: 1.5rem; }

@@ -177,7 +177,7 @@ export default function Home() {
         .hero-badge span { font-size: clamp(0.6rem, 2.5vw, 0.75rem); font-weight: 900; letter-spacing: 3px; color: var(--accent-blue); }
         .hero-main-title { 
           font-family: 'Syne', sans-serif; 
-          font-size: clamp(2rem, 12vw, 8rem); 
+          font-size: clamp(2rem, 10.5vw, 8rem); 
           font-weight: 800; 
           line-height: 1; 
           margin: 0; 
@@ -185,7 +185,6 @@ export default function Home() {
           display: block;
           text-align: center;
           width: 100%;
-          white-space: nowrap;
           color: var(--text-primary);
         }
         .hero-main-title span { color: var(--accent-blue); text-shadow: 0 0 80px rgba(59, 130, 246, 0.4); }
