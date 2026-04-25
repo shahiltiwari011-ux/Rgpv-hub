@@ -5,14 +5,18 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
+    chunkSizeWarningLimit: 3000,
     sourcemap: false,
     target: 'esnext',
-    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          supabase: ['@supabase/supabase-js'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('html2pdf.js')) return 'html2pdf';
+            if (id.includes('@supabase')) return 'supabase';
+            if (id.includes('framer-motion')) return 'animations';
+            return 'vendor';
+          }
         },
       },
     },
