@@ -92,11 +92,19 @@ export default function Dashboard () {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2rem' }}>
-            <EmptyState
-              icon='🔐'
-              title='Access Restricted'
-              message='Authentication is currently disabled for this portal.'
-            />
+            <div className="glass-effect" style={{ padding: '4rem 2rem', textAlign: 'center', borderRadius: 'var(--radius-lg)' }}>
+              <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🎯</div>
+              <h2 style={{ fontFamily: 'Syne', fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Academic Dashboard</h2>
+              <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto 2rem' }}>
+                Manage your bookmarks, track result history, and access premium resources in one centralized elite workspace.
+              </p>
+              
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                <a href="/admin/index.html" className="btn-glow-blue" style={{ textDecoration: 'none', padding: '1rem 2rem' }}>
+                    ADMIN CONTROL CENTER
+                </a>
+              </div>
+            </div>
           </div>
         )}
       </section>

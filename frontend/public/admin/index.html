@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectX | Admin Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        dark: '#03040a',
+                        card: '#0a0c14',
+                        border: 'rgba(255,255,255,0.08)'
+                    },
+                    fontFamily: {
+                        syne: ['Syne', 'sans-serif'],
+                        space: ['Space Grotesk', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background: #03040a; color: white; overflow-x: hidden; }
+        .glass { background: rgba(10, 12, 20, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); }
+        .sidebar-link { transition: all 0.2s; border-radius: 0.75rem; }
+        .sidebar-link.active { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .input-field { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0.75rem; padding: 0.75rem 1rem; width: 100%; transition: all 0.2s; outline: none; }
+        .input-field:focus { border-color: #3b82f6; background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body class="bg-dark text-slate-200">
+
+    <!-- Auth Overlay -->
+    <div id="auth-gate" class="fixed inset-0 z-[100] flex items-center justify-center bg-dark">
+        <div class="w-full max-w-md p-8 glass rounded-[2rem] text-center">
+            <h1 class="text-3xl font-syne font-extrabold mb-2 tracking-tight">PROJECT<span class="text-primary">X</span></h1>
+            <p class="text-slate-400 mb-8 text-sm font-medium tracking-wide">ADMINISTRATOR AUTHENTICATION</p>
+            
+            <div class="space-y-4">
+                <div class="text-left">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Secret Key</label>
+                    <input type="password" id="admin-pass" placeholder="••••••••" class="input-field text-center text-xl tracking-[0.5em]">
+                </div>
+                <p id="auth-error" class="text-red-400 text-xs font-bold hidden">Invalid security key. Access denied.</p>
+                <button onclick="handleLogin()" class="w-full btn-primary py-4 rounded-xl font-bold text-sm tracking-widest uppercase">Verify Identity</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard-ui" class="hidden flex min-h-screen">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 glass border-r border-border fixed h-full z-50 transition-all duration-300">
+            <div class="p-6">
+                <h1 class="text-2xl font-syne font-extrabold mb-1 tracking-tight">PROJECT<span class="text-primary">X</span></h1>
+                <p class="text-[10px] font-bold text-primary tracking-[0.2em] uppercase">Admin Control</p>
+            </div>
+
+            <nav class="px-4 space-y-2 mt-8">
+                <button onclick="switchTab('upload')" id="nav-upload" class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 text-sm font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    Upload Notes
+                </button>
+                <button onclick="switchTab('manage')" id="nav-manage" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-sm font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Manage Archive
+                </button>
+            </nav>
+
+            <div class="absolute bottom-8 left-4 right-4">
+                <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 text-xs font-bold border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    LOGOUT
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-64 p-8">
+            
+            <!-- Upload Section -->
+            <section id="section-upload" class="max-w-3xl mx-auto py-10">
+                <div class="mb-10">
+                    <h2 class="text-3xl font-syne font-bold mb-2">Publish New Asset</h2>
+                    <p class="text-slate-400 text-sm">Upload academic notes directly to the ProjectX repository.</p>
+                </div>
+
+                <div class="glass p-8 rounded-[2rem] space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="col-span-2">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Document Title</label>
+                            <input type="text" id="note-title" placeholder="e.g. Computer Graphics Unit 1" class="input-field">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Academic Branch</label>
+                            <select id="note-subject" class="input-field appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em]">
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Electrical">Electrical</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Electronics">Electronics</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Semester</label>
+                            <select id="note-semester" class="input-field">
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option>
+                                <option value="4">Semester 4</option>
+                                <option value="5">Semester 5</option>
+                                <option value="6">Semester 6</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="drop-zone" class="border-2 border-dashed border-border rounded-2xl p-10 text-center transition-all cursor-pointer hover:border-primary hover:bg-primary/5 group">
+                        <input type="file" id="note-file" accept=".pdf" class="hidden">
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-all">
+                                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            </div>
+                            <h4 class="font-bold text-sm mb-1" id="file-name-display">Click or Drag PDF here</h4>
+                            <p class="text-xs text-slate-500">Max file size: 50MB</p>
+                        </div>
+                    </div>
+
+                    <div id="upload-progress-container" class="hidden">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-bold text-primary uppercase">Uploading to Storage...</span>
+                            <span id="progress-percent" class="text-[10px] font-bold">0%</span>
+                        </div>
+                        <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-primary transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <button onclick="handleUpload()" id="upload-btn" class="w-full btn-primary py-4 rounded-xl font-bold text-sm tracking-widest uppercase flex items-center justify-center gap-2">
+                        <span>Initiate Upload</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Manage Section -->
+            <section id="section-manage" class="hidden">
+                <div class="flex justify-between items-end mb-10">
+                    <div>
+                        <h2 class="text-3xl font-syne font-bold mb-2">Academic Archive</h2>
+                        <p class="text-slate-400 text-sm">Monitor and manage all active academic assets.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <input type="text" id="search-notes" placeholder="Search by title..." oninput="filterNotes()" class="input-field w-64 bg-card">
+                    </div>
+                </div>
+
+                <div class="glass rounded-[2rem] overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 border-b border-border">
+                            <tr>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Document Title</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Branch</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sem</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notes-list">
+                            <!-- JS will inject rows here -->
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center text-slate-500 text-sm">Loading archive...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 right-8 z-[200] translate-y-20 opacity-0 transition-all duration-500">
+        <div class="glass px-6 py-4 rounded-2xl flex items-center gap-4 shadow-2xl border-l-4 border-l-primary" id="toast-content">
+            <span id="toast-icon">✅</span>
+            <p id="toast-msg" class="text-sm font-bold"></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
