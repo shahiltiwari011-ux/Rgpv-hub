@@ -1,76 +1,98 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Production Debugging Logs (Remove after verifying Vercel config)
+console.log('🔍 Supabase URL:', import.meta.env.VITE_SUPABASE_URL ? '✅ Configured' : '❌ MISSING')
+console.log('🔍 Supabase Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Configured' : '❌ MISSING')
+
 const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim()
 const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
 
-
+// Validation check for production
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error(
-    '🚨 CONFIG ERROR: Supabase credentials are missing!\n' +
-    'Please verify .env.local contains VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.\n' +
-    'IMPORTANT: You MUST restart your Vite development server (npm run dev) after creating or editing .env.local for changes to take effect.'
+    '🚨 CRITICAL: Supabase credentials not found in environment variables!\n' +
+    'Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in Vercel Project Settings.'
   )
-} else {
-  console.log('✅ Supabase initialized with project:', supabaseUrl.split('//')[1]?.split('.')[0])
 }
 
-export const supabase =
-  supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        // Unique storage key prevents navigator.locks collisions from stale dev sessions
-        storageKey: 'study-hub-auth-v2',
-        // Production-critical: keep users logged in across page refreshes
         persistSession: true,
-        // Automatically refresh JWT before it expires
         autoRefreshToken: true,
-        // Detect and restore session from URL hash (OAuth/magic link support)
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        storageKey: 'rgpv_hub_auth_session', // Clean storage key
       },
       global: {
-        // High 60-second ceiling to allow for paused free-tier projects to wake up
-        fetch: (url, options = {}) => {
-          const controller = new AbortController()
-          const id = setTimeout(() => controller.abort(), 60000)
-          return fetch(url, { ...options, signal: controller.signal })
-            .finally(() => clearTimeout(id))
-        }
+        headers: { 'x-application-name': 'rgpv-study-hub' }
       }
     })
-    : null
+  : null
 
-export const isSupabaseReady = () => {
-  return !!(supabase && supabaseUrl && supabaseAnonKey)
+// Prevent infinite refresh_token loops if session is corrupted
+if (supabase) {
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+      // Clear any potential stale state
+    }
+    
+    if (event === 'TOKEN_REFRESHED' && !session) {
+      console.warn('⚠️ Session refresh failed. Clearing local storage to prevent loops.');
+      localStorage.removeItem('rgpv_hub_auth_session');
+      window.location.reload();
+    }
+    
+    // If we get an error response indicating invalid key, we should handle it
+    // But that usually happens during a fetch
+  });
 }
 
 /**
- * Checks if the Supabase project is reachable
- * @returns {Promise<boolean>}
+ * Enhanced connection check with session validation
  */
 export async function checkSupabaseConnection() {
-  if (!supabase) return false
+  if (!supabase) {
+    console.error('❌ Supabase client not initialized');
+    return false;
+  }
+  
   try {
-    // Try a simple ping to the resources table
-    const { error } = await supabase.from('resources').select('id', { head: true }).limit(1)
+    // Check if the current session is valid
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.warn('⚠️ Session error detected:', sessionError.message);
+      if (sessionError.message.includes('refresh_token') || sessionError.message.includes('invalid')) {
+        console.log('🧹 Clearing corrupted session...');
+        localStorage.removeItem('rgpv_hub_auth_session');
+      }
+    }
+
+    // Ping the database
+    const { error } = await supabase.from('resources').select('id', { head: true }).limit(1);
     
     if (error) {
-      // PGRST116: Result not found (Table exists but empty)
-      // 42P01: relation "resources" does not exist (Connected but schema missing)
-      if (
-        error.code === 'PGRST116' || 
-        error.code === '42P01' || 
-        error.message?.includes('not found') ||
-        error.message?.includes('exist')
-      ) {
-        console.log('📡 Connected to Supabase (Database ready or initialization pending)')
-        return true
+      // If the error is "No API key found", it means the anon key was invalid/missing
+      if (error.message?.includes('No API key found')) {
+        console.error('❌ Supabase Auth Error: No API key found in request headers. Check your VITE_SUPABASE_ANON_KEY.');
+        return false;
       }
-      console.warn('Supabase connectivity check failed:', error.code, error.message)
-      return false
+      
+      // These codes are acceptable for a "connected" state
+      const acceptableCodes = ['PGRST116', '42P01', 'PGRST301'];
+      if (acceptableCodes.includes(error.code) || error.message?.includes('not found')) {
+        return true;
+      }
+      
+      console.error('❌ Supabase Connection Failed:', error.message);
+      return false;
     }
-    return true
+    
+    return true;
   } catch (err) {
-    console.error('Supabase connection exception:', err.message)
-    return false
+    console.error('❌ Supabase Exception:', err.message);
+    return false;
   }
 }
+
+export const isSupabaseReady = () => !!supabase;
