@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+const RETRY_INTERVAL = 30 // seconds
+
 export default function OfflineBanner ({ isMock, onRetry }) {
   const [isDismissed, setIsDismissed] = useState(false)
+  const [countdown, setCountdown] = useState(RETRY_INTERVAL)
 
   // Manage layout shift class
   useEffect(() => {
@@ -18,6 +21,19 @@ export default function OfflineBanner ({ isMock, onRetry }) {
   useEffect(() => {
     if (!isMock) setIsDismissed(false)
   }, [isMock])
+
+  // Countdown timer that resets every 30s
+  useEffect(() => {
+    if (!isMock || isDismissed) return
+    setCountdown(RETRY_INTERVAL)
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) return RETRY_INTERVAL
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [isMock, isDismissed])
 
   if (!isMock || isDismissed) return null
 
@@ -37,12 +53,12 @@ export default function OfflineBanner ({ isMock, onRetry }) {
           </div>
           <div className='separator'></div>
           <p className='message'>
-            Cloud database unreachable. Showing local fallback data.
+            Cloud database unreachable. Auto-retrying in <strong>{countdown}s</strong>…
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button onClick={onRetry} className='retry-action'>
+            <button onClick={() => { onRetry(); setCountdown(RETRY_INTERVAL) }} className='retry-action'>
               <span className='icon'>🔄</span>
-              RECONNECT
+              RECONNECT NOW
             </button>
             <button 
               onClick={() => setIsDismissed(true)} 

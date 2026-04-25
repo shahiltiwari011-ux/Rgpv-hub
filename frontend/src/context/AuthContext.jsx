@@ -1,8 +1,10 @@
-import { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react'
 import { supabase, isSupabaseReady, checkSupabaseConnection } from '../services/supabaseClient'
 import { fetchWithTimeout, getSafeSession, getSafeSessionData, isAuthLockError } from '../services/api'
 
 const AuthContext = createContext(null)
+
+const RECONNECT_INTERVAL_MS = 30_000 // Poll every 30 seconds when offline
 
 export function AuthProvider ({ children }) {
   const [user, setUser] = useState(null)
@@ -12,6 +14,7 @@ export function AuthProvider ({ children }) {
   const [isConnected, setIsConnected] = useState(true)
   const checkInAttempted = useRef(false)
   const initStarted = useRef(false)
+  const reconnectTimer = useRef(null)
 
   // Fetch role and last_active from DB
   async function _fetchProfile (userId) {
@@ -125,7 +128,9 @@ export function AuthProvider ({ children }) {
         clearTimeout(failsafe)
         setLoading(false)
         // Ensure connectivity check happens even if auth fails
-        checkSupabaseConnection().then(setIsConnected)
+        checkSupabaseConnection().then((connected) => {
+          setIsConnected(connected)
+        })
       }
     }
 
@@ -185,6 +190,51 @@ export function AuthProvider ({ children }) {
       }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-reconnect polling: when offline, ping every 30s
+  // When connection is restored, re-initialize the auth session
+  useEffect(() => {
+    if (isConnected) {
+      // Clear any pending reconnect timer if we're back online
+      if (reconnectTimer.current) {
+        clearInterval(reconnectTimer.current)
+        reconnectTimer.current = null
+      }
+      return
+    }
+
+    // Start polling
+    reconnectTimer.current = setInterval(async () => {
+      console.log('🔄 Attempting to reconnect to Supabase...')
+      const connected = await checkSupabaseConnection()
+      if (connected) {
+        console.log('✅ Supabase reconnected! Refreshing session...')
+        setIsConnected(true)
+        // Reset init flag so auth can re-initialize with the live DB
+        initStarted.current = false
+        checkInAttempted.current = false
+        // Re-fetch the session
+        if (isSupabaseReady()) {
+          try {
+            const freshUser = await getSafeSession(supabase)
+            if (freshUser) {
+              setUser(freshUser)
+              void _fetchProfile(freshUser.id)
+            }
+          } catch { /* silent */ }
+        }
+        clearInterval(reconnectTimer.current)
+        reconnectTimer.current = null
+      }
+    }, RECONNECT_INTERVAL_MS)
+
+    return () => {
+      if (reconnectTimer.current) {
+        clearInterval(reconnectTimer.current)
+        reconnectTimer.current = null
+      }
+    }
+  }, [isConnected]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const signup = async (email, password) => {
     if (!isSupabaseReady() || !isConnected) {
