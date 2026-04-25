@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_MXq5SQESXs_BYZpx0TK4oA_fJF-A6MM";
 const ADMIN_PASSWORD_HASH = "admin123"; // Simple password check (user can change this)
 
 // Initialize Supabase Client
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- STATE MANAGEMENT ---
 let allNotes = [];
@@ -43,6 +43,7 @@ function handleLogin() {
         setTimeout(() => passInput.classList.remove('border-red-500'), 2000);
     }
 }
+window.handleLogin = handleLogin;
 
 function handleLogout() {
     localStorage.removeItem('projectx_admin_session');
@@ -125,7 +126,7 @@ async function handleUpload() {
         const filePath = `${subject}/${fileName}`;
 
         // 2. Upload to Supabase Storage
-        const { data: storageData, error: storageError } = await supabase.storage
+        const { data: storageData, error: storageError } = await supabaseClient.storage
             .from('notes')
             .upload(filePath, file, {
                 cacheControl: '3600',
@@ -135,12 +136,12 @@ async function handleUpload() {
         if (storageError) throw storageError;
 
         // 3. Get Public URL
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = supabaseClient.storage
             .from('notes')
             .getPublicUrl(filePath);
 
         // 4. Save to Database
-        const { error: dbError } = await supabase
+        const { error: dbError } = await supabaseClient
             .from('notes')
             .insert([
                 { 
@@ -168,7 +169,7 @@ async function handleUpload() {
 // --- MANAGE NOTES LOGIC ---
 async function fetchNotes() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('notes')
             .select('*')
             .order('created_at', { ascending: false });
@@ -213,7 +214,7 @@ async function deleteNote(id, fileUrl) {
         const path = fileUrl.split('/public/notes/')[1];
         
         // 2. Delete from DB
-        const { error: dbError } = await supabase
+        const { error: dbError } = await supabaseClient
             .from('notes')
             .delete()
             .eq('id', id);
@@ -222,7 +223,7 @@ async function deleteNote(id, fileUrl) {
 
         // 3. Delete from Storage (Optional but recommended)
         if (path) {
-            await supabase.storage.from('notes').remove([decodeURIComponent(path)]);
+            await supabaseClient.storage.from('notes').remove([decodeURIComponent(path)]);
         }
 
         showToast("Asset Deleted Permanently", "🗑️");
