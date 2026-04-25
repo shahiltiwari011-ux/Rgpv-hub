@@ -40,17 +40,21 @@ let supabase = null;
 console.log('------------------------------------');
 console.log('🚀 SYSTEM: Checking Supabase Configuration...');
 
-if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
+// Support both standard and VITE_ prefixed variables
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+if (supabaseUrl && supabaseKey) {
     try {
-        supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+        supabase = createClient(supabaseUrl, supabaseKey);
         console.log('✅ SYSTEM: Supabase Client Initialized Successfully');
     } catch (err) {
         console.error('❌ SYSTEM: Supabase Initialization Failed:', err.message);
     }
 } else {
     console.error('❌ SYSTEM: Supabase URL or Key is MISSING in Environment Variables');
-    if (!process.env.SUPABASE_URL) console.error('   -> Missing: SUPABASE_URL');
-    if (!process.env.SUPABASE_KEY) console.error('   -> Missing: SUPABASE_KEY');
+    if (!supabaseUrl) console.error('   -> Missing: SUPABASE_URL (or VITE_SUPABASE_URL)');
+    if (!supabaseKey) console.error('   -> Missing: SUPABASE_KEY (or VITE_SUPABASE_ANON_KEY)');
 }
 console.log('------------------------------------');
 
