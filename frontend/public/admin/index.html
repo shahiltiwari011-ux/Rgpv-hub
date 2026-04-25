@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProjectX | Admin Management</title>
+    <title>ProjectX | Unified Admin Console</title>
     
     <!-- Core Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,9 +53,11 @@
 
         .sidebar-link:hover { background: rgba(255, 255, 255, 0.05); }
         .sidebar-link.active { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .input-field { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0.75rem; padding: 0.75rem 1rem; width: 100%; transition: all 0.2s; outline: none; }
+        .input-field { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0.75rem; padding: 0.75rem 1rem; width: 100%; transition: all 0.2s; outline: none; color: white; }
         .input-field:focus { border-color: #3b82f6; background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        select.input-field option { background: var(--bg-card); color: white; }
         .fade-out { opacity: 0; pointer-events: none; transition: opacity 0.4s ease-out; }
+        
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -64,15 +66,15 @@
 </head>
 <body class="antialiased">
 
-    <!-- LOGIN GATE (Auth Section) -->
+    <!-- LOGIN GATE -->
     <div id="auth-gate" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#050608]">
         <div class="glass p-10 rounded-[2.5rem] w-full max-w-md text-center border-white/5 shadow-3xl">
             <h1 style="font-family: 'Syne'; font-size: 2rem; letter-spacing: -1px; margin-bottom: 0.5rem;">PROJECT<span class="text-primary">X</span></h1>
-            <p class="text-slate-500 text-xs font-bold tracking-widest uppercase mb-8">Administrator Authentication</p>
+            <p class="text-slate-500 text-xs font-bold tracking-widest uppercase mb-8">System Access Control</p>
             
             <div class="space-y-4">
                 <div class="text-left">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Secret Key</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 mb-2 block">Security Key</label>
                     <input type="password" id="admin-pass" placeholder="••••••••" class="input-field text-center text-xl tracking-[0.5em]" onkeyup="if(event.key === 'Enter') window.handleLogin()">
                 </div>
                 <p id="auth-error" class="text-red-400 text-xs font-bold hidden">Invalid security key. Access denied.</p>
@@ -81,56 +83,63 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD UI -->
+    <!-- MAIN DASHBOARD -->
     <div id="dashboard-ui" class="hidden min-h-screen flex">
         
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar -->
         <aside class="w-72 glass border-r border-white/5 fixed inset-y-0 left-0 p-8 flex flex-col z-50">
             <div class="mb-12">
                 <h2 style="font-family: 'Syne'; font-size: 1.5rem; letter-spacing: -1px;">PROJECT<span class="text-primary">X</span></h2>
-                <p class="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase mt-1">Management Console</p>
+                <p class="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase mt-1">Resource Console</p>
             </div>
 
             <nav class="space-y-2 flex-grow">
                 <button onclick="switchTab('upload')" id="nav-upload" class="sidebar-link active w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-semibold">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                    Upload Notes
+                    Upload Asset
                 </button>
                 <button onclick="switchTab('manage')" id="nav-manage" class="sidebar-link w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-semibold">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    Manage Archive
+                    Manage Database
                 </button>
             </nav>
 
             <div class="pt-8 border-t border-white/5">
                 <button onclick="handleLogout()" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-semibold text-red-400 hover:bg-red-400/5 transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    Exit Session
+                    Terminate Session
                 </button>
             </div>
         </aside>
 
-        <!-- Main Content Area -->
+        <!-- Content -->
         <main class="flex-grow ml-72 p-12">
             
-            <!-- SECTION: UPLOAD NOTES -->
-            <section id="section-upload" class="">
+            <!-- SECTION: UPLOAD -->
+            <section id="section-upload">
                 <header class="mb-12">
-                    <h1 class="text-3xl font-bold mb-2">Publish New Content</h1>
-                    <p class="text-slate-400">Add new academic resources to the ProjectX public library.</p>
+                    <h1 class="text-3xl font-bold mb-2">Publish Resource</h1>
+                    <p class="text-slate-400">Deploy Notes, Syllabus, or PYQs to the production database.</p>
                 </header>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Form Column -->
                     <div class="lg:col-span-2 glass p-8 rounded-[2rem] space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Asset Title</label>
-                                <input type="text" id="note-title" placeholder="e.g. Data Structures Notes" class="input-field">
+                                <input type="text" id="res-title" placeholder="e.g. OS Previous Year 2023" class="input-field">
                             </div>
                             <div class="space-y-2">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Subject</label>
-                                <select id="note-subject" class="input-field appearance-none cursor-pointer">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Content Type</label>
+                                <select id="res-type" class="input-field appearance-none cursor-pointer">
+                                    <option value="notes">Lecture Notes</option>
+                                    <option value="syllabus">Syllabus</option>
+                                    <option value="pyq">Previous Year Papers (PYQ)</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Branch / Department</label>
+                                <select id="res-branch" class="input-field appearance-none cursor-pointer">
                                     <option value="Computer Science">Computer Science</option>
                                     <option value="Mechanical">Mechanical</option>
                                     <option value="Electrical">Electrical</option>
@@ -141,7 +150,7 @@
                             </div>
                             <div class="space-y-2">
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Semester</label>
-                                <select id="note-semester" class="input-field appearance-none cursor-pointer">
+                                <select id="res-semester" class="input-field appearance-none cursor-pointer">
                                     <option value="1">Semester 1</option>
                                     <option value="2">Semester 2</option>
                                     <option value="3">Semester 3</option>
@@ -154,41 +163,37 @@
                             </div>
                         </div>
 
-                        <!-- Dropzone Area -->
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">PDF Document</label>
                             <div id="drop-zone" class="border-2 border-dashed border-white/10 rounded-[2rem] p-12 text-center hover:border-primary/50 transition-all cursor-pointer bg-white/[0.01]">
-                                <input type="file" id="note-file" accept="application/pdf" class="hidden">
+                                <input type="file" id="res-file" accept="application/pdf" class="hidden">
                                 <div class="flex flex-col items-center">
                                     <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
                                         <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                                     </div>
                                     <p class="font-semibold text-lg" id="file-name-display">Click or Drag PDF here</p>
-                                    <p class="text-slate-500 text-sm mt-1">Maximum file size: 50MB</p>
                                 </div>
                             </div>
                         </div>
 
                         <button id="upload-btn" onclick="handleUpload()" class="w-full btn-primary py-5 rounded-2xl font-bold text-sm tracking-widest uppercase mt-4">
-                            Initiate Upload
+                            Deploy Content
                         </button>
                     </div>
 
-                    <!-- Side Info Column -->
                     <div class="space-y-6">
                         <div class="glass p-6 rounded-3xl border-l-4 border-l-blue-500">
-                            <h3 class="font-bold mb-2">Upload Rules</h3>
+                            <h3 class="font-bold mb-2">Instructions</h3>
                             <ul class="text-sm text-slate-400 space-y-3">
-                                <li class="flex items-start gap-2"><span>•</span> Use clear, descriptive titles.</li>
-                                <li class="flex items-start gap-2"><span>•</span> Ensure PDFs are high quality.</li>
-                                <li class="flex items-start gap-2"><span>•</span> Do not upload duplicate files.</li>
+                                <li>• <strong>PYQ</strong>: Use year in title (e.g. 2024).</li>
+                                <li>• <strong>Syllabus</strong>: Upload latest schemes only.</li>
+                                <li>• <strong>Notes</strong>: Mention author if possible.</li>
                             </ul>
                         </div>
                         
-                        <!-- Progress Card (Hidden by default) -->
                         <div id="upload-progress-container" class="glass p-6 rounded-3xl hidden">
                             <div class="flex justify-between items-center mb-4">
-                                <span class="text-xs font-bold uppercase tracking-widest">Progress</span>
+                                <span class="text-xs font-bold uppercase tracking-widest">Uploading...</span>
                                 <span id="progress-percent" class="text-xs font-bold text-primary">0%</span>
                             </div>
                             <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
@@ -199,15 +204,15 @@
                 </div>
             </section>
 
-            <!-- SECTION: MANAGE ARCHIVE -->
+            <!-- SECTION: MANAGE -->
             <section id="section-manage" class="hidden">
                 <header class="mb-12 flex justify-between items-end">
                     <div>
-                        <h1 class="text-3xl font-bold mb-2">Archive Manager</h1>
-                        <p class="text-slate-400">View, search, and manage your published resources.</p>
+                        <h1 class="text-3xl font-bold mb-2">Resource Library</h1>
+                        <p class="text-slate-400">Total synchronization with public production assets.</p>
                     </div>
                     <div class="relative w-72">
-                        <input type="text" id="search-notes" oninput="filterNotes()" placeholder="Filter archive..." class="input-field pl-12 pr-4 py-3 text-sm">
+                        <input type="text" id="search-res" oninput="filterResources()" placeholder="Search library..." class="input-field pl-12 pr-4 py-3 text-sm">
                         <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                 </header>
@@ -216,17 +221,15 @@
                     <table class="w-full text-left">
                         <thead>
                             <tr class="bg-white/[0.03] border-b border-white/5 text-xs font-bold uppercase tracking-widest text-slate-500">
-                                <th class="px-6 py-5">Content Title</th>
-                                <th class="px-6 py-5">Subject</th>
-                                <th class="px-6 py-5">Semester</th>
-                                <th class="px-6 py-5 text-right">Actions</th>
+                                <th class="px-6 py-5">Title</th>
+                                <th class="px-6 py-5">Type</th>
+                                <th class="px-6 py-5">Branch</th>
+                                <th class="px-6 py-5">Sem</th>
+                                <th class="px-6 py-5 text-right">Delete</th>
                             </tr>
                         </thead>
-                        <tbody id="notes-list">
-                            <!-- JS will inject rows here -->
-                            <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-slate-500 text-sm">Loading archive...</td>
-                            </tr>
+                        <tbody id="res-list">
+                            <tr><td colspan="5" class="px-6 py-12 text-center text-slate-500">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -235,7 +238,6 @@
         </main>
     </div>
 
-    <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-8 right-8 z-[200] translate-y-20 opacity-0 transition-all duration-500">
         <div class="glass px-6 py-4 rounded-2xl flex items-center gap-4 shadow-2xl border-l-4 border-l-primary" id="toast-content">
             <span id="toast-icon">✅</span>
@@ -243,249 +245,187 @@
         </div>
     </div>
 
-    <!-- INLINED LOGIC FOR MAXIMUM RELIABILITY -->
+    <!-- INLINED CORE LOGIC -->
     <script>
-        /**
-         * ProjectX Admin Dashboard Logic
-         */
-
-        // --- CONFIGURATION ---
+        // --- CONFIG ---
         const SUPABASE_URL = "https://knrcqovuxkwxkafsmirm.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_MXq5SQESXs_BYZpx0TK4oA_fJF-A6MM";
         const ADMIN_PASSWORD_HASH = "admin123";
 
-        // Initialize Supabase Client
-        let supabaseClient;
-        try {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.error("Supabase failed to initialize", e);
-        }
-
-        // --- STATE MANAGEMENT ---
-        let allNotes = [];
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let allResources = [];
         let currentTab = 'upload';
+        let selectedFile = null; // Store file here for reliability
 
-        // --- AUTHENTICATION ---
+        // --- AUTH ---
         function checkAuth() {
-            const session = localStorage.getItem('projectx_admin_session');
-            if (session === 'active') {
+            if (localStorage.getItem('projectx_admin_session') === 'active') {
                 document.getElementById('auth-gate').classList.add('hidden');
                 document.getElementById('dashboard-ui').classList.remove('hidden');
-                if (currentTab === 'manage') fetchNotes();
             }
         }
 
-        function handleLogin() {
-            const passInput = document.getElementById('admin-pass');
-            const errorMsg = document.getElementById('auth-error');
-            const loginBtn = document.getElementById('login-btn');
-            
-            const password = passInput.value.trim();
-
-            if (password === ADMIN_PASSWORD_HASH) {
+        window.handleLogin = function() {
+            const pass = document.getElementById('admin-pass').value.trim();
+            if (pass === ADMIN_PASSWORD_HASH) {
                 localStorage.setItem('projectx_admin_session', 'active');
-                
-                loginBtn.innerHTML = "Access Granted...";
                 document.getElementById('auth-gate').classList.add('fade-out');
-                
                 setTimeout(() => {
                     document.getElementById('auth-gate').classList.add('hidden');
                     document.getElementById('dashboard-ui').classList.remove('hidden');
-                    showToast("Authenticated Successfully", "✅");
-                    if (currentTab === 'manage') fetchNotes();
+                    showToast("Access Granted", "🛡️");
                 }, 400);
             } else {
-                errorMsg.classList.remove('hidden');
-                passInput.classList.add('border-red-500');
-                passInput.value = '';
-                setTimeout(() => passInput.classList.remove('border-red-500'), 1000);
+                document.getElementById('auth-error').classList.remove('hidden');
+                document.getElementById('admin-pass').classList.add('border-red-500');
             }
-        }
-        window.handleLogin = handleLogin;
+        };
 
-        function handleLogout() {
-            localStorage.removeItem('projectx_admin_session');
-            window.location.reload();
-        }
-        window.handleLogout = handleLogout;
+        window.handleLogout = () => { localStorage.removeItem('projectx_admin_session'); window.location.reload(); };
 
-        // --- UI ROUTING ---
-        function switchTab(tab) {
+        // --- UI ---
+        window.switchTab = function(tab) {
             currentTab = tab;
             document.getElementById('nav-upload').classList.toggle('active', tab === 'upload');
             document.getElementById('nav-manage').classList.toggle('active', tab === 'manage');
             document.getElementById('section-upload').classList.toggle('hidden', tab !== 'upload');
             document.getElementById('section-manage').classList.toggle('hidden', tab !== 'manage');
+            if (tab === 'manage') fetchResources();
+        };
 
-            if (tab === 'manage') fetchNotes();
-        }
-        window.switchTab = switchTab;
+        // --- DRAG & DROP ---
+        const dz = document.getElementById('drop-zone');
+        const fi = document.getElementById('res-file');
+        const fnd = document.getElementById('file-name-display');
 
-        // --- DRAG & DROP HANDLING ---
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('note-file');
-        const fileNameDisplay = document.getElementById('file-name-display');
-
-        if(dropZone) {
-            dropZone.onclick = () => fileInput.click();
-            dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('border-primary', 'bg-primary/5'); };
-            dropZone.ondragleave = () => { dropZone.classList.remove('border-primary', 'bg-primary/5'); };
-            dropZone.ondrop = (e) => {
+        if(dz) {
+            dz.onclick = () => fi.click();
+            dz.ondragover = (e) => { e.preventDefault(); dz.classList.add('border-primary'); };
+            dz.ondragleave = () => { dz.classList.remove('border-primary'); };
+            dz.ondrop = (e) => {
                 e.preventDefault();
-                dropZone.classList.remove('border-primary', 'bg-primary/5');
-                if (e.dataTransfer.files.length) {
-                    fileInput.files = e.dataTransfer.files;
-                    updateFileName();
+                dz.classList.remove('border-primary');
+                if (e.dataTransfer.files.length) { 
+                    selectedFile = e.dataTransfer.files[0]; 
+                    updateFN(); 
                 }
             };
         }
+        if(fi) fi.onchange = (e) => {
+            if (e.target.files.length) {
+                selectedFile = e.target.files[0];
+                updateFN();
+            }
+        };
 
-        if(fileInput) fileInput.onchange = () => updateFileName();
-
-        function updateFileName() {
-            if (fileInput.files.length) {
-                const file = fileInput.files[0];
-                if (file.type !== 'application/pdf') {
-                    showToast("Only PDF files allowed", "❌");
-                    fileInput.value = '';
-                    return;
-                }
-                fileNameDisplay.innerText = file.name;
-                fileNameDisplay.classList.add('text-primary');
+        function updateFN() {
+            if (selectedFile) {
+                fnd.innerText = selectedFile.name;
+                fnd.classList.add('text-primary');
+                showToast("File attached: " + selectedFile.name, "📎");
             }
         }
 
-        // --- UPLOAD LOGIC ---
-        async function handleUpload() {
-            const title = document.getElementById('note-title').value.trim();
-            const subject = document.getElementById('note-subject').value;
-            const semester = document.getElementById('note-semester').value;
-            const file = fileInput.files[0];
+        // --- CORE OPS ---
+        window.handleUpload = async function() {
+            const title = document.getElementById('res-title').value.trim();
+            const type = document.getElementById('res-type').value;
+            const branch = document.getElementById('res-branch').value;
+            const semester = document.getElementById('res-semester').value;
 
-            if (!title || !file) {
-                showToast("Please fill all fields and select a file", "⚠️");
-                return;
-            }
+            if (!title) return showToast("Please enter a title", "⚠️");
+            if (!selectedFile) return showToast("Please select a PDF file", "⚠️");
 
             try {
                 setLoading(true);
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-                const filePath = `${subject}/${fileName}`;
+                const path = `${type}/${Date.now()}_${selectedFile.name.replace(/\s+/g, '_')}`;
+                
+                // 1. Upload to storage
+                const { data: sData, error: sErr } = await supabaseClient.storage.from('study-materials').upload(path, selectedFile);
+                if (sErr) throw new Error("Storage Error: " + sErr.message);
 
-                const { data: storageData, error: storageError } = await supabaseClient.storage
-                    .from('notes')
-                    .upload(filePath, file, { cacheControl: '3600', upsert: false });
+                const { data: { publicUrl } } = supabaseClient.storage.from('study-materials').getPublicUrl(path);
 
-                if (storageError) throw storageError;
+                // 2. Insert to database
+                const { error: dErr } = await supabaseClient.from('resources').insert([{
+                    title, 
+                    type, 
+                    branch, 
+                    semester: parseInt(semester), 
+                    file_url: publicUrl, 
+                    created_at: new Date().toISOString()
+                }]);
+                
+                if (dErr) throw new Error("Database Error: " + dErr.message);
 
-                const { data: { publicUrl } } = supabaseClient.storage.from('notes').getPublicUrl(filePath);
+                showToast("Resource Published Successfully!", "🚀");
+                
+                // Reset form
+                document.getElementById('res-title').value = '';
+                selectedFile = null;
+                fi.value = '';
+                fnd.innerText = "Click or Drag PDF here";
+                fnd.classList.remove('text-primary');
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, "❌");
+            } finally { setLoading(false); }
+        };
 
-                const { error: dbError } = await supabaseClient
-                    .from('notes')
-                    .insert([{ 
-                        title, subject, semester: parseInt(semester), 
-                        file_url: publicUrl, created_at: new Date().toISOString()
-                    }]);
 
-                if (dbError) throw dbError;
-
-                showToast("Note Published Successfully!", "🚀");
-                resetForm();
-            } catch (error) {
-                console.error(error);
-                showToast(error.message || "Upload Failed", "❌");
-            } finally {
-                setLoading(false);
-            }
-        }
-        window.handleUpload = handleUpload;
-
-        // --- MANAGE NOTES LOGIC ---
-        async function fetchNotes() {
-            try {
-                const { data, error } = await supabaseClient.from('notes').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                allNotes = data;
-                renderNotes(data);
-            } catch (error) {
-                showToast("Failed to fetch archive", "❌");
-            }
+        async function fetchResources() {
+            const { data, error } = await supabaseClient.from('resources').select('*').order('created_at', { ascending: false });
+            if (!error) { allResources = data; renderResources(data); }
+            else showToast("Fetch Error: " + error.message, "❌");
         }
 
-        function renderNotes(notes) {
-            const container = document.getElementById('notes-list');
-            if (!notes.length) {
-                container.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-500 text-sm">No notes found in archive.</td></tr>`;
-                return;
-            }
-            container.innerHTML = notes.map(note => `
-                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-all group">
-                    <td class="px-6 py-5 font-medium text-sm">${note.title}</td>
-                    <td class="px-6 py-5"><span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full border border-primary/20">${note.subject}</span></td>
-                    <td class="px-6 py-5 text-slate-400 text-xs">Sem ${note.semester}</td>
-                    <td class="px-6 py-5 text-right">
-                        <button onclick="deleteNote('${note.id}', '${note.file_url}')" class="p-2 text-slate-500 hover:text-red-400 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
+        function renderResources(data) {
+            const list = document.getElementById('res-list');
+            list.innerHTML = data.map(r => `
+                <tr class="border-b border-white/5 hover:bg-white/[0.02]">
+                    <td class="px-6 py-4 text-sm">${r.title}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded uppercase">${r.type}</span></td>
+                    <td class="px-6 py-4 text-xs text-slate-400">${r.branch}</td>
+                    <td class="px-6 py-4 text-xs text-slate-400">Sem ${r.semester}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deleteResource('${r.id}', '${r.file_url}')" class="text-red-500/50 hover:text-red-500">🗑️</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        async function deleteNote(id, fileUrl) {
-            if (!confirm("Are you sure?")) return;
-            try {
-                const path = fileUrl.split('/public/notes/')[1];
-                const { error: dbError } = await supabaseClient.from('notes').delete().eq('id', id);
-                if (dbError) throw dbError;
-                if (path) await supabaseClient.storage.from('notes').remove([decodeURIComponent(path)]);
-                showToast("Deleted", "🗑️");
-                fetchNotes();
-            } catch (error) { showToast("Failed", "❌"); }
-        }
-        window.deleteNote = deleteNote;
+        window.deleteResource = async (id, url) => {
+            if (!confirm("Delete permanently?")) return;
+            const { error } = await supabaseClient.from('resources').delete().eq('id', id);
+            if (!error) { 
+                showToast("Removed", "🗑️"); 
+                fetchResources(); 
+            } else showToast(error.message, "❌");
+        };
 
-        function filterNotes() {
-            const query = document.getElementById('search-notes').value.toLowerCase();
-            const filtered = allNotes.filter(n => n.title.toLowerCase().includes(query));
-            renderNotes(filtered);
-        }
-        window.filterNotes = filterNotes;
+        window.filterResources = () => {
+            const q = document.getElementById('search-res').value.toLowerCase();
+            renderResources(allResources.filter(r => r.title.toLowerCase().includes(q)));
+        };
 
-        function showToast(msg, icon = "✅") {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            document.getElementById('toast-icon').innerText = icon;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000);
+        function showToast(m, i) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = m;
+            document.getElementById('toast-icon').innerText = i;
+            t.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
-        function setLoading(isLoading) {
-            const btn = document.getElementById('upload-btn');
-            const progress = document.getElementById('upload-progress-container');
-            if (isLoading) {
-                btn.disabled = true;
-                btn.innerHTML = `Processing...`;
-                progress.classList.remove('hidden');
-                let p = 0;
-                const interval = setInterval(() => {
-                    p += 10; if (p > 95) { p = 95; clearInterval(interval); }
-                    document.getElementById('progress-bar').style.width = p + '%';
-                    document.getElementById('progress-percent').innerText = p + '%';
-                }, 300);
-            } else {
-                btn.disabled = false;
-                btn.innerHTML = `Initiate Upload`;
-                progress.classList.add('hidden');
+        function setLoading(l) {
+            const b = document.getElementById('upload-btn');
+            const pc = document.getElementById('upload-progress-container');
+            b.disabled = l;
+            b.innerText = l ? "Deploying..." : "Deploy Content";
+            pc.classList.toggle('hidden', !l);
+            if(l) {
+                let p = 0; 
+                const iv = setInterval(() => { p += 5; if(p>95) clearInterval(iv); document.getElementById('progress-bar').style.width = p + '%'; document.getElementById('progress-percent').innerText = p + '%'; }, 200);
             }
-        }
-
-        function resetForm() {
-            document.getElementById('note-title').value = '';
-            fileInput.value = '';
-            fileNameDisplay.innerText = "Click or Drag PDF here";
         }
 
         checkAuth();
