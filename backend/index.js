@@ -37,9 +37,22 @@ app.use(cors({
 app.use(express.json());
 
 let supabase = null;
+console.log('------------------------------------');
+console.log('🚀 SYSTEM: Checking Supabase Configuration...');
+
 if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
-    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+    try {
+        supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+        console.log('✅ SYSTEM: Supabase Client Initialized Successfully');
+    } catch (err) {
+        console.error('❌ SYSTEM: Supabase Initialization Failed:', err.message);
+    }
+} else {
+    console.error('❌ SYSTEM: Supabase URL or Key is MISSING in Environment Variables');
+    if (!process.env.SUPABASE_URL) console.error('   -> Missing: SUPABASE_URL');
+    if (!process.env.SUPABASE_KEY) console.error('   -> Missing: SUPABASE_KEY');
 }
+console.log('------------------------------------');
 
 const sessionStore = new Map();
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
