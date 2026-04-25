@@ -5,7 +5,7 @@ import { getMergedEnv, resolveSiteUrl } from './site-url.mjs'
 const rootDir = process.cwd()
 const distDir = path.join(rootDir, 'dist')
 const mergedEnv = getMergedEnv(rootDir)
-const siteUrl = resolveSiteUrl(mergedEnv) || 'https://example.com'
+const siteUrl = resolveSiteUrl(mergedEnv) || 'https://rgpvdiploma.vercel.app'
 const publicRoutes = ['/', '/notes', '/pyq', '/syllabus', '/leaderboard', '/discussions']
 
 const robotsTxt = `User-agent: *
@@ -31,8 +31,8 @@ fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemapXml, 'utf8')
 const indexPath = path.join(distDir, 'index.html')
 if (fs.existsSync(indexPath)) {
   const indexHtml = fs.readFileSync(indexPath, 'utf8')
-    .replaceAll('https://example.com/#website', `${siteUrl}/#website`)
-    .replaceAll('https://example.com/#organization', `${siteUrl}/#organization`)
-    .replaceAll('https://example.com/', `${siteUrl}/`)
+    .replaceAll('https://rgpvdiploma.vercel.app/#website', `${siteUrl}/#website`)
+    .replaceAll('https://rgpvdiploma.vercel.app/#organization', `${siteUrl}/#organization`)
+    .replaceAll('https://rgpvdiploma.vercel.app/', `${siteUrl}/`)
   fs.writeFileSync(indexPath, indexHtml, 'utf8')
 }

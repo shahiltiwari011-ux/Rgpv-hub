@@ -31,7 +31,7 @@ if (resolvedSiteUrl) {
   if (!robots.includes(`${resolvedSiteUrl}/sitemap.xml`)) {
     throw new Error('robots.txt does not reference the configured production sitemap URL')
   }
-} else if (!robots.includes('https://example.com/sitemap.xml')) {
+} else if (!robots.includes('https://rgpvdiploma.vercel.app/sitemap.xml')) {
   throw new Error('robots.txt fallback sitemap URL is missing')
 }
 
