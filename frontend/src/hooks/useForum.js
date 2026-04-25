@@ -23,8 +23,8 @@ const MOCK_FORUM_POSTS = [
   },
   {
     id: 'mock-3',
-    title: 'PROJECTX Result Proxy is amazing!',
-    content: 'Just used the result proxy and it works even when the main RGPV site is crashing. Kudos to the devs.',
+    title: 'PROJECTX Academic Results feature is amazing!',
+    content: 'Just checked my marks and it works even when the main RGPV site is crashing. Kudos to the devs.',
     branch: 'Electronics',
     semester: 5,
     created_at: new Date(Date.now() - 3600000 * 4).toISOString(),

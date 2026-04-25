@@ -66,7 +66,7 @@ export default function Home() {
             className="hero-actions"
           >
             <Link to="/notes" className="btn-glow-blue">BROWSE ARCHIVE</Link>
-            <Link to="/result" className="btn-glass">RESULT PROXY</Link>
+            <Link to="/result" className="btn-glass">ACADEMIC RESULT</Link>
           </motion.div>
 
         </div>
@@ -123,9 +123,9 @@ export default function Home() {
             </Link>
             <Link to="/result" className="matrix-item glass">
               <div className="m-icon gold">📊</div>
-              <h3>RESULT PROXY</h3>
+              <h3>ACADEMIC RESULT</h3>
               <p>Real-time academic performance tracking with 1-tap retrieval.</p>
-              <div className="m-tag">Live Proxy Active</div>
+              <div className="m-tag">Portal Sync Active</div>
             </Link>
           </div>
         </section>

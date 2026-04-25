@@ -48,7 +48,7 @@ export default function Footer() {
                 <li><Link to="/notes">Lecture Notes</Link></li>
                 <li><Link to="/pyq">PYQ Archives</Link></li>
                 <li><Link to="/syllabus">Syllabus Matrix</Link></li>
-                <li><Link to="/result">Result Proxy</Link></li>
+                <li><Link to="/result">Academic Results</Link></li>
               </ul>
             </div>
             <div className="link-group">
