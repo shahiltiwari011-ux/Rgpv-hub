@@ -56,7 +56,6 @@ export default function Footer() {
               <ul>
                 <li><Link to="/discussions">Forums</Link></li>
                 <li><Link to="/leaderboard">Rankings</Link></li>
-                <li><Link to="/dashboard">My Dashboard</Link></li>
               </ul>
             </div>
           </div>

@@ -10,7 +10,6 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 // Core pages (Lazy-loaded for maximum split chunks)
 const Home = lazy(() => import('./pages/Home'))
 const ResourcePage = lazy(() => import('./pages/ResourcePage'))
-const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Profile = lazy(() => import('./pages/Profile'))
 const DiscussionPage = lazy(() => import('./pages/DiscussionPage'))
 const ThreadPage = lazy(() => import('./pages/ThreadPage'))
@@ -33,7 +32,6 @@ export default function App () {
             <Route path='/syllabus' element={<ResourcePage type='syllabus' />} />
             <Route path='/pyq' element={<ResourcePage type='pyq' />} />
             <Route path='/profile/:id' element={<Profile />} />
-            <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/discussions' element={<DiscussionPage />} />
             <Route path='/discussion/:id' element={<ThreadPage />} />
             <Route path='/result' element={<Result />} />

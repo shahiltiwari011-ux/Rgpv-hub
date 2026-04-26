@@ -10,7 +10,7 @@ export function ProtectedRoute ({ children, adminOnly = false }) {
   }
 
   if (!user) {
-    return <Navigate to='/dashboard' replace />
+    return <Navigate to='/' replace />
   }
 
   if (adminOnly && !isAdmin) {
