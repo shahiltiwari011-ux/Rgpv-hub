@@ -54,9 +54,18 @@ export default function AdminUpload () {
   if (!user || !isAdmin) return <Navigate to='/' replace />;
 
   // Filter out any accidentally hardcoded semesters 7 or 8 (strictly 1-6)
-  const semesterOptions = SEMESTERS.filter(s => s <= 6).map(s => ({ value: s.toString(), label: `Semester ${s}` }));
-  const branchOptions = BRANCHES.map(b => ({ value: b, label: b }));
-  const typeOptions = RESOURCE_TYPES.map(t => ({ value: t, label: t.toUpperCase() }));
+  const semesterOptions = [
+    { value: '', label: 'Select Semester' },
+    ...SEMESTERS.filter(s => s <= 6).map(s => ({ value: s.toString(), label: `Semester ${s}` }))
+  ];
+  const branchOptions = [
+    { value: '', label: 'Select Branch' },
+    ...BRANCHES.map(b => ({ value: b, label: b }))
+  ];
+  const typeOptions = [
+    { value: '', label: 'Select Type' },
+    ...RESOURCE_TYPES.map(t => ({ value: t, label: t.toUpperCase() }))
+  ];
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
