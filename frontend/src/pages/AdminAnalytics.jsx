@@ -52,7 +52,6 @@ export default function AdminAnalytics () {
   if (!user || !isAdmin) return <Navigate to='/' replace />
 
   return (
-  return (
     <div className="analytics-view">
       <SEO title="Admin Analytics" />
       <OfflineBanner isMock={isMock} onRetry={loadStats} />
