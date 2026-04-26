@@ -77,7 +77,7 @@ export default function Home() {
         <div className="metrics-grid">
           {[
             { label: 'Academic Branches', value: '5+', icon: '🏛️' },
-            { label: 'Active Semesters', value: '08', icon: '📅' },
+            { label: 'Active Semesters', value: '06', icon: '📅' },
             { label: 'Subject Archives', value: s.total_notes, icon: '📂' },
             { label: 'PYQ Repository', value: s.total_pyq, icon: '📄' }
           ].map((m, i) => (

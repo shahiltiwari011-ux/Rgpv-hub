@@ -19,6 +19,7 @@ const Result = lazy(() => import('./pages/Result'))
 const Admin = lazy(() => import('./pages/Admin'))
 const AdminAnalytics = lazy(() => import('./pages/AdminAnalytics'))
 const AdminUpload = lazy(() => import('./pages/admin/AdminUpload'))
+import AdminLayout from './components/AdminLayout'
 
 export default function App () {
   return (
@@ -37,27 +38,11 @@ export default function App () {
             <Route path='/result' element={<Result />} />
 
             {/* Admin routes protected by adminOnly flag */}
-            <Route
-              path='/admin' element={
-                <ProtectedRoute adminOnly>
-                  <Admin />
-                </ProtectedRoute>
-            }
-            />
-            <Route
-              path='/admin/analytics' element={
-                <ProtectedRoute adminOnly>
-                  <AdminAnalytics />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path='/admin/upload' element={
-                <ProtectedRoute adminOnly>
-                  <AdminUpload />
-                </ProtectedRoute>
-              }
-            />
+            <Route element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
+              <Route path='/admin' element={<Admin />} />
+              <Route path='/admin/analytics' element={<AdminAnalytics />} />
+              <Route path='/admin/upload' element={<AdminUpload />} />
+            </Route>
 
             <Route path='/login' element={<Navigate to='/' replace />} />
             <Route path='/auth' element={<Navigate to='/' replace />} />
