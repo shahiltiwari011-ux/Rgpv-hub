@@ -93,31 +93,26 @@ const Result = () => {
             const { default: html2pdf } = await import('html2pdf.js');
             const element = document.querySelector('.transcript-container');
             if (!element) throw new Error("Result container not found");
+            
             element.classList.add('export-mode');
             
             const opt = {
-                margin:       0,
+                margin:       [10, 10, 10, 10],
                 filename:     `ProjectX_Result_${result.enroll}_Sem_${result.semester || semester}.pdf`,
-                image:        { type: 'jpeg', quality: 1.0 },
+                image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
-                    scale: 2, 
+                    scale: 3, 
                     useCORS: true, 
                     backgroundColor: '#03040a',
                     logging: false,
                     scrollY: 0,
-                    windowWidth: 1200
+                    windowWidth: 1200,
+                    letterRendering: true
                 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
             };
 
-            const worker = html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = totalPages; i > 1; i--) {
-                    pdf.deletePage(i);
-                }
-            }).save();
-
-            await worker;
+            await html2pdf().set(opt).from(element).save();
             element.classList.remove('export-mode');
         } catch (err) {
             console.error("PDF Export Error:", err);
@@ -242,10 +237,14 @@ const Result = () => {
                             )}
 
                             <div className="glass-panel transcript-container">
+                                <div className="transcript-watermark">PROJECTX OFFICIAL TRANSCRIPT</div>
                                 <div className="pdf-header-premium">
                                     <div className="pdf-logo">PROJECT<span>X</span></div>
-                                    <div className="pdf-title">OFFICIAL DIGITAL TRANSCRIPT</div>
-                                    <div className="pdf-subtitle">RAJIV GANDHI PROUDYOGIKI VISHWAVIDYALAYA, BHOPAL</div>
+                                    <div className="pdf-title-group">
+                                        <div className="pdf-title">OFFICIAL DIGITAL TRANSCRIPT</div>
+                                        <div className="pdf-subtitle">RAJIV GANDHI PROUDYOGIKI VISHWAVIDYALAYA, BHOPAL</div>
+                                    </div>
+                                    <div className="pdf-timestamp">Generated: {new Date().toLocaleDateString()}</div>
                                 </div>
 
                                 <div className="transcript-section">
@@ -422,6 +421,39 @@ const Result = () => {
                     .transcript-footer { flex-direction: column; gap: 2rem; text-align: center; }
                     .download-button { width: 100%; justify-content: center; }
                 }
+
+                /* PDF Export Optimizations */
+                .transcript-container.export-mode {
+                    background: #03040a !important;
+                    color: #ffffff !important;
+                    padding: 15mm !important;
+                    width: 210mm !important;
+                    margin: 0 !important;
+                    border-radius: 0 !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    min-height: 297mm !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    position: relative !important;
+                }
+
+                .export-mode .transcript-watermark { display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 6rem; opacity: 0.03; font-weight: 900; width: 100%; text-align: center; pointer-events: none; }
+                .export-mode .pdf-header-premium { border-bottom: 2px solid rgba(59, 130, 246, 0.3); padding-bottom: 2rem; margin-bottom: 2rem; }
+                .export-mode .glass-panel { background: transparent !important; border: none !important; backdrop-filter: none !important; }
+                .export-mode .download-button { display: none !important; }
+                
+                .transcript-watermark { display: none; }
+                .pdf-header-premium { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; position: relative; }
+                .pdf-title-group { text-align: center; flex: 1; }
+                .pdf-timestamp { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+                
+                .subjects-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+                .subjects-table tr:hover { background: rgba(59, 130, 246, 0.05); }
+                
+                .summary-table { background: rgba(59, 130, 246, 0.05); border-radius: 1.5rem; overflow: hidden; border: 1px solid rgba(59, 130, 246, 0.1); }
+                .summary-table th { background: rgba(59, 130, 246, 0.1); }
+
             `}</style>
         </div>
     );
