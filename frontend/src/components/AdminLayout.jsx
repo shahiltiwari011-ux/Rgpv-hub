@@ -20,7 +20,13 @@ export default function AdminLayout() {
 
   return (
     <div className="admin-console-layout">
-      {/* Sidebar */}
+      {/* Mobile Top Header */}
+      <header className="mobile-admin-header">
+        <div className="brand-logo">X</div>
+        <span className="main-brand">PROJECTX CONSOLE</span>
+      </header>
+
+      {/* Sidebar (Desktop) */}
       <aside className="console-sidebar">
         <div className="sidebar-brand">
           <div className="brand-logo">X</div>
@@ -39,7 +45,7 @@ export default function AdminLayout() {
             >
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
-              {pathname === item.to && <motion.div layoutId="nav-pill" className="nav-pill-bg" />}
+              {pathname === item.to && <motion.div layoutId="nav-pill-desktop" className="nav-pill-bg" />}
             </Link>
           ))}
         </nav>
@@ -52,6 +58,25 @@ export default function AdminLayout() {
         </div>
       </aside>
 
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        {menuItems.map((item) => (
+          <Link 
+            key={item.to} 
+            to={item.to} 
+            className={`mobile-nav-item ${pathname === item.to ? 'active' : ''}`}
+          >
+            <span className="mobile-nav-icon">{item.icon}</span>
+            <span className="mobile-nav-label">{item.label.split(' ')[0]}</span>
+            {pathname === item.to && <motion.div layoutId="nav-pill-mobile" className="mobile-nav-pill" />}
+          </Link>
+        ))}
+        <button onClick={handleLogout} className="mobile-nav-item logout">
+          <span className="mobile-nav-icon">🚪</span>
+          <span className="mobile-nav-label">Exit</span>
+        </button>
+      </nav>
+
       {/* Main Content Area */}
       <main className="console-main">
         <div className="console-scroll-container">
@@ -62,6 +87,9 @@ export default function AdminLayout() {
       <style>{`
         .admin-console-layout { display: flex; height: 100vh; background: var(--bg-primary); overflow: hidden; }
         
+        .mobile-admin-header { display: none; }
+        .mobile-bottom-nav { display: none; }
+
         .console-sidebar { 
           width: 280px; 
           background: var(--bg-card); 
@@ -107,10 +135,46 @@ export default function AdminLayout() {
         .console-scroll-container { height: 100%; overflow-y: auto; padding: 3rem; }
 
         @media (max-width: 1024px) {
-          .console-sidebar { width: 80px; padding: 2rem 1rem; align-items: center; }
+          .console-sidebar { width: 85px; padding: 2rem 1rem; align-items: center; }
           .brand-titles, .nav-label, .terminate-btn .label { display: none; }
-          .nav-item { justify-content: center; padding: 1rem; }
+          .nav-item { justify-content: center; padding: 1.25rem; }
           .sidebar-brand { margin-bottom: 3rem; }
+        }
+
+        @media (max-width: 768px) {
+          .admin-console-layout { flex-direction: column; }
+          .console-sidebar { display: none; }
+          
+          .mobile-admin-header { 
+            display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; 
+            background: var(--bg-card); border-bottom: 1px solid var(--border); 
+            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;
+          }
+          .mobile-admin-header .brand-logo { width: 32px; height: 32px; font-size: 1.1rem; }
+          .mobile-admin-header .main-brand { font-size: 0.9rem; letter-spacing: 0; }
+
+          .console-main { padding-bottom: 80px; }
+          .console-scroll-container { padding: 1.5rem; }
+
+          .mobile-bottom-nav { 
+            display: flex; position: fixed; bottom: 0; left: 0; right: 0; 
+            background: var(--bg-card); border-top: 1px solid var(--border); 
+            backdrop-filter: blur(20px); padding: 0.75rem 1rem; z-index: 200;
+            justify-content: space-around;
+          }
+          .mobile-nav-item { 
+            display: flex; flex-direction: column; align-items: center; gap: 0.25rem; 
+            text-decoration: none; color: var(--text-muted); font-size: 0.65rem; 
+            font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+            position: relative; padding: 0.5rem; flex: 1;
+          }
+          .mobile-nav-item.active { color: var(--accent-blue); }
+          .mobile-nav-icon { font-size: 1.2rem; }
+          .mobile-nav-pill { 
+            position: absolute; top: -0.75rem; left: 50%; transform: translateX(-50%); 
+            width: 40px; height: 3px; background: var(--accent-blue); border-radius: 0 0 4px 4px; 
+          }
+          .mobile-nav-item.logout { color: #f43f5e; border: none; background: transparent; }
         }
       `}</style>
     </div>

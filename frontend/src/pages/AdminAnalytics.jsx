@@ -52,45 +52,40 @@ export default function AdminAnalytics () {
   if (!user || !isAdmin) return <Navigate to='/' replace />
 
   return (
-    <>
+  return (
+    <div className="analytics-view">
       <SEO title="Admin Analytics" />
       <OfflineBanner isMock={isMock} onRetry={loadStats} />
-      <div className='page-hero'>
-        <span className='page-hero-icon'>📊</span>
-        <h1 className='page-hero-title'>Platform Analytics</h1>
-        <p className='page-hero-sub'>Real-time insights for PROJECTX</p>
-        <Link to='/admin' style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginTop: '1rem', fontSize: '0.9rem' }}>← Back to Resources</Link>
+      
+      <div className="view-header">
+        <h1 className="view-title">Platform <span>Analytics</span></h1>
+        <p className="view-subtitle">Real-time performance insights for PROJECTX ecosystem.</p>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem 4rem' }}>
+      <div className="analytics-content">
         {loading ? <LoadingSpinner /> : error ? <ErrorState message={error} onRetry={loadStats} /> : (
           stats && (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '3rem' }}>
+            <div className="stats-grid">
               <StatCard title="Resources" value={stats.totalResources} icon="📚" color="#3b82f6" />
               <StatCard title="Downloads" value={stats.totalDownloads} icon="📥" color="#10b981" />
               <StatCard title="Discussions" value={stats.totalForumPosts} icon="💬" color="#f59e0b" />
               <StatCard title="Total Users" value={stats.totalUsers} icon="👥" color="#8b5cf6" />
             </div>
 
-            <div style={{ background: 'var(--bg-card)', padding: '2.5rem', borderRadius: 24, border: '1px solid var(--border)' }}>
-              <h2 style={{ marginBottom: '2rem', fontFamily: 'Syne, sans-serif' }}>Resources by Branch</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="glass-panel branch-stats-card">
+              <h2 className="card-title">Distribution by Branch</h2>
+              <div className="branch-list">
                 {Object.entries(stats.branches).map(([branch, count]) => (
-                  <div key={branch}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                      <span style={{ fontWeight: 600 }}>{branch}</span>
-                      <span style={{ color: 'var(--text-muted)' }}>{count} items</span>
+                  <div key={branch} className="branch-item">
+                    <div className="branch-info">
+                      <span className="branch-name">{branch}</span>
+                      <span className="branch-count">{count} items</span>
                     </div>
-                    <div style={{ width: '100%', height: '12px', background: 'var(--bg-secondary)', borderRadius: '6px', overflow: 'hidden' }}>
+                    <div className="progress-track">
                       <div 
-                        style={{ 
-                          width: `${stats.totalResources > 0 ? (count / stats.totalResources) * 100 : 0}%`, 
-                          height: '100%', 
-                          background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-purple))',
-                          borderRadius: '6px',
-                          transition: 'width 1s ease-out'
-                        }} 
+                        className="progress-fill"
+                        style={{ width: `${stats.totalResources > 0 ? (count / stats.totalResources) * 100 : 0}%` }} 
                       />
                     </div>
                   </div>
@@ -101,19 +96,78 @@ export default function AdminAnalytics () {
           )
         )}
       </div>
-    </>
+
+      <style>{`
+        .analytics-view { max-width: 1200px; margin: 0 auto; }
+        .view-header { margin-bottom: 2.5rem; }
+        .view-title { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 800; margin: 0; }
+        .view-title span { color: var(--accent-blue); }
+        .view-subtitle { color: var(--text-muted); margin-top: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+
+        .analytics-content { padding-bottom: 4rem; }
+        
+        .stats-grid { 
+          display: grid; 
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+          gap: 1.5rem; 
+          margin-bottom: 3rem; 
+        }
+
+        .stat-card-premium { 
+          padding: 2rem; border-radius: 2rem; display: flex; align-items: center; gap: 1.5rem; 
+          background: var(--bg-card); border: 1px solid var(--border); transition: 0.3s;
+        }
+        .stat-card-premium:hover { border-color: var(--accent-blue); transform: translateY(-5px); }
+        
+        .stat-icon-box { 
+          font-size: 2rem; width: 64px; height: 64px; display: flex; 
+          align-items: center; justify-content: center; border-radius: 1.25rem; flex-shrink: 0;
+        }
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-label { color: var(--text-muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.25rem; }
+        .stat-value { font-size: 1.75rem; font-weight: 900; margin: 0; color: var(--text-primary); }
+
+        .branch-stats-card { padding: 2.5rem; border-radius: 2rem; }
+        .card-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 2.5rem; color: var(--text-primary); }
+        
+        .branch-list { display: flex; flexDirection: column; gap: 1.75rem; }
+        .branch-item { display: flex; flex-direction: column; gap: 0.75rem; }
+        .branch-info { display: flex; justify-content: space-between; align-items: center; }
+        .branch-name { font-weight: 700; color: var(--text-primary); font-size: 0.95rem; }
+        .branch-count { color: var(--accent-blue); font-size: 0.8rem; font-weight: 800; }
+        
+        .progress-track { width: 100%; height: 10px; background: var(--bg-secondary); border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
+        .progress-fill { 
+          height: 100%; border-radius: 5px;
+          background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+          transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+
+        @media (max-width: 768px) {
+          .stats-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+          .stat-card-premium { padding: 1.25rem; flex-direction: column; align-items: flex-start; gap: 1rem; text-align: left; }
+          .stat-icon-box { width: 48px; height: 48px; font-size: 1.5rem; border-radius: 1rem; }
+          .stat-value { font-size: 1.4rem; }
+          .branch-stats-card { padding: 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+          .stats-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+    </div>
   )
 }
 
 function StatCard ({ title, value, icon, color }) {
   return (
-    <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: 24, border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-      <div style={{ fontSize: '2.5rem', background: `${color}20`, width: '70px', height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '18px' }}>
+    <div className="stat-card-premium">
+      <div className="stat-icon-box" style={{ background: `${color}15` }}>
         {icon}
       </div>
-      <div>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{title}</p>
-        <h3 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>{value.toLocaleString()}</h3>
+      <div className="stat-info">
+        <span className="stat-label">{title}</span>
+        <h3 className="stat-value">{value.toLocaleString()}</h3>
       </div>
     </div>
   )
