@@ -85,7 +85,18 @@ export default function AdminLayout() {
       </main>
 
       <style>{`
-        .admin-console-layout { display: flex; height: 100vh; background: var(--bg-primary); overflow: hidden; }
+        html, body { overflow-x: hidden; max-width: 100vw; }
+        .admin-console-layout { 
+          display: flex; 
+          flex-direction: row;
+          height: 100vh; 
+          height: 100dvh;
+          width: 100vw;
+          max-width: 100vw;
+          background: var(--bg-primary); 
+          overflow: hidden; 
+          position: relative;
+        }
         
         .mobile-admin-header { display: none; }
         .mobile-bottom-nav { display: none; }
@@ -131,48 +142,79 @@ export default function AdminLayout() {
         }
         .terminate-btn:hover { background: #f43f5e; color: #fff; transform: translateY(-2px); }
 
-        .console-main { flex: 1; position: relative; overflow: hidden; background: radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 40%); }
-        .console-scroll-container { height: 100%; overflow-y: auto; padding: 3rem; }
+        .console-main { 
+          flex: 1; 
+          min-width: 0;
+          position: relative; 
+          overflow: hidden; 
+          background: radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 40%); 
+        }
+        .console-scroll-container { height: 100%; overflow-y: auto; overflow-x: hidden; padding: 3rem; }
 
         @media (max-width: 1024px) {
-          .console-sidebar { width: 85px; padding: 2rem 1rem; align-items: center; }
+          .console-sidebar { width: 85px; padding: 1.5rem 0.75rem; align-items: center; }
           .brand-titles, .nav-label, .terminate-btn .label { display: none; }
-          .nav-item { justify-content: center; padding: 1.25rem; }
-          .sidebar-brand { margin-bottom: 3rem; }
+          .nav-item { justify-content: center; padding: 1.25rem; width: 50px; height: 50px; }
+          .sidebar-brand { margin-bottom: 2rem; justify-content: center; }
+          .sidebar-footer { padding: 1rem 0; }
+          .terminate-btn { padding: 1rem; justify-content: center; width: 50px; }
         }
 
-        @media (max-width: 768px) {
-          .admin-console-layout { flex-direction: column; }
-          .console-sidebar { display: none; }
+        @media (max-width: 900px) {
+          .admin-console-layout { 
+            flex-direction: column !important; 
+            height: 100vh; 
+            height: 100dvh;
+            width: 100vw;
+          }
+          .console-sidebar { display: none !important; width: 0 !important; }
           
           .mobile-admin-header { 
-            display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; 
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; 
             background: var(--bg-card); border-bottom: 1px solid var(--border); 
-            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 100;
+            flex-shrink: 0;
           }
           .mobile-admin-header .brand-logo { width: 32px; height: 32px; font-size: 1.1rem; }
-          .mobile-admin-header .main-brand { font-size: 0.9rem; letter-spacing: 0; }
+          .mobile-admin-header .main-brand { font-size: 0.85rem; font-weight: 800; }
 
-          .console-main { padding-bottom: 80px; }
-          .console-scroll-container { padding: 1.5rem; }
+          .console-main { 
+            flex: 1; 
+            width: 100% !important; 
+            max-width: 100vw !important;
+            min-width: 0 !important; 
+            padding-bottom: 80px; 
+            overflow-x: hidden; 
+            overflow-y: auto;
+          }
+          .console-scroll-container { 
+            height: auto; 
+            overflow-y: visible; 
+            padding: 1.25rem; 
+            width: 100%; 
+            max-width: 100vw; 
+            overflow-x: hidden; 
+          }
 
           .mobile-bottom-nav { 
             display: flex; position: fixed; bottom: 0; left: 0; right: 0; 
             background: var(--bg-card); border-top: 1px solid var(--border); 
-            backdrop-filter: blur(20px); padding: 0.75rem 1rem; z-index: 200;
+            backdrop-filter: blur(20px); padding: 0.75rem 0.5rem; z-index: 200;
             justify-content: space-around;
+            box-shadow: 0 -10px 20px rgba(0,0,0,0.2);
           }
           .mobile-nav-item { 
-            display: flex; flex-direction: column; align-items: center; gap: 0.25rem; 
-            text-decoration: none; color: var(--text-muted); font-size: 0.65rem; 
-            font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-            position: relative; padding: 0.5rem; flex: 1;
+            display: flex; flex-direction: column; align-items: center; gap: 0.2rem; 
+            text-decoration: none; color: var(--text-muted); font-size: 0.6rem; 
+            font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            position: relative; padding: 0.5rem; flex: 1; min-width: 0;
           }
           .mobile-nav-item.active { color: var(--accent-blue); }
           .mobile-nav-icon { font-size: 1.2rem; }
           .mobile-nav-pill { 
             position: absolute; top: -0.75rem; left: 50%; transform: translateX(-50%); 
-            width: 40px; height: 3px; background: var(--accent-blue); border-radius: 0 0 4px 4px; 
+            width: 30px; height: 3px; background: var(--accent-blue); border-radius: 0 0 4px 4px; 
+            box-shadow: 0 2px 10px var(--accent-blue);
           }
           .mobile-nav-item.logout { color: #f43f5e; border: none; background: transparent; }
         }

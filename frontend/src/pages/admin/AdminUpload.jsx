@@ -284,15 +284,19 @@ export default function AdminUpload () {
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 960px) {
-          .publish-layout { grid-template-columns: 1fr; }
+          .publish-layout { grid-template-columns: 1fr; width: 100%; }
           .publish-info-col { flex-direction: row; }
           .info-card { flex: 1; }
         }
 
+        @media (max-width: 800px) {
+          .form-row { grid-template-columns: 1fr; gap: 1rem; }
+        }
+
         @media (max-width: 640px) {
           .publish-info-col { flex-direction: column; }
-          .form-row { grid-template-columns: 1fr; gap: 1rem; }
-          .publish-form-col .admin-form { padding: 1.5rem; }
+          .publish-form-col .admin-form { padding: 1.25rem; }
+          .view-header { margin-bottom: 1.5rem; }
         }
       `}</style>
     </div>

@@ -37,17 +37,17 @@ export default function App () {
             <Route path='/discussion/:id' element={<ThreadPage />} />
             <Route path='/result' element={<Result />} />
 
-            {/* Admin routes protected by adminOnly flag */}
-            <Route element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
-              <Route path='/admin' element={<Admin />} />
-              <Route path='/admin/analytics' element={<AdminAnalytics />} />
-              <Route path='/admin/upload' element={<AdminUpload />} />
-            </Route>
-
             <Route path='/login' element={<Navigate to='/' replace />} />
             <Route path='/auth' element={<Navigate to='/' replace />} />
             <Route path='/leaderboard' element={<Navigate to='/' replace />} />
             <Route path='*' element={<Navigate to='/' replace />} />
+          </Route>
+
+          {/* Admin routes with their own layout, moved outside of main Layout */}
+          <Route element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
+            <Route path='/admin' element={<Admin />} />
+            <Route path='/admin/analytics' element={<AdminAnalytics />} />
+            <Route path='/admin/upload' element={<AdminUpload />} />
           </Route>
         </Routes>
       </Suspense>
