@@ -439,7 +439,19 @@ const Result = () => {
                 }
 
                 .export-mode .transcript-watermark { display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 6rem; opacity: 0.03; font-weight: 900; width: 100%; text-align: center; pointer-events: none; }
-                .export-mode .pdf-header-premium { border-bottom: 2px solid rgba(59, 130, 246, 0.3); padding-bottom: 2rem; margin-bottom: 2rem; }
+                .export-mode .pdf-header-premium { border-bottom: 2px solid rgba(59, 130, 246, 0.3); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+                .export-mode .transcript-section { margin-bottom: 1rem; }
+                .export-mode table th, .export-mode table td { padding: 0.5rem 0.8rem !important; font-size: 0.7rem !important; }
+                .export-mode .identity-table strong { font-size: 0.85rem !important; }
+                .export-mode .summary-table .highlight-val { font-size: 1.4rem !important; }
+                .export-mode .summary-table td { padding: 0.5rem !important; font-size: 0.8rem !important; }
+                .export-mode .section-header-pill { margin-bottom: 0.6rem; padding: 0.3rem 1.2rem; font-size: 0.65rem; }
+                .export-mode .pdf-logo { font-size: 1.3rem; }
+                .export-mode .pdf-title { font-size: 0.9rem; }
+                .export-mode .pdf-subtitle { font-size: 0.6rem; }
+                .export-mode .transcript-footer { padding-top: 1rem; margin-top: 1rem; }
+                .export-mode .transcript-section { page-break-inside: avoid; }
+                
                 .export-mode .glass-panel { background: transparent !important; border: none !important; backdrop-filter: none !important; }
                 .export-mode .download-button { display: none !important; }
                 
