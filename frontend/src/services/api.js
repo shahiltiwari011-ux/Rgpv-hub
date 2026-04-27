@@ -484,7 +484,7 @@ export async function deleteResource (id) {
 /* ── File Upload ── */
 
 const STORAGE_BUCKET = 'study-materials'
-const MAX_UPLOAD_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_UPLOAD_SIZE = 50 * 1024 * 1024 // 50MB
 
 export async function uploadFile (bucket, path, file) {
   enforceRateLimit('upload', 2, 10000) // 2 uploads per 10s
@@ -495,20 +495,24 @@ export async function uploadFile (bucket, path, file) {
   if (file.size > MAX_UPLOAD_SIZE) throw new Error(`File exceeds ${MAX_UPLOAD_SIZE / 1024 / 1024}MB limit`)
 
   try {
-    const { data } = await retry(() =>
+    const { data, error } = await retry(() =>
       fetchWithTimeout(
-        // Storage API doesn't use throwOnError natively in all versions, so we await and check manually
-        sb.storage.from(bucket).upload(path, file, { cacheControl: '3600', upsert: false })
+        sb.storage.from(bucket).upload(path, file, { cacheControl: '3600', upsert: false }),
+        300000 // 5 minute timeout for large 50MB PDF uploads
       )
     )
-    if (!data || data.error) throw data.error || new Error('Upload object returned null')
+    if (error) throw error
+    if (!data) throw new Error('Upload object returned null')
 
     const { data: { publicUrl } } = sb.storage.from(bucket).getPublicUrl(data.path)
     return publicUrl
   } catch (error) {
     if (error.message?.includes('already exists')) throw new Error('File already exists in storage')
+    if (error.message?.includes('fetch') || error.message?.includes('timeout')) {
+      throw new Error('Connection failed. Large files may require a faster connection.')
+    }
     logger.error('File upload failed', { path, error: error.message })
-    throw new Error(`Upload failed: ${error.message}`)
+    throw new Error(`Storage Error: ${error.message}`)
   }
 }
 

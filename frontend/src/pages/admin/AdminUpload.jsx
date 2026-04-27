@@ -79,7 +79,8 @@ export default function AdminUpload () {
     }
 
     if (selectedFile.size > MAX_FILE_SIZE) {
-      toast.error(`File size exceeds 10MB limit.`);
+      const limitMB = MAX_FILE_SIZE / 1024 / 1024;
+      toast.error(`File size exceeds ${limitMB}MB limit.`);
       setFile(null);
       setFileKey(Date.now());
       return;
