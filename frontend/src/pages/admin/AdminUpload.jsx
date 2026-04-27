@@ -233,7 +233,12 @@ export default function AdminUpload () {
             </div>
 
             <button type='submit' className="deploy-btn" disabled={isUploading || isMock}>
-              {isUploading ? <div className='spinner' /> : 'DEPLOY CONTENT'}
+              {isUploading ? (
+                <div className='upload-progress-btn'>
+                  <div className='spinner' />
+                  <span>PUBLISHING... (Large files take 2-5 mins)</span>
+                </div>
+              ) : 'DEPLOY CONTENT'}
             </button>
           </motion.form>
         </div>
@@ -307,7 +312,9 @@ export default function AdminUpload () {
         .dot.success { background: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); }
         .dot.warning { background: var(--accent-orange); box-shadow: 0 0 10px var(--accent-orange); }
 
-        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .upload-progress-btn { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+        .upload-progress-btn span { font-size: 0.8rem; letter-spacing: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 960px) {

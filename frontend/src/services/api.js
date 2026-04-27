@@ -495,12 +495,16 @@ export async function uploadFile (bucket, path, file) {
   if (file.size > MAX_UPLOAD_SIZE) throw new Error(`File exceeds ${MAX_UPLOAD_SIZE / 1024 / 1024}MB limit`)
 
   try {
-    const { data, error } = await retry(() =>
-      fetchWithTimeout(
-        sb.storage.from(bucket).upload(path, file, { cacheControl: '3600', upsert: false }),
-        300000 // 5 minute timeout for large 50MB PDF uploads
-      )
+    // Large 50MB files should NOT use the standard retry/timeout logic 
+    // to avoid multiple concurrent large uploads if one takes too long.
+    const { data, error } = await fetchWithTimeout(
+      sb.storage.from(bucket).upload(path, file, { 
+        cacheControl: '3600', 
+        upsert: true // Use upsert to prevent "already exists" errors from blocking retries
+      }),
+      600000 // 10 minute timeout for 50MB files
     )
+    
     if (error) throw error
     if (!data) throw new Error('Upload object returned null')
 
