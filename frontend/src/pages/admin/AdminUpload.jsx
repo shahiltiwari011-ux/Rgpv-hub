@@ -105,12 +105,34 @@ export default function AdminUpload () {
     if (!form.semester || !form.branch) return toast.error('Select Branch and Semester.');
 
     setIsUploading(true);
+    const toastId = toast.loading('Publishing resource...');
+    
     try {
       const timestamp = Date.now();
       const sanitizedTitle = form.title.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 50);
-      const filePath = `${user.id}/${form.branch}/${form.semester}/${form.type}/${timestamp}_${sanitizedTitle}.pdf`;
+      // Sanitize branch for path
+      const sanitizedBranch = form.branch.replace(/\s+/g, '_');
+      const filePath = `${user.id}/${sanitizedBranch}/${form.semester}/${form.type}/${timestamp}_${sanitizedTitle}.pdf`;
 
+      logger.info('Starting file upload', { path: filePath, size: file.size });
       const fileUrl = await uploadFile('study-materials', filePath, file);
+      
+      logger.info('File uploaded successfully, creating database entry', { fileUrl });
+      
+      // Calculate file size in MB
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+      
+      // Extract year from title if present (e.g. "2023", "2024")
+      const yearMatch = form.title.match(/\b(20\d{2})\b/);
+      const extractedYear = yearMatch ? yearMatch[1] : null;
+
+      // Map icons
+      const iconMap = {
+        notes: '📝',
+        pyq: '📄',
+        syllabus: '📋'
+      };
+
       await createResource({
         ...form,
         title: sanitizeInput(form.title),
@@ -118,16 +140,20 @@ export default function AdminUpload () {
         semester: parseInt(form.semester),
         subject: sanitizeInput(form.subject),
         file_url: fileUrl,
+        file_size: fileSizeMB,
+        icon: iconMap[form.type] || '📄',
+        year: extractedYear,
         created_by: user.id
       });
 
-      toast.success('Resource published!');
+      toast.success('Resource published!', { id: toastId });
       setForm({ title: '', description: '', type: 'notes', branch: '', semester: '', subject: '' });
       setFile(null);
       setFileKey(Date.now());
       setTimeout(() => navigate('/admin'), 1500);
     } catch (err) {
-      toast.error(err.message || 'Upload failed.');
+      logger.error('Resource publication failed', { error: err.message, form });
+      toast.error(err.message || 'Upload failed.', { id: toastId });
     } finally {
       setIsUploading(false);
     }

@@ -448,6 +448,9 @@ export async function createResource (resourceData) {
             semester: resourceData.semester,
             subject: resourceData.subject?.trim() || null,
             file_url: resourceData.file_url,
+            file_size: resourceData.file_size || null,
+            icon: resourceData.icon || null,
+            year: resourceData.year || null,
             created_by: resourceData.created_by || null
           }])
           .select()
@@ -583,8 +586,7 @@ export async function getAnalytics () {
       { count: totalResources },
       { count: totalDownloads },
       { data: branchStats },
-      { count: totalUsers },
-      { count: totalForumPosts }
+      { count: totalUsers }
     ] = await Promise.all([
       fetchWithTimeout(sb.from('resources').select('*', { count: 'exact', head: true }).throwOnError()),
       fetchWithTimeout(sb.from('downloads').select('*', { count: 'exact', head: true }).throwOnError()),
