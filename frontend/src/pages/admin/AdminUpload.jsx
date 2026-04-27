@@ -44,6 +44,7 @@ export default function AdminUpload () {
   const [file, setFile] = useState(null);
   const [fileKey, setFileKey] = useState(Date.now());
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isMock, setIsMock] = useState(false);
 
   useEffect(() => {
@@ -116,7 +117,9 @@ export default function AdminUpload () {
       const filePath = `${user.id}/${sanitizedBranch}/${form.semester}/${form.type}/${timestamp}_${sanitizedTitle}.pdf`;
 
       logger.info('Starting file upload', { path: filePath, size: file.size });
-      const fileUrl = await uploadFile('study-materials', filePath, file);
+      const fileUrl = await uploadFile('study-materials', filePath, file, (progress) => {
+        setUploadProgress(progress);
+      });
       
       logger.info('File uploaded successfully, creating database entry', { fileUrl });
       
@@ -151,12 +154,14 @@ export default function AdminUpload () {
       setForm({ title: '', description: '', type: 'notes', branch: '', semester: '', subject: '' });
       setFile(null);
       setFileKey(Date.now());
+      setUploadProgress(0);
       setTimeout(() => navigate('/admin'), 1500);
     } catch (err) {
       logger.error('Resource publication failed', { error: err.message, form });
       toast.error(err.message || 'Upload failed.', { id: toastId });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -236,7 +241,7 @@ export default function AdminUpload () {
               {isUploading ? (
                 <div className='upload-progress-btn'>
                   <div className='spinner' />
-                  <span>PUBLISHING... (Large files take 2-5 mins)</span>
+                  <span>{uploadProgress > 0 ? `PUBLISHING... ${uploadProgress}%` : 'PREPARING...'}</span>
                 </div>
               ) : 'DEPLOY CONTENT'}
             </button>

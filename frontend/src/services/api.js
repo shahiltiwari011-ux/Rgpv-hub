@@ -486,8 +486,8 @@ export async function deleteResource (id) {
 const STORAGE_BUCKET = 'study-materials'
 const MAX_UPLOAD_SIZE = 50 * 1024 * 1024 // 50MB
 
-export async function uploadFile (bucket, path, file) {
-  enforceRateLimit('upload', 2, 10000) // 2 uploads per 10s
+export async function uploadFile (bucket, path, file, onProgress = null) {
+  enforceRateLimit('upload', 2, 10000)
   const sb = _ensureSupabase()
 
   if (bucket !== STORAGE_BUCKET) throw new Error('Invalid storage target')
@@ -495,15 +495,18 @@ export async function uploadFile (bucket, path, file) {
   if (file.size > MAX_UPLOAD_SIZE) throw new Error(`File exceeds ${MAX_UPLOAD_SIZE / 1024 / 1024}MB limit`)
 
   try {
-    // Large 50MB files should NOT use the standard retry/timeout logic 
-    // to avoid multiple concurrent large uploads if one takes too long.
-    const { data, error } = await fetchWithTimeout(
-      sb.storage.from(bucket).upload(path, file, { 
-        cacheControl: '3600', 
-        upsert: true // Use upsert to prevent "already exists" errors from blocking retries
-      }),
-      600000 // 10 minute timeout for 50MB files
-    )
+    // Native upload with progress tracking and NO timeout wrapper 
+    // to allow the browser to manage the large stream natively.
+    const { data, error } = await sb.storage.from(bucket).upload(path, file, { 
+      cacheControl: '3600', 
+      upsert: true,
+      onUploadProgress: (progress) => {
+        if (onProgress) {
+          const percent = (progress.loaded / progress.total) * 100;
+          onProgress(Math.round(percent));
+        }
+      }
+    })
     
     if (error) throw error
     if (!data) throw new Error('Upload object returned null')
