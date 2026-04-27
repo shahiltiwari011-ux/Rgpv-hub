@@ -11,8 +11,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 const Home = lazy(() => import('./pages/Home'))
 const ResourcePage = lazy(() => import('./pages/ResourcePage'))
 const Profile = lazy(() => import('./pages/Profile'))
-const DiscussionPage = lazy(() => import('./pages/DiscussionPage'))
-const ThreadPage = lazy(() => import('./pages/ThreadPage'))
+
 const Result = lazy(() => import('./pages/Result'))
 
 // Admin pages
@@ -33,8 +32,7 @@ export default function App () {
             <Route path='/syllabus' element={<ResourcePage type='syllabus' />} />
             <Route path='/pyq' element={<ResourcePage type='pyq' />} />
             <Route path='/profile/:id' element={<Profile />} />
-            <Route path='/discussions' element={<DiscussionPage />} />
-            <Route path='/discussion/:id' element={<ThreadPage />} />
+
             <Route path='/result' element={<Result />} />
 
             <Route path='/login' element={<Navigate to='/' replace />} />

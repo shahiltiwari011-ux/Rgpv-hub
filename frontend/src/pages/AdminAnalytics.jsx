@@ -32,7 +32,6 @@ export default function AdminAnalytics () {
       setStats({
         totalResources: MOCK_STATS.total_notes + MOCK_STATS.total_pyq + MOCK_STATS.total_syllabus,
         totalDownloads: 1250, // Mock value
-        totalForumPosts: 42,   // Mock value
         totalUsers: 156,       // Mock value
         branches: {
           'Computer Science': MOCK_STATS.total_notes,
@@ -68,7 +67,7 @@ export default function AdminAnalytics () {
             <div className="stats-grid">
               <StatCard title="Resources" value={stats.totalResources} icon="📚" color="#3b82f6" />
               <StatCard title="Downloads" value={stats.totalDownloads} icon="📥" color="#10b981" />
-              <StatCard title="Discussions" value={stats.totalForumPosts} icon="💬" color="#f59e0b" />
+
               <StatCard title="Total Users" value={stats.totalUsers} icon="👥" color="#8b5cf6" />
             </div>
 

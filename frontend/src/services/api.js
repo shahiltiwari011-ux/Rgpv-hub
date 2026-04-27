@@ -413,80 +413,7 @@ export async function getResourceRatingsBatch (resourceIds = [], userId = null) 
   }
 }
 
-/* ── Forum / Discussions ── */
-export async function getForumPosts ({ branch = '', semester = '', page = 1, limit = 20 } = {}) {
-  const sb = _ensureSupabase()
-  const from = (page - 1) * limit
-  const to = from + limit - 1
-  
-  let query = sb.from('forum_posts').select('*, profiles(name)', { count: 'exact' })
-  if (branch && branch !== 'All') query = query.eq('branch', branch)
-  if (semester && semester !== 'All') query = query.eq('semester', parseInt(semester))
-  
-  const { data, count } = await fetchWithTimeout(
-    query.order('created_at', { ascending: false }).range(from, to).throwOnError()
-  )
-  
-  return { 
-    data: data || [], 
-    count: count || 0, 
-    totalPages: Math.ceil((count || 0) / limit) 
-  }
-}
 
-export async function getForumPost (id) {
-  const sb = _ensureSupabase()
-  const { data } = await fetchWithTimeout(
-    sb.from('forum_posts').select('*, profiles(name)').eq('id', id).single().throwOnError()
-  )
-  return data
-}
-
-export async function createForumPost (post) {
-  enforceRateLimit('forum_write', 2, 10000)
-  const sb = _ensureSupabase()
-  const user = await getSafeSession(sb)
-  if (!user) throw new Error('Login to post')
-  
-  const { data } = await fetchWithTimeout(
-    sb.from('forum_posts').insert({
-      title: post.title,
-      content: post.content,
-      branch: post.branch || null,
-      semester: post.semester || null,
-      user_id: user.id
-    }).select().single().throwOnError()
-  )
-  return data
-}
-
-export async function getForumComments (postId) {
-  const sb = _ensureSupabase()
-  const { data } = await fetchWithTimeout(
-    sb.from('forum_comments')
-      .select('*, profiles(name)')
-      .eq('post_id', postId)
-      .order('created_at', { ascending: true })
-      .throwOnError()
-  )
-  return data || []
-}
-
-export async function addForumComment (postId, content) {
-  enforceRateLimit('forum_write', 5, 5000)
-  const sb = _ensureSupabase()
-  const user = await getSafeSession(sb)
-  if (!user) throw new Error('Login to comment')
-  
-  const { data } = await fetchWithTimeout(
-    sb.from('forum_comments').insert({
-      post_id: postId,
-      user_id: user.id,
-      content
-    }).select().single().throwOnError()
-  )
-  return data
-}
 
 
 /* ── Admin CRUD ── */
@@ -662,8 +589,7 @@ export async function getAnalytics () {
       fetchWithTimeout(sb.from('resources').select('*', { count: 'exact', head: true }).throwOnError()),
       fetchWithTimeout(sb.from('downloads').select('*', { count: 'exact', head: true }).throwOnError()),
       fetchWithTimeout(sb.from('resources').select('branch').throwOnError()),
-      fetchWithTimeout(sb.from('profiles').select('*', { count: 'exact', head: true }).throwOnError()),
-      fetchWithTimeout(sb.from('forum_posts').select('*', { count: 'exact', head: true }).throwOnError())
+      fetchWithTimeout(sb.from('profiles').select('*', { count: 'exact', head: true }).throwOnError())
     ])
 
     const branchCounts = (branchStats || []).reduce((acc, r) => {
@@ -675,7 +601,6 @@ export async function getAnalytics () {
       totalResources: totalResources || 0,
       totalDownloads: totalDownloads || 0,
       totalUsers: totalUsers || 0,
-      totalForumPosts: totalForumPosts || 0,
       branches: branchCounts
     }
   } catch (err) {

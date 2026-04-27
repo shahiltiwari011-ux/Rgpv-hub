@@ -54,7 +54,6 @@ export default function Footer() {
             <div className="link-group">
               <h4>COMMUNITY</h4>
               <ul>
-                <li><Link to="/discussions">Forums</Link></li>
                 <li><Link to="/leaderboard">Rankings</Link></li>
               </ul>
             </div>

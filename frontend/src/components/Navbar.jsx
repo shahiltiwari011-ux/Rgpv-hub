@@ -8,8 +8,7 @@ const NAV_LINKS = [
   { to: '/notes', icon: '📝', label: 'Notes' },
   { to: '/pyq', icon: '📄', label: 'PYQ' },
   { to: '/syllabus', icon: '📋', label: 'Syllabus' },
-  { to: '/result', icon: '📊', label: 'Results' },
-  { to: '/discussions', icon: '💬', label: 'Forum' }
+  { to: '/result', icon: '📊', label: 'Results' }
 ];
 
 export default function Navbar() {
