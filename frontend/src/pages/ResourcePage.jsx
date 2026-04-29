@@ -164,46 +164,54 @@ export default function ResourcePage ({ type }) {
         {count > 0 && <div className="results-count-pill">{count} {config.countLabel} found</div>}
       </motion.div>
 
-      <FilterBar
-        branch={filters.branch}
-        semester={filters.semester}
-        search={searchTerm}
-        type={type}
-        onBranchChange={(value) => updateFilter('branch', value)}
-        onSemesterChange={(value) => updateFilter('semester', value)}
-        onSearchChange={setSearchTerm}
-        onTypeChange={handleTypeChange}
-      />
+      <div className="resource-container">
+        <FilterBar
+          branch={filters.branch}
+          semester={filters.semester}
+          search={searchTerm}
+          type={type}
+          onBranchChange={(value) => updateFilter('branch', value)}
+          onSemesterChange={(value) => updateFilter('semester', value)}
+          onSearchChange={setSearchTerm}
+          onTypeChange={handleTypeChange}
+        />
 
-      {isPending && <LoadingSpinner text={config.loadingText} />}
-      {error && !isMock && <ErrorState message={error} onRetry={refetch} />}
-      {!isPending && !isMock && !error && data.length === 0 && <EmptyState icon={config.icon} title={config.emptyTitle} message={config.emptyMessage} />}
+        {isPending && <LoadingSpinner text={config.loadingText} />}
+        {error && !isMock && <ErrorState message={error} onRetry={refetch} />}
+        {!isPending && !isMock && !error && data.length === 0 && <EmptyState icon={config.icon} title={config.emptyTitle} message={config.emptyMessage} />}
 
-      {!isPending && (data.length > 0 || isMock) && (!error || isMock) && (
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="subjects-grid"
-        >
-          {data.map((item) => (
-            <ResourceCard
-              key={item.id}
-              item={item}
-              type={type}
-              ratingInfo={ratingsByResource[item.id] || { average: 0, count: 0 }}
-              userRating={userRatingsByResource[item.id] ?? null}
-              onRatingSubmitted={refreshRatings}
-            />
-          ))}
-        </motion.div>
-      )}
-      
-      {!isPending && totalPages > 1 && (
-        <Pagination page={filters.page} totalPages={totalPages} onPageChange={(page) => updateFilter('page', page)} />
-      )}
+        {!isPending && (data.length > 0 || isMock) && (!error || isMock) && (
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="subjects-grid"
+          >
+            {data.map((item) => (
+              <ResourceCard
+                key={item.id}
+                item={item}
+                type={type}
+                ratingInfo={ratingsByResource[item.id] || { average: 0, count: 0 }}
+                userRating={userRatingsByResource[item.id] ?? null}
+                onRatingSubmitted={refreshRatings}
+              />
+            ))}
+          </motion.div>
+        )}
+        
+        {!isPending && totalPages > 1 && (
+          <Pagination page={filters.page} totalPages={totalPages} onPageChange={(page) => updateFilter('page', page)} />
+        )}
+      </div>
 
       <style>{`
+        .resource-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 var(--container-px);
+        }
+
         .page-hero-premium {
           display: flex;
           flex-direction: column;

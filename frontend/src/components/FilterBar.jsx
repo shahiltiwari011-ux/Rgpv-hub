@@ -32,7 +32,7 @@ export default function FilterBar({
         {/* Resource Type */}
         <div className="filter-item">
           <label className="selector-label">Resource Type</label>
-          <div className="premium-tab-group">
+          <div className="premium-tab-group scrollable">
             {RESOURCE_TYPES.map((t) => (
               <button
                 key={t}
@@ -148,6 +148,10 @@ export default function FilterBar({
         @media (max-width: 650px) {
           .filter-grid { grid-template-columns: 1fr; }
           .filter-bar-container { padding: 1.5rem; }
+        }
+
+        .filter-item {
+          min-width: 0;
         }
 
         .selector-label { 
