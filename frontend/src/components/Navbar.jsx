@@ -76,7 +76,7 @@ export default function Navbar() {
                 <Link to="/teacher" className="role-btn desktop-only">FACULTY</Link>
               )}
               {isAdmin && (
-                <Link to="/admin" className="avatar-link">
+                <Link to="/admin" className="avatar-link desktop-only">
                   <div className="avatar-mini">A</div>
                 </Link>
               )}
@@ -214,7 +214,8 @@ export default function Navbar() {
         .login-icon { font-size: 0.85rem; }
         
         @media (max-width: 768px) {
-          .login-btn.desktop-only { display: none !important; }
+          .login-btn.desktop-only,
+          .avatar-link.desktop-only { display: none !important; }
         }
 
         .nav-actions .streak-wrap, 
