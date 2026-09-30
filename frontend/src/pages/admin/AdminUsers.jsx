@@ -143,12 +143,9 @@ export default function AdminUsers() {
     const targetUser = users.find(u => u.id === userId);
     const targetEmail = targetUser?.email;
 
-    // Background DB sync — try by id first, then by email as fallback
+    // Background DB sync — update by email because locally generated IDs won't match DB
     try {
-      const updateById = supabase.from('profiles').update({ role: newRole }).eq('id', userId);
-      const { error: idError } = await fetchWithTimeout(updateById, 2000);
-      if (idError && targetEmail) {
-        // Fallback: update by email
+      if (targetEmail) {
         await fetchWithTimeout(
           supabase.from('profiles').update({ role: newRole }).eq('email', targetEmail),
           2000
