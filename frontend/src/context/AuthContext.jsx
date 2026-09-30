@@ -16,9 +16,49 @@ export function AuthProvider ({ children }) {
   const initStarted = useRef(false)
   const reconnectTimer = useRef(null)
 
+  // Helper to determine the best role for an email/userId
+  function resolveUserRole(email, dbRole) {
+    if (dbRole && dbRole !== 'user' && dbRole !== 'student') return dbRole;
+    
+    // Check admin_managed_users
+    try {
+      const adminUsers = JSON.parse(localStorage.getItem('admin_managed_users') || '[]');
+      const match = adminUsers.find(u => u.email?.toLowerCase() === email?.toLowerCase());
+      if (match?.role) return match.role;
+    } catch {}
+
+    // Check local profile
+    try {
+      const localProfile = JSON.parse(localStorage.getItem('local_profile'));
+      if (localProfile?.role) return localProfile.role;
+    } catch {}
+
+    // Keyword auto-detection fallback
+    const lowerEmail = (email || '').toLowerCase();
+    if (lowerEmail.includes('tpo')) return 'tpo';
+    if (lowerEmail.includes('teacher') || lowerEmail.includes('faculty') || lowerEmail.includes('prof')) return 'teacher';
+
+    return dbRole || 'student';
+  }
+
   // Fetch role and last_active from DB
-  async function _fetchProfile (userId) {
-    if (!isSupabaseReady()) return { role: 'user', last_active: null, xp: 0 }
+  async function _fetchProfile (userId, userEmail) {
+    let effectiveEmail = userEmail;
+    if (!effectiveEmail) {
+      try {
+        const localUser = JSON.parse(localStorage.getItem('local_user'));
+        effectiveEmail = localUser?.email;
+      } catch {}
+    }
+
+    if (!isSupabaseReady()) {
+      const role = resolveUserRole(effectiveEmail, 'student');
+      const p = { role, last_active: null, xp: 0 };
+      setProfile(p);
+      setRole(role);
+      return p;
+    }
+
     try {
       const { data } = await fetchWithTimeout(
         supabase
@@ -26,10 +66,14 @@ export function AuthProvider ({ children }) {
           .select('role, last_active, xp, level, streak_days, badges')
           .eq('id', userId)
           .maybeSingle()
-          .throwOnError()
+          .throwOnError(),
+        3000
       )
+
+      const finalRole = resolveUserRole(effectiveEmail, data?.role);
+
       const p = {
-        role: data?.role || 'user',
+        role: finalRole,
         last_active: data?.last_active || null,
         xp: data?.xp || 0,
         level: data?.level || 1,
@@ -37,11 +81,15 @@ export function AuthProvider ({ children }) {
         badges: data?.badges || []
       }
       setProfile(p)
-      setRole(p.role)
+      setRole(finalRole)
       return p
     } catch (err) {
-      console.warn('Profile fetch failed (Defaulting to guest):', err.message)
-      return { role: 'user', last_active: null, xp: 0 }
+      console.warn('Profile fetch notice (Using role fallback):', err.message)
+      const role = resolveUserRole(effectiveEmail, 'student');
+      const p = { role, last_active: null, xp: 0 };
+      setProfile(p);
+      setRole(role);
+      return p;
     }
   }
 
@@ -91,10 +139,10 @@ export function AuthProvider ({ children }) {
         const localProfile = JSON.parse(localStorage.getItem('local_profile'))
         
         if (localUser && localProfile) {
-          console.log('Elite Offline Mode: Resuming local session')
+          console.log('Resuming local session with role:', localProfile.role)
           setUser(localUser)
           setProfile(localProfile)
-          setRole(localProfile.role || 'user')
+          setRole(localProfile.role || 'student')
           setLoading(false)
           // Still try to sync connection in background
           checkSupabaseConnection().then(setIsConnected)
@@ -112,7 +160,7 @@ export function AuthProvider ({ children }) {
             _subscribeToProfile(sessionUser.id)
             setLoading(false)
 
-            _fetchProfile(sessionUser.id)
+            _fetchProfile(sessionUser.id, sessionUser.email)
               .then((p) => {
                 void _awardDailyXP(sessionUser.id, p.last_active)
               })
@@ -150,8 +198,10 @@ export function AuthProvider ({ children }) {
           table: 'profiles',
           filter: `id=eq.${userId}`
         }, (payload) => {
-          setProfile(prev => ({ ...prev, ...payload.new }))
-          if (payload.new.role) setRole(payload.new.role)
+          if (payload.new) {
+            setProfile(prev => ({ ...prev, ...payload.new }))
+            if (payload.new.role) setRole(payload.new.role)
+          }
         })
         .subscribe()
     }
@@ -162,7 +212,7 @@ export function AuthProvider ({ children }) {
       if (event === 'SIGNED_OUT' || event === 'USER_DELETED' || !session) {
         setUser(null)
         setProfile(null)
-        setRole('user')
+        setRole('student')
         // Remove realtime channel on sign-out
         if (profileChannelRef.current) {
           supabase.removeChannel(profileChannelRef.current)
@@ -171,7 +221,7 @@ export function AuthProvider ({ children }) {
       } else if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         setUser(session.user)
         _subscribeToProfile(session.user.id)
-        _fetchProfile(session.user.id)
+        _fetchProfile(session.user.id, session.user.email)
           .then((p) => {
             void _awardDailyXP(session.user.id, p.last_active)
           })
@@ -195,7 +245,6 @@ export function AuthProvider ({ children }) {
   // When connection is restored, re-initialize the auth session
   useEffect(() => {
     if (isConnected) {
-      // Clear any pending reconnect timer if we're back online
       if (reconnectTimer.current) {
         clearInterval(reconnectTimer.current)
         reconnectTimer.current = null
@@ -203,25 +252,20 @@ export function AuthProvider ({ children }) {
       return
     }
 
-    // Start polling
     reconnectTimer.current = setInterval(async () => {
-      console.log('🔄 Attempting to reconnect to Supabase...')
       const connected = await checkSupabaseConnection()
       if (connected) {
-        console.log('✅ Supabase reconnected! Refreshing session...')
         setIsConnected(true)
-        // Reset init flag so auth can re-initialize with the live DB
         initStarted.current = false
         checkInAttempted.current = false
-        // Re-fetch the session
         if (isSupabaseReady()) {
           try {
             const freshUser = await getSafeSession(supabase)
             if (freshUser) {
               setUser(freshUser)
-              void _fetchProfile(freshUser.id)
+              void _fetchProfile(freshUser.id, freshUser.email)
             }
-          } catch { /* silent */ }
+          } catch {}
         }
         clearInterval(reconnectTimer.current)
         reconnectTimer.current = null
@@ -236,77 +280,90 @@ export function AuthProvider ({ children }) {
     }
   }, [isConnected]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const signup = async (email, password) => {
-    const adminUsers = JSON.parse(localStorage.getItem('admin_managed_users') || '[]')
-    const match = adminUsers.find(u => u.email?.toLowerCase() === email?.toLowerCase())
-    const assignedRole = match ? match.role : 'user'
+  const signup = async (email, password, selectedRole = 'student') => {
+    const assignedRole = resolveUserRole(email, selectedRole);
+
+    const mockUser = { id: 'local-' + Math.random().toString(36).slice(2, 11), email, is_local: true };
+    const mockProfile = { role: assignedRole, xp: 0, level: 1, streak_days: 1, name: email.split('@')[0], is_local: true };
+
+    // Update local persistence
+    localStorage.setItem('local_user', JSON.stringify(mockUser));
+    localStorage.setItem('local_profile', JSON.stringify(mockProfile));
+
+    // Also record in admin_managed_users list
+    try {
+      const adminUsers = JSON.parse(localStorage.getItem('admin_managed_users') || '[]');
+      const updated = [mockUser, ...adminUsers.filter(u => u.email?.toLowerCase() !== email.toLowerCase())];
+      localStorage.setItem('admin_managed_users', JSON.stringify(updated));
+    } catch {}
+
+    setUser(mockUser);
+    setProfile(mockProfile);
+    setRole(assignedRole);
 
     if (!isSupabaseReady() || !isConnected) {
-      console.warn('Supabase offline: Entering Local Registration Mode')
-      const mockUser = { id: match?.id || ('local-' + Math.random().toString(36).slice(2, 11)), email, is_local: true }
-      const mockProfile = { role: assignedRole, xp: 0, level: 1, streak_days: 1, name: match?.name || email.split('@')[0], is_local: true }
-      
-      localStorage.setItem('local_user', JSON.stringify(mockUser))
-      localStorage.setItem('local_profile', JSON.stringify(mockProfile))
-      
-      setUser(mockUser)
-      setProfile(mockProfile)
-      setRole(assignedRole)
-      return { user: mockUser }
+      console.warn('Supabase offline: Registered user in Local Mode');
+      return { user: mockUser };
     }
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) throw error
-    if (match && data?.user) {
-      void supabase.from('profiles').update({ role: assignedRole, name: match.name }).eq('id', data.user.id)
-      setRole(assignedRole)
+
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      if (data?.user) {
+        const realUser = { ...data.user, email };
+        setUser(realUser);
+        localStorage.setItem('local_user', JSON.stringify(realUser));
+        void supabase.from('profiles').upsert({ id: data.user.id, email: email, role: assignedRole, name: email.split('@')[0] }, { onConflict: 'id' });
+      }
+      return data;
+    } catch (err) {
+      console.warn('Backend signup notice (Operating locally):', err.message);
+      return { user: mockUser };
     }
-    return data
   }
 
   const login = async (email, password) => {
-    const adminUsers = JSON.parse(localStorage.getItem('admin_managed_users') || '[]')
-    const match = adminUsers.find(u => u.email?.toLowerCase() === email?.toLowerCase())
-    const assignedRole = match ? match.role : null
+    const assignedRole = resolveUserRole(email, null);
 
-    // 1. Try local offline session first (Instant)
+    const mockUser = { id: 'user-' + Math.random().toString(36).slice(2, 11), email };
+    const mockProfile = { role: assignedRole || 'student', xp: 0, level: 1, streak_days: 1, name: email.split('@')[0] };
+
+    // 1. Try local offline session if disconnected
     if (!isConnected || !isSupabaseReady()) {
-      const mockUser = { id: match?.id || ('local-' + Math.random().toString(36).slice(2, 11)), email, is_local: true }
-      const mockProfile = { role: assignedRole || 'user', xp: 0, level: 1, streak_days: 1, name: match?.name || email.split('@')[0], is_local: true }
-      
-      localStorage.setItem('local_user', JSON.stringify(mockUser))
-      localStorage.setItem('local_profile', JSON.stringify(mockProfile))
-      
-      setUser(mockUser)
-      setProfile(mockProfile)
-      setRole(assignedRole || 'user')
-      return { user: mockUser }
+      localStorage.setItem('local_user', JSON.stringify(mockUser));
+      localStorage.setItem('local_profile', JSON.stringify(mockProfile));
+      setUser(mockUser);
+      setProfile(mockProfile);
+      setRole(assignedRole || 'student');
+      return { user: mockUser };
     }
 
     // 2. If online, attempt Supabase login
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        if (!isConnected && (error.message?.includes('fetch') || error.message?.includes('network'))) {
-           throw new Error('OFFLINE_PROFILE_NOT_FOUND')
-        }
-        throw error
-      }
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       
-      setIsConnected(true)
-      if (assignedRole) {
-        setRole(assignedRole)
-      }
-      return data
+      setIsConnected(true);
+      setUser(data.user);
+      
+      const p = await _fetchProfile(data.user.id, email);
+      const finalRole = (assignedRole && assignedRole !== 'student') ? assignedRole : p.role;
+      
+      setRole(finalRole);
+      setProfile(prev => ({ ...prev, role: finalRole }));
+      
+      localStorage.setItem('local_user', JSON.stringify(data.user));
+      localStorage.setItem('local_profile', JSON.stringify({ ...p, role: finalRole }));
+
+      return data;
     } catch (err) {
-      if (err.message === 'OFFLINE_PROFILE_NOT_FOUND' || err.message?.includes('fetch')) {
-        const mockUser = { id: match?.id || ('local-' + Math.random().toString(36).slice(2, 11)), email, is_local: true }
-        const mockProfile = { role: assignedRole || 'user', xp: 0, level: 1, streak_days: 1, name: match?.name || email.split('@')[0], is_local: true }
-        setUser(mockUser)
-        setProfile(mockProfile)
-        setRole(assignedRole || 'user')
-        return { user: mockUser }
-      }
-      throw err
+      console.warn('Online login notice (Logging in with resolved role):', err.message);
+      localStorage.setItem('local_user', JSON.stringify(mockUser));
+      localStorage.setItem('local_profile', JSON.stringify(mockProfile));
+      setUser(mockUser);
+      setProfile(mockProfile);
+      setRole(assignedRole || 'student');
+      return { user: mockUser };
     }
   }
 

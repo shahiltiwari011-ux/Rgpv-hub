@@ -9,6 +9,7 @@ export default function AuthModal({ isOpen, onClose }) {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedRole, setSelectedRole] = useState('student');
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -32,8 +33,8 @@ export default function AuthModal({ isOpen, onClose }) {
         toast.success('Password reset link sent to your email!');
         setIsForgotPassword(false);
       } else if (isSignUp) {
-        await signup(email, password);
-        toast.success('Account created successfully!');
+        await signup(email, password, selectedRole);
+        toast.success(`Account created as ${selectedRole.toUpperCase()}!`);
         onClose();
       } else {
         await login(email, password);
@@ -91,12 +92,41 @@ export default function AuthModal({ isOpen, onClose }) {
               {isForgotPassword
                 ? 'Enter your email address to receive a password reset link'
                 : isSignUp
-                ? 'Sign up to get full access to study hub features'
+                ? 'Sign up and select your role to access your dashboard'
                 : 'Enter your credentials to access your account'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
+            {isSignUp && (
+              <div className="form-group">
+                <label>Select Your Role</label>
+                <div className="role-selector-pills">
+                  <button
+                    type="button"
+                    className={`role-pill ${selectedRole === 'student' ? 'active' : ''}`}
+                    onClick={() => setSelectedRole('student')}
+                  >
+                    🎓 Student
+                  </button>
+                  <button
+                    type="button"
+                    className={`role-pill ${selectedRole === 'teacher' ? 'active' : ''}`}
+                    onClick={() => setSelectedRole('teacher')}
+                  >
+                    👨‍🏫 Faculty
+                  </button>
+                  <button
+                    type="button"
+                    className={`role-pill ${selectedRole === 'tpo' ? 'active' : ''}`}
+                    onClick={() => setSelectedRole('tpo')}
+                  >
+                    💼 TPO Officer
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="form-group">
               <label htmlFor="auth-email">Email Address</label>
               <input 
@@ -141,7 +171,7 @@ export default function AuthModal({ isOpen, onClose }) {
               ) : isForgotPassword ? (
                 'Send Reset Link'
               ) : isSignUp ? (
-                'Create Account'
+                `Create ${selectedRole.toUpperCase()} Account`
               ) : (
                 'Sign In'
               )}
@@ -193,7 +223,7 @@ export default function AuthModal({ isOpen, onClose }) {
             border: 1px solid var(--border);
             border-radius: 1.5rem;
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             padding: 2.25rem 2rem;
             position: relative;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -265,6 +295,36 @@ export default function AuthModal({ isOpen, onClose }) {
             display: flex;
             flex-direction: column;
             gap: 0.4rem;
+          }
+
+          .role-selector-pills {
+            display: flex;
+            gap: 0.5rem;
+          }
+
+          .role-pill {
+            flex: 1;
+            padding: 0.6rem 0.4rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+            white-space: nowrap;
+          }
+
+          .role-pill.active {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+          }
+
+          .role-pill:hover {
+            border-color: var(--accent-blue);
           }
 
           .label-row {
