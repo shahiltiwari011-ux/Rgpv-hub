@@ -237,57 +237,74 @@ export function AuthProvider ({ children }) {
   }, [isConnected]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const signup = async (email, password) => {
+    const adminUsers = JSON.parse(localStorage.getItem('admin_managed_users') || '[]')
+    const match = adminUsers.find(u => u.email?.toLowerCase() === email?.toLowerCase())
+    const assignedRole = match ? match.role : 'user'
+
     if (!isSupabaseReady() || !isConnected) {
       console.warn('Supabase offline: Entering Local Registration Mode')
-      // Simulate successful signup for Offline Mode
-      const mockUser = { id: 'local-' + Math.random().toString(36).slice(2, 11), email, is_local: true }
-      const mockProfile = { role: 'user', xp: 0, level: 1, streak_days: 1, name: email.split('@')[0], is_local: true }
+      const mockUser = { id: match?.id || ('local-' + Math.random().toString(36).slice(2, 11)), email, is_local: true }
+      const mockProfile = { role: assignedRole, xp: 0, level: 1, streak_days: 1, name: match?.name || email.split('@')[0], is_local: true }
       
       localStorage.setItem('local_user', JSON.stringify(mockUser))
       localStorage.setItem('local_profile', JSON.stringify(mockProfile))
       
       setUser(mockUser)
       setProfile(mockProfile)
+      setRole(assignedRole)
       return { user: mockUser }
     }
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
+    if (match && data?.user) {
+      void supabase.from('profiles').update({ role: assignedRole, name: match.name }).eq('id', data.user.id)
+      setRole(assignedRole)
+    }
     return data
   }
 
   const login = async (email, password) => {
+    const adminUsers = JSON.parse(localStorage.getItem('admin_managed_users') || '[]')
+    const match = adminUsers.find(u => u.email?.toLowerCase() === email?.toLowerCase())
+    const assignedRole = match ? match.role : null
+
     // 1. Try local offline session first (Instant)
-    if (!isConnected) {
-      const localUser = JSON.parse(localStorage.getItem('local_user'))
-      if (localUser && localUser.email === email) {
-        setUser(localUser)
-        setProfile(JSON.parse(localStorage.getItem('local_profile')))
-        return { user: localUser }
-      }
+    if (!isConnected || !isSupabaseReady()) {
+      const mockUser = { id: match?.id || ('local-' + Math.random().toString(36).slice(2, 11)), email, is_local: true }
+      const mockProfile = { role: assignedRole || 'user', xp: 0, level: 1, streak_days: 1, name: match?.name || email.split('@')[0], is_local: true }
+      
+      localStorage.setItem('local_user', JSON.stringify(mockUser))
+      localStorage.setItem('local_profile', JSON.stringify(mockProfile))
+      
+      setUser(mockUser)
+      setProfile(mockProfile)
+      setRole(assignedRole || 'user')
+      return { user: mockUser }
     }
 
-    // 2. If no local profile OR we want to attempt a real login
-    if (!isSupabaseReady()) throw new Error('Supabase configuration missing')
-    
+    // 2. If online, attempt Supabase login
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
-        // If we are offline and the real login fails, ONLY then throw the offline error if relevant
         if (!isConnected && (error.message?.includes('fetch') || error.message?.includes('network'))) {
            throw new Error('OFFLINE_PROFILE_NOT_FOUND')
         }
         throw error
       }
       
-      // If we got here, we are actually online!
       setIsConnected(true)
+      if (assignedRole) {
+        setRole(assignedRole)
+      }
       return data
     } catch (err) {
-      if (err.message === 'OFFLINE_PROFILE_NOT_FOUND') throw err
-      
-      // If it's a connection error during login, and we don't have a local profile, throw the helpful error
-      if (!isConnected && (err.message?.includes('fetch') || err.message?.includes('network'))) {
-        throw new Error('OFFLINE_PROFILE_NOT_FOUND')
+      if (err.message === 'OFFLINE_PROFILE_NOT_FOUND' || err.message?.includes('fetch')) {
+        const mockUser = { id: match?.id || ('local-' + Math.random().toString(36).slice(2, 11)), email, is_local: true }
+        const mockProfile = { role: assignedRole || 'user', xp: 0, level: 1, streak_days: 1, name: match?.name || email.split('@')[0], is_local: true }
+        setUser(mockUser)
+        setProfile(mockProfile)
+        setRole(assignedRole || 'user')
+        return { user: mockUser }
       }
       throw err
     }
