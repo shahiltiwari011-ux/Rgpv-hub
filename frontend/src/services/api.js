@@ -638,7 +638,7 @@ export async function logSystemError (message, metadata = {}) {
   }
 }
 
-/* ── Express Backend API (Railway) ── */
+/* ── Express Backend API (Render) ── */
 
 const getApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;

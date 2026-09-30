@@ -20,7 +20,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const app = express();
 
 // Production Middleware
-app.set('trust proxy', 1); // Trust first proxy (Railway/Vercel)
+app.set('trust proxy', 1); // Trust first proxy (Render/Vercel)
 app.use(helmet({
     contentSecurityPolicy: false, // Disable CSP if frontend is separate, or configure properly
 }));
@@ -72,7 +72,7 @@ setInterval(() => {
     }
 }, 10 * 60 * 1000);
 
-// Root route — required for Railway health check
+// Root route — required for Render health check
 app.get('/', (req, res) => {
     res.json({ status: 'RGPV Hub API is running', timestamp: new Date().toISOString() });
 });
