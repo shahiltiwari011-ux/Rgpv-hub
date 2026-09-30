@@ -302,6 +302,7 @@ app.post('/api/result', async (req, res) => {
             try {
                 await supabase.from('results_cache').upsert({
                     enrollment: enroll,
+                    semester: sem,
                     result_data: resultData,
                     updated_at: new Date()
                 });

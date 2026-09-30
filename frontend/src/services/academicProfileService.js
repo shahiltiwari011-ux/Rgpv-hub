@@ -13,15 +13,14 @@ async function getCachedSemesterResult(enrollment, semester) {
     const { data, error } = await supabase
       .from('results_cache')
       .select('result_data, updated_at')
-      .eq('enrollment', enrollment.toUpperCase())
+      .ilike('enrollment', enrollment)
+      .eq('semester', String(semester))
       .maybeSingle();
 
     if (error || !data) return null;
 
-    // The cache stores a single result_data object keyed by last fetch.
-    // Check if the cached semester matches the requested semester.
     const rd = data.result_data;
-    if (rd && String(rd.semester) === String(semester)) {
+    if (rd) {
       return { ...rd, _cachedAt: data.updated_at };
     }
     return null;
@@ -63,11 +62,18 @@ export async function findStudentByEnrollment(enrollment) {
   }
 
   // Also check the results_cache for student info from RGPV data
-  const { data: cacheData } = await supabase
+  const { data: cacheData, error: cacheError } = await supabase
     .from('results_cache')
-    .select('result_data, updated_at')
-    .eq('enrollment', normalized)
+    .select('result_data, updated_at, enrollment')
+    .ilike('enrollment', normalized)
+    .limit(1)
     .maybeSingle();
+
+  console.log("CACHE DATA FOR ENROLLMENT", normalized, ":", cacheData);
+
+  if (cacheError) {
+    console.error("Cache search error:", cacheError);
+  }
 
   if (!data && !cacheData) {
     return null;
