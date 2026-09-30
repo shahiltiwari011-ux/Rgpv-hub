@@ -139,9 +139,21 @@ export default function AdminUsers() {
     localStorage.setItem('admin_managed_users', JSON.stringify(updatedUsers));
     toast.success('Role updated successfully');
 
-    // Background DB sync with 2s timeout
+    // Get the email for this user (needed to update DB by email as fallback)
+    const targetUser = users.find(u => u.id === userId);
+    const targetEmail = targetUser?.email;
+
+    // Background DB sync — try by id first, then by email as fallback
     try {
-      await fetchWithTimeout(supabase.from('profiles').update({ role: newRole }).eq('id', userId), 2000);
+      const updateById = supabase.from('profiles').update({ role: newRole }).eq('id', userId);
+      const { error: idError } = await fetchWithTimeout(updateById, 2000);
+      if (idError && targetEmail) {
+        // Fallback: update by email
+        await fetchWithTimeout(
+          supabase.from('profiles').update({ role: newRole }).eq('email', targetEmail),
+          2000
+        );
+      }
     } catch (err) {
       console.warn('Background role update notice:', err.message);
     }

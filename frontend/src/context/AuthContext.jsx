@@ -18,22 +18,18 @@ export function AuthProvider ({ children }) {
 
   // Helper to determine the best role for an email/userId
   function resolveUserRole(email, dbRole) {
-    if (dbRole && dbRole !== 'user' && dbRole !== 'student') return dbRole;
+    // If dbRole is already a specific known role, trust it immediately
+    const knownRoles = ['tpo', 'teacher', 'admin', 'faculty'];
+    if (dbRole && knownRoles.includes(dbRole)) return dbRole;
     
-    // Check admin_managed_users
+    // Check admin_managed_users list (set by Admin panel)
     try {
       const adminUsers = JSON.parse(localStorage.getItem('admin_managed_users') || '[]');
       const match = adminUsers.find(u => u.email?.toLowerCase() === email?.toLowerCase());
-      if (match?.role) return match.role;
+      if (match?.role && knownRoles.includes(match.role)) return match.role;
     } catch {}
 
-    // Check local profile
-    try {
-      const localProfile = JSON.parse(localStorage.getItem('local_profile'));
-      if (localProfile?.role) return localProfile.role;
-    } catch {}
-
-    // Keyword auto-detection fallback
+    // Keyword auto-detection fallback (email-based)
     const lowerEmail = (email || '').toLowerCase();
     if (lowerEmail.includes('tpo')) return 'tpo';
     if (lowerEmail.includes('teacher') || lowerEmail.includes('faculty') || lowerEmail.includes('prof')) return 'teacher';
@@ -139,13 +135,31 @@ export function AuthProvider ({ children }) {
         const localProfile = JSON.parse(localStorage.getItem('local_profile'))
         
         if (localUser && localProfile) {
-          console.log('Resuming local session with role:', localProfile.role)
+          // Always re-run resolveUserRole to catch roles set by Admin panel
+          const resolvedRole = resolveUserRole(localUser.email, localProfile.role);
+          // If role was upgraded, persist it back so next reload is also correct
+          if (resolvedRole !== localProfile.role) {
+            const updatedProfile = { ...localProfile, role: resolvedRole };
+            localStorage.setItem('local_profile', JSON.stringify(updatedProfile));
+            setProfile(updatedProfile);
+          } else {
+            setProfile(localProfile);
+          }
+          console.log('Resuming local session with role:', resolvedRole)
           setUser(localUser)
-          setProfile(localProfile)
-          setRole(localProfile.role || 'student')
+          setRole(resolvedRole)
           setLoading(false)
-          // Still try to sync connection in background
-          checkSupabaseConnection().then(setIsConnected)
+          // Still try to sync connection in background, then also refresh profile from DB
+          checkSupabaseConnection().then(async (connected) => {
+            setIsConnected(connected);
+            if (connected && isSupabaseReady() && localUser.id && !localUser.id.startsWith('local-')) {
+              // Silently refresh role from DB in background
+              const p = await _fetchProfile(localUser.id, localUser.email).catch(() => null);
+              if (p?.role) {
+                localStorage.setItem('local_profile', JSON.stringify({ ...localProfile, role: p.role }));
+              }
+            }
+          });
           return
         }
 
