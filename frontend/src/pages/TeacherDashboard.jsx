@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 
 const CARDS = [
   { to: '/teacher/upload', icon: '📤', color: 'blue', title: 'UPLOAD MATERIAL', desc: 'Publish new notes, PDFs, or assignments.' },
-  { to: '/teacher/materials', icon: '📂', color: 'purple', title: 'MY MATERIALS', desc: 'View, edit, or delete resources you have published.' }
+  { to: '/teacher/materials', icon: '📂', color: 'purple', title: 'MY MATERIALS', desc: 'View, edit, or delete resources you have published.' },
+  { to: '/teacher/academic-profile', icon: '🎓', color: 'gold', title: 'ACADEMIC PROFILE', desc: 'Search and view comprehensive academic records by student enrollment number.' }
 ];
 
 export default function TeacherDashboard() {

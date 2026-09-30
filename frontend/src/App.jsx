@@ -29,6 +29,7 @@ const TPOPackages = lazy(() => import('./pages/TPOPackages'))
 const TPOExperiences = lazy(() => import('./pages/TPOExperiences'))
 const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard'))
 const TeacherUpload = lazy(() => import('./pages/TeacherUpload'))
+const StudentAcademicProfile = lazy(() => import('./pages/StudentAcademicProfile'))
 
 // Admin pages
 const Admin = lazy(() => import('./pages/Admin'))
@@ -62,6 +63,7 @@ export default function App () {
             {/* Teacher Routes */}
             <Route path='/teacher' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherDashboard /></ProtectedRoute>} />
             <Route path='/teacher/upload' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherUpload /></ProtectedRoute>} />
+            <Route path='/teacher/academic-profile' element={<ProtectedRoute allowedRoles={['teacher', 'tpo']}><StudentAcademicProfile /></ProtectedRoute>} />
 
             {/* TPO Routes */}
             <Route path='/tpo' element={<ProtectedRoute allowedRoles={['tpo']}><TPODashboard /></ProtectedRoute>} />
