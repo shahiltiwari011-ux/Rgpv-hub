@@ -433,11 +433,11 @@ export default function StudentAcademicProfile() {
                     <div className="apx-stat-sub">Current</div>
                   </div>
                   <div className="apx-stat-card">
-                    <div className="apx-stat-label">Semesters</div>
+                    <div className="apx-stat-label">History Available</div>
                     <div className="apx-stat-value" style={{ color: '#f59e0b' }}>
-                      {academicSummary.semestersCompleted}
+                      {academicSummary.semestersCompleted} / {student?.currentSemester || 6}
                     </div>
-                    <div className="apx-stat-sub">Completed</div>
+                    <div className="apx-stat-sub">Semesters Stored</div>
                   </div>
                 </div>
                 <div className="apx-status-row">

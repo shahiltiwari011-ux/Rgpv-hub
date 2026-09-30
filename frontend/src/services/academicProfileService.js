@@ -305,7 +305,18 @@ function isBacklogGrade(grade) {
  */
 function computeAcademicSummary(semesterResults, lastResult) {
   const validSGPAs = semesterResults.filter(r => r.sgpa !== null).map(r => r.sgpa);
-  const latestCGPA = lastResult?.cgpa ?? null;
+  
+  // Find CGPA from latest result, or search backwards for the most recent valid CGPA
+  let latestCGPA = lastResult?.cgpa ?? null;
+  if (latestCGPA === null) {
+    for (let i = semesterResults.length - 1; i >= 0; i--) {
+      if (semesterResults[i].cgpa !== null && !isNaN(semesterResults[i].cgpa)) {
+        latestCGPA = semesterResults[i].cgpa;
+        break;
+      }
+    }
+  }
+  
   const latestSGPA = lastResult?.sgpa ?? null;
 
   const seenBacklogs = new Map();
