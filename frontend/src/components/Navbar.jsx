@@ -83,7 +83,7 @@ export default function Navbar() {
               <button onClick={logout} className="logout-btn desktop-only">LOGOUT</button>
             </div>
           ) : (
-            <button onClick={() => setIsAuthOpen(true)} className="login-btn" title="Sign In / Register">
+            <button onClick={() => setIsAuthOpen(true)} className="login-btn desktop-only" title="Sign In / Register">
               <span className="login-icon">🔑</span>
               <span className="login-label">LOGIN</span>
             </button>
@@ -213,8 +213,8 @@ export default function Navbar() {
         .login-btn:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); }
         .login-icon { font-size: 0.85rem; }
         
-        @media (max-width: 640px) {
-          .login-icon { display: none; }
+        @media (max-width: 768px) {
+          .login-btn.desktop-only { display: none !important; }
         }
 
         .nav-actions .streak-wrap, 
