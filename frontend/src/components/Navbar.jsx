@@ -3,20 +3,24 @@ import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AuthModal from './AuthModal';
+
 const NAV_LINKS = [
   { to: '/', icon: '🏠', label: 'Home' },
   { to: '/notes', icon: '📝', label: 'Notes' },
   { to: '/pyq', icon: '📄', label: 'PYQ' },
   { to: '/syllabus', icon: '📋', label: 'Syllabus' },
-  { to: '/result', icon: '📊', label: 'Results' }
+  { to: '/result', icon: '📊', label: 'Results' },
+  { to: '/placement', icon: '🚀', label: 'Placements' }
 ];
 
 export default function Navbar() {
   const { pathname } = useLocation();
-  const { user, isAdmin, logout, isConnected } = useAuth();
+  const { user, isAdmin, role, logout, isConnected } = useAuth();
   const { dark, toggle } = useDarkMode();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -63,13 +67,26 @@ export default function Navbar() {
             {dark ? '🌙' : '☀️'}
           </button>
 
-          {isAdmin && (
+          {user || isAdmin ? (
             <div className="user-group">
-              <Link to="/admin" className="avatar-link">
-                <div className="avatar-mini">A</div>
-              </Link>
+              {role === 'tpo' && (
+                <Link to="/tpo" className="role-btn desktop-only">TPO PORTAL</Link>
+              )}
+              {role === 'teacher' && (
+                <Link to="/teacher" className="role-btn desktop-only">FACULTY</Link>
+              )}
+              {isAdmin && (
+                <Link to="/admin" className="avatar-link">
+                  <div className="avatar-mini">A</div>
+                </Link>
+              )}
               <button onClick={logout} className="logout-btn desktop-only">LOGOUT</button>
             </div>
+          ) : (
+            <button onClick={() => setIsAuthOpen(true)} className="login-btn" title="Sign In / Register">
+              <span className="login-icon">🔑</span>
+              <span className="login-label">LOGIN</span>
+            </button>
           )}
 
           {/* Mobile Menu Toggle */}
@@ -112,14 +129,18 @@ export default function Navbar() {
                 {dark ? '🌙 Dark' : '☀️ Light'}
               </button>
             </div>
-            {isAdmin && (
-              <div className="mobile-footer">
+            <div className="mobile-footer">
+              {user || isAdmin ? (
                 <button onClick={() => { logout(); setMobileOpen(false); }} className="mobile-logout">SIGN OUT</button>
-              </div>
-            )}
+              ) : (
+                <button onClick={() => { setIsAuthOpen(true); setMobileOpen(false); }} className="mobile-login">🔑 SIGN IN / REGISTER</button>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
       <style>{`
         .projectx-nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 1.5rem 0; }
@@ -149,6 +170,7 @@ export default function Navbar() {
         }
 
         .nav-actions { display: flex; align-items: center; gap: clamp(0.4rem, 2vw, 0.75rem); flex-shrink: 0; }
+        .user-group { display: flex; align-items: center; gap: 0.5rem; }
         .theme-toggle { background: var(--bg-card); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 12px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; color: var(--text-primary); }
         @media (min-width: 768px) { .theme-toggle { width: 40px; height: 40px; font-size: 1.1rem; } }
         .theme-toggle:hover { background: rgba(var(--bg-glass-rgb), 0.1); border-color: var(--accent-blue); }
@@ -158,9 +180,16 @@ export default function Navbar() {
         .logout-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 0.5rem 1rem; border-radius: 0.75rem; font-weight: 800; font-size: 0.7rem; cursor: pointer; transition: 0.3s; }
         .logout-btn:hover { color: #f43f5e; border-color: #f43f5e40; background: #f43f5e10; }
         
-        .btn-sign { text-decoration: none; background: var(--text-primary); color: var(--bg-primary); padding: 0.5rem 1rem; border-radius: 0.8rem; font-weight: 900; font-size: 0.75rem; transition: 0.3s; white-space: nowrap; }
-        @media (min-width: 768px) { .btn-sign { padding: 0.6rem 1.2rem; font-size: 0.8rem; } }
-        .btn-sign:hover { background: var(--accent-blue); color: #fff; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
+        .role-btn { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-primary); padding: 0.5rem 1rem; border-radius: 0.75rem; font-weight: 800; font-size: 0.7rem; cursor: pointer; transition: 0.3s; text-decoration: none; }
+        .role-btn:hover { color: var(--accent-blue); border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.1); }
+        
+        .login-btn { background: var(--accent-blue); color: #fff; border: 1px solid rgba(59, 130, 246, 0.4); padding: 0.45rem 0.9rem; border-radius: 0.75rem; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); }
+        .login-btn:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); }
+        .login-icon { font-size: 0.85rem; }
+        @media (max-width: 640px) {
+          .login-label { display: none; }
+          .login-btn { padding: 0.45rem; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
+        }
 
         .nav-actions .streak-wrap, 
         .nav-actions .connectivity-status, 

@@ -10,6 +10,7 @@ export default function AdminLayout() {
   const menuItems = [
     { to: '/admin/upload', icon: '📤', label: 'Upload Asset' },
     { to: '/admin', icon: '🗄️', label: 'Manage Database' },
+    { to: '/admin/users', icon: '👥', label: 'Manage Users' },
     { to: '/admin/analytics', icon: '📊', label: 'Analytics' }
   ];
 
