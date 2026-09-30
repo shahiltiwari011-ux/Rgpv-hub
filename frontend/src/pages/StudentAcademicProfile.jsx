@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO';
 import { useAuth } from '../context/AuthContext';
-import { getStudentAcademicProfile } from '../services/academicProfileService';
+import { getStudentAcademicProfile, fetchSemesterLive, buildProfileFromResults } from '../services/academicProfileService';
 
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
 
@@ -35,10 +35,22 @@ export default function StudentAcademicProfile() {
 
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState({ current: 0, total: 6 });
+  const [progress, setProgress] = useState({ current: 0, total: 6, phase: '' });
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
   const [expandedSems, setExpandedSems] = useState({});
+  
+  // Live fetching state (CAPTCHA flow)
+  const [liveFetching, setLiveFetching] = useState(false);
+  const [liveSem, setLiveSem] = useState(null);
+  const [captchaImg, setCaptchaImg] = useState(null);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [sessionId, setSessionId] = useState(null);
+  const [liveResults, setLiveResults] = useState([]);
+  const [liveStudent, setLiveStudent] = useState(null);
+  const [fetchQueue, setFetchQueue] = useState([]);
+  const [semStatus, setSemStatus] = useState({});
+  const captchaRef = useRef(null);
 
   const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
@@ -48,21 +60,42 @@ export default function StudentAcademicProfile() {
     setLoading(true);
     setError(null);
     setProfile(null);
-    setProgress({ current: 0, total: 6 });
+    setLiveFetching(false);
+    setLiveResults([]);
+    setLiveStudent(null);
+    setCaptchaImg(null);
+    setCaptchaInput('');
+    setSessionId(null);
+    setSemStatus({});
+    setProgress({ current: 0, total: 6, phase: 'Checking cache...' });
 
     try {
       const result = await getStudentAcademicProfile(trimmed, (sem, total) => {
-        setProgress({ current: sem, total });
+        setProgress({ current: sem, total, phase: `Checking cache for semester ${sem}...` });
       });
 
-      if (!result.found) {
-        setError('No student found with this enrollment number. Please check and try again.');
-      } else if (result.noResults) {
+      if (result.found && result.semesterResults.length > 0) {
+        // We have cached data! Show it immediately
         setProfile(result);
         setError(null);
       } else {
-        setProfile(result);
-        setError(null);
+        // No cache — switch to live fetch mode with CAPTCHA
+        setLiveStudent(result.student || {
+          id: null,
+          name: null,
+          rollNumber: trimmed,
+          branch: null,
+          college: 'RGPV',
+        });
+        
+        // Start live fetching from semester 1
+        const semQueue = [1, 2, 3, 4, 5, 6];
+        setFetchQueue(semQueue);
+        setLiveFetching(true);
+        setLiveSem(semQueue[0]);
+        
+        // Trigger first semester fetch
+        await startLiveFetch(trimmed, semQueue[0]);
       }
     } catch (err) {
       if (err.message.includes('Invalid enrollment')) {
@@ -70,12 +103,136 @@ export default function StudentAcademicProfile() {
       } else if (err.message.includes('Database')) {
         setError('Database connection error. Please try again.');
       } else {
-        setError('Unable to fetch academic data. The RGPV portal may be temporarily unavailable.');
+        setError('Unable to fetch academic data. Please try again.');
       }
     } finally {
       setLoading(false);
     }
   }, [query]);
+
+  const startLiveFetch = async (enrollment, semester) => {
+    setLiveSem(semester);
+    setSemStatus(prev => ({ ...prev, [semester]: 'fetching' }));
+    setCaptchaImg(null);
+    setCaptchaInput('');
+    setSessionId(null);
+
+    try {
+      const result = await fetchSemesterLive(enrollment, semester);
+      
+      if (result.success) {
+        // Got the result without captcha!
+        setSemStatus(prev => ({ ...prev, [semester]: 'done' }));
+        setLiveResults(prev => [...prev, result.result]);
+        
+        // Move to next semester
+        moveToNextSemester(enrollment, semester);
+      } else if (result.type === 'captcha_required') {
+        // Show CAPTCHA to teacher
+        setCaptchaImg(result.captchaImg);
+        setSessionId(result.sessionId);
+        setSemStatus(prev => ({ ...prev, [semester]: 'captcha' }));
+        setTimeout(() => captchaRef.current?.focus(), 200);
+      } else if (result.type === 'not_found') {
+        // No result for this semester — skip
+        setSemStatus(prev => ({ ...prev, [semester]: 'empty' }));
+        moveToNextSemester(enrollment, semester);
+      } else {
+        setSemStatus(prev => ({ ...prev, [semester]: 'error' }));
+        moveToNextSemester(enrollment, semester);
+      }
+    } catch (err) {
+      setSemStatus(prev => ({ ...prev, [semester]: 'error' }));
+      moveToNextSemester(enrollment, semester);
+    }
+  };
+
+  const handleCaptchaSubmit = async (e) => {
+    e?.preventDefault();
+    if (!captchaInput.trim()) return;
+    
+    const enrollment = query.trim().toUpperCase();
+    setSemStatus(prev => ({ ...prev, [liveSem]: 'fetching' }));
+    
+    try {
+      const result = await fetchSemesterLive(enrollment, liveSem, captchaInput, sessionId);
+      
+      if (result.success) {
+        setSemStatus(prev => ({ ...prev, [liveSem]: 'done' }));
+        setLiveResults(prev => [...prev, result.result]);
+        setCaptchaImg(null);
+        setCaptchaInput('');
+        setSessionId(null);
+        moveToNextSemester(enrollment, liveSem);
+      } else if (result.type === 'captcha') {
+        // Wrong captcha
+        setError('Wrong CAPTCHA. Please try again.');
+        setCaptchaInput('');
+        // Re-fetch to get new CAPTCHA
+        await startLiveFetch(enrollment, liveSem);
+      } else if (result.type === 'not_found') {
+        setSemStatus(prev => ({ ...prev, [liveSem]: 'empty' }));
+        setCaptchaImg(null);
+        setCaptchaInput('');
+        setSessionId(null);
+        moveToNextSemester(enrollment, liveSem);
+      } else {
+        setSemStatus(prev => ({ ...prev, [liveSem]: 'error' }));
+        setCaptchaImg(null);
+        moveToNextSemester(enrollment, liveSem);
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+      setSemStatus(prev => ({ ...prev, [liveSem]: 'error' }));
+    }
+  };
+
+  const moveToNextSemester = (enrollment, currentSem) => {
+    const allSems = [1, 2, 3, 4, 5, 6];
+    const nextIdx = allSems.indexOf(currentSem) + 1;
+    
+    if (nextIdx < allSems.length) {
+      // Continue to next semester
+      startLiveFetch(enrollment, allSems[nextIdx]);
+    } else {
+      // All semesters checked — build the profile
+      finalizeLiveProfile();
+    }
+  };
+
+  const finalizeLiveProfile = useCallback(() => {
+    setLiveFetching(false);
+    setCaptchaImg(null);
+    
+    // Use the latest state via the setter
+    setLiveResults(currentResults => {
+      if (currentResults.length === 0) {
+        setError('No results found for this enrollment number on the RGPV portal.');
+        return currentResults;
+      }
+      
+      setLiveStudent(currentStudent => {
+        const profileData = buildProfileFromResults(currentStudent || {}, currentResults);
+        setProfile(profileData);
+        return currentStudent;
+      });
+      
+      return currentResults;
+    });
+  }, []);
+
+  const skipSemester = () => {
+    const enrollment = query.trim().toUpperCase();
+    setSemStatus(prev => ({ ...prev, [liveSem]: 'skipped' }));
+    setCaptchaImg(null);
+    setCaptchaInput('');
+    setSessionId(null);
+    moveToNextSemester(enrollment, liveSem);
+  };
+
+  const finishEarly = () => {
+    finalizeLiveProfile();
+  };
 
   const toggleSemester = (sem) => {
     setExpandedSems(prev => ({ ...prev, [sem]: !prev[sem] }));
@@ -122,22 +279,92 @@ export default function StudentAcademicProfile() {
               onChange={e => setQuery(e.target.value.toUpperCase())}
               placeholder="e.g. 0101CS221001"
               className="apx-input"
-              disabled={loading}
+              disabled={loading || liveFetching}
               maxLength={20}
               autoFocus
             />
-            <button type="submit" className="apx-btn-search" disabled={loading || !query.trim()}>
+            <button type="submit" className="apx-btn-search" disabled={loading || liveFetching || !query.trim()}>
               {loading ? <span className="apx-spinner" /> : 'SEARCH'}
             </button>
           </div>
           {loading && (
             <div className="apx-progress">
               <div className="apx-progress-bar" style={{ width: `${(progress.current / progress.total) * 100}%` }} />
-              <span>Checking semester {progress.current} of {progress.total}...</span>
+              <span>{progress.phase || `Checking semester ${progress.current} of ${progress.total}...`}</span>
             </div>
           )}
         </form>
       </motion.div>
+
+      {/* Live Fetch UI with CAPTCHA */}
+      <AnimatePresence>
+        {liveFetching && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="apx-live-panel">
+            <div className="apx-card">
+              <div className="apx-card-pill">🔍 Fetching Results from RGPV Portal</div>
+              
+              {/* Progress indicators for each semester */}
+              <div className="apx-live-progress">
+                {[1,2,3,4,5,6].map(sem => (
+                  <div key={sem} className={`apx-live-sem ${semStatus[sem] || 'pending'}`}>
+                    <div className="apx-live-sem-label">Sem {ROMAN[sem]}</div>
+                    <div className="apx-live-sem-icon">
+                      {semStatus[sem] === 'fetching' && <span className="apx-spinner-sm" />}
+                      {semStatus[sem] === 'done' && '✅'}
+                      {semStatus[sem] === 'empty' && '—'}
+                      {semStatus[sem] === 'error' && '❌'}
+                      {semStatus[sem] === 'skipped' && '⏭'}
+                      {semStatus[sem] === 'captcha' && '🔐'}
+                      {!semStatus[sem] && '⏳'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CAPTCHA Section */}
+              {captchaImg && (
+                <div className="apx-captcha-section">
+                  <div className="apx-captcha-header">
+                    <span>Solve CAPTCHA for Semester {ROMAN[liveSem] || liveSem}</span>
+                  </div>
+                  <div className="apx-captcha-body">
+                    <img src={captchaImg} alt="CAPTCHA" className="apx-captcha-img" />
+                    <form onSubmit={handleCaptchaSubmit} className="apx-captcha-form">
+                      <input
+                        ref={captchaRef}
+                        type="text"
+                        value={captchaInput}
+                        onChange={e => setCaptchaInput(e.target.value)}
+                        placeholder="Enter text shown in image"
+                        className="apx-input apx-captcha-input"
+                        autoFocus
+                      />
+                      <div className="apx-captcha-actions">
+                        <button type="submit" className="apx-btn-search" disabled={!captchaInput.trim()}>
+                          SUBMIT
+                        </button>
+                        <button type="button" className="apx-btn-skip" onClick={skipSemester}>
+                          SKIP THIS SEM
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* Finish early button */}
+              {liveResults.length > 0 && (
+                <div className="apx-finish-section">
+                  <p>{liveResults.length} semester(s) fetched so far.</p>
+                  <button className="apx-btn-finish" onClick={finishEarly}>
+                    📊 Generate Profile with Current Data
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Error */}
       <AnimatePresence>
@@ -403,6 +630,35 @@ function ProfileStyles() {
       .apx-error { max-width: 900px; margin: 0 auto 1.5rem; padding: 0 var(--container-px); position: relative; z-index: 10; }
       .apx-error { background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.25); border-radius: 1.5rem; padding: 1.25rem 1.75rem; color: #fb7185; font-weight: 700; max-width: 860px; }
       
+      /* Live Fetch Panel */
+      .apx-live-panel { max-width: 900px; margin: 0 auto 1.5rem; padding: 0 var(--container-px); position: relative; z-index: 10; }
+      .apx-live-progress { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem; }
+      .apx-live-sem { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 1rem; padding: 0.75rem 1.25rem; text-align: center; flex: 1; min-width: 80px; transition: 0.3s; }
+      .apx-live-sem.fetching { border-color: var(--accent-blue); background: rgba(59,130,246,0.1); }
+      .apx-live-sem.done { border-color: #10b981; background: rgba(16,185,129,0.1); }
+      .apx-live-sem.captcha { border-color: #f59e0b; background: rgba(245,158,11,0.1); }
+      .apx-live-sem.error { border-color: #f43f5e; background: rgba(244,63,94,0.1); }
+      .apx-live-sem-label { font-size: 0.7rem; font-weight: 900; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 0.35rem; }
+      .apx-live-sem-icon { font-size: 1.1rem; }
+      .apx-spinner-sm { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(59,130,246,0.2); border-top-color: var(--accent-blue); border-radius: 50%; animation: apx-spin 0.7s linear infinite; }
+      
+      /* CAPTCHA Section */
+      .apx-captcha-section { background: var(--bg-secondary); border: 1px solid rgba(245,158,11,0.3); border-radius: 1.5rem; padding: 1.75rem; margin-top: 0.5rem; }
+      .apx-captcha-header { font-size: 0.85rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 1.25rem; }
+      .apx-captcha-body { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
+      .apx-captcha-img { border-radius: 0.75rem; border: 2px solid var(--border); max-width: 250px; background: #fff; }
+      .apx-captcha-form { width: 100%; max-width: 400px; }
+      .apx-captcha-input { width: 100%; margin-bottom: 1rem; text-align: center; font-size: 1.1rem; letter-spacing: 3px; }
+      .apx-captcha-actions { display: flex; gap: 0.75rem; justify-content: center; }
+      .apx-btn-skip { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 1rem; padding: 0.85rem 1.5rem; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: 0.3s; }
+      .apx-btn-skip:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
+
+      /* Finish Early */
+      .apx-finish-section { text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+      .apx-finish-section p { color: var(--text-muted); font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; }
+      .apx-btn-finish { background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 1rem; padding: 0.85rem 2rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
+      .apx-btn-finish:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.4); }
+
       .apx-results { max-width: 900px; margin: 0 auto; padding: 0 var(--container-px) 6rem; position: relative; z-index: 10; display: flex; flex-direction: column; gap: 1.5rem; }
       
       .apx-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 2rem; padding: clamp(1.5rem, 4vw, 2.5rem); }

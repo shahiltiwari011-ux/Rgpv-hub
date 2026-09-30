@@ -305,7 +305,7 @@ app.post('/api/result', async (req, res) => {
                     semester: sem,
                     result_data: resultData,
                     updated_at: new Date()
-                });
+                }, { onConflict: 'enrollment,semester' });
             } catch (e) {
                 // Non-critical — don't fail the request if cache fails
                 console.warn('Cache write failed:', e.message);

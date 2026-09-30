@@ -17,7 +17,23 @@ async function getCachedSemesterResult(enrollment, semester) {
       .eq('semester', String(semester))
       .maybeSingle();
 
-    if (error || !data) return null;
+    if (error || !data) {
+      // Fallback: try old schema (no semester column)
+      const { data: fallback } = await supabase
+        .from('results_cache')
+        .select('result_data, updated_at')
+        .ilike('enrollment', enrollment)
+        .limit(1)
+        .maybeSingle();
+
+      if (fallback?.result_data) {
+        const rd = fallback.result_data;
+        if (String(rd.semester) === String(semester)) {
+          return { ...rd, _cachedAt: fallback.updated_at };
+        }
+      }
+      return null;
+    }
 
     const rd = data.result_data;
     if (rd) {
@@ -31,7 +47,6 @@ async function getCachedSemesterResult(enrollment, semester) {
 
 /**
  * Search for a student in the profiles table by enrollment number.
- * Only queries the specific enrollment — never fetches all students.
  */
 export async function findStudentByEnrollment(enrollment) {
   if (!enrollment || !enrollment.trim()) {
@@ -40,46 +55,45 @@ export async function findStudentByEnrollment(enrollment) {
 
   const normalized = enrollment.trim().toUpperCase();
 
-  // Validate format: must be alphanumeric, 8-15 chars
   if (!/^[A-Z0-9]{6,20}$/.test(normalized)) {
     throw new Error('Invalid enrollment number format');
   }
 
   if (!isSupabaseReady()) {
-    throw new Error('Database not available');
+    // Return null instead of throwing — we can still try scraping
+    return null;
   }
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, name, email, roll_number, branch, semester, department, college, created_at, role')
-    .eq('roll_number', normalized)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Profile search error:", error);
-    // Don't throw here, just treat it as not found in profiles table
-    // because they might only exist in results_cache
+  let data = null;
+  try {
+    const result = await supabase
+      .from('profiles')
+      .select('id, name, email, roll_number, branch, semester, department, college, created_at, role')
+      .eq('roll_number', normalized)
+      .maybeSingle();
+    data = result.data;
+  } catch (e) {
+    console.warn("Profile search error:", e);
   }
 
   // Also check the results_cache for student info from RGPV data
-  const { data: cacheData, error: cacheError } = await supabase
-    .from('results_cache')
-    .select('result_data, updated_at, enrollment')
-    .ilike('enrollment', normalized)
-    .limit(1)
-    .maybeSingle();
-
-  console.log("CACHE DATA FOR ENROLLMENT", normalized, ":", cacheData);
-
-  if (cacheError) {
-    console.error("Cache search error:", cacheError);
+  let cacheData = null;
+  try {
+    const result = await supabase
+      .from('results_cache')
+      .select('result_data, updated_at, enrollment')
+      .ilike('enrollment', normalized)
+      .limit(1)
+      .maybeSingle();
+    cacheData = result.data;
+  } catch (e) {
+    console.warn("Cache search error:", e);
   }
 
   if (!data && !cacheData) {
     return null;
   }
 
-  // Merge: profile data takes precedence; result_data fills gaps
   const rgpvInfo = cacheData?.result_data || {};
 
   return {
@@ -98,12 +112,9 @@ export async function findStudentByEnrollment(enrollment) {
 }
 
 /**
- * Primary service: builds a complete Academic Profile for a student.
- * Uses the existing result scraping backend + results_cache as the single source of truth.
- * 
- * @param {string} enrollment - Student enrollment number
- * @param {Function} onProgress - Optional callback (semester, total) for progress updates
- * @returns {AcademicProfile}
+ * Phase 1: Build an academic profile from CACHED data only (no live scraping).
+ * Returns whatever is available in the cache. If nothing is cached, returns found:false.
+ * Also returns missingSemesters so the UI can drive live fetching.
  */
 export async function getStudentAcademicProfile(enrollment, onProgress = null) {
   const normalized = enrollment.trim().toUpperCase();
@@ -111,98 +122,136 @@ export async function getStudentAcademicProfile(enrollment, onProgress = null) {
   // 1. Find student from DB or Cache
   let student = await findStudentByEnrollment(normalized);
   
-  // If not found in our DB, we'll construct a basic one later from the RGPV scrape
   if (!student) {
     student = {
       id: null,
-      name: 'Fetching...',
+      name: null,
       email: null,
       rollNumber: normalized,
-      branch: 'Fetching...',
+      branch: null,
       semester: null,
       department: null,
-      college: 'Fetching...',
+      college: 'RGPV',
       joinedAt: null,
       _fromCache: false,
       _lastResultAt: null,
     };
   }
 
-  // 2. Fetch semester results — first check cache, then scrape
+  // 2. Check cache for each semester
   const semesterResults = [];
-  let checkedSemesters = 0;
-  let apiErrors = 0;
-  let scrapeAttempts = 0;
+  const missingSemesters = [];
 
   for (const sem of SEMESTERS) {
-    // Try the cache first (set by backend on each result check)
     const cached = await getCachedSemesterResult(normalized, sem);
-
     if (cached) {
       semesterResults.push(normalizeSemesterResult(cached, sem));
-      checkedSemesters++;
-      if (onProgress) onProgress(sem, SEMESTERS.length);
-      continue;
+    } else {
+      missingSemesters.push(sem);
     }
-
-    // No cache — try live scrape (no captcha on first attempt)
-    try {
-      scrapeAttempts++;
-      const data = await fetchProxyResult(normalized, String(sem));
-      if (data.success && data.data) {
-        semesterResults.push(normalizeSemesterResult(data.data, sem));
-        checkedSemesters++;
-      }
-    } catch (e) {
-      apiErrors++;
-    }
-
     if (onProgress) onProgress(sem, SEMESTERS.length);
   }
 
-  // If we attempted to scrape and ALL attempts threw an exception, the portal is likely down
-  if (scrapeAttempts > 0 && apiErrors === scrapeAttempts && semesterResults.length === 0) {
-    throw new Error('RGPV portal is down');
-  }
-
-  // 3. Sort by semester ascending
   semesterResults.sort((a, b) => a.semester - b.semester);
 
   if (semesterResults.length === 0) {
-    if (student.name === 'Fetching...') {
-      return { found: false, student: null };
-    }
+    // Nothing cached — need live fetch
     return {
-      found: true,
+      found: false,
       student,
-      noResults: true,
+      needsLiveFetch: true,
+      missingSemesters,
       semesterResults: [],
       academicSummary: null,
       backlogDetails: [],
     };
   }
 
-  // 4. Compute Academic Summary from fetched results
-  const lastResult = semesterResults[semesterResults.length - 1];
-  const academicSummary = computeAcademicSummary(semesterResults, lastResult);
-
-  if (student.name === 'Fetching...') {
+  // Update student info from results if missing
+  if (!student.name || student.name === 'Unknown') {
+    const lastResult = semesterResults[semesterResults.length - 1];
     student.name = lastResult._rawName || 'Unknown';
-    student.branch = lastResult._rawBranch || 'Unknown';
+    student.branch = lastResult._rawBranch || student.branch || 'N/A';
   }
 
-  // 5. Extract backlog details
+  const lastResult = semesterResults[semesterResults.length - 1];
+  const academicSummary = computeAcademicSummary(semesterResults, lastResult);
   const backlogDetails = extractBacklogDetails(semesterResults);
 
   return {
     found: true,
     student: {
       ...student,
-      // Override semester with the highest completed semester from results
       currentSemester: lastResult.semester,
     },
     academicSummary,
     semesterResults,
+    backlogDetails,
+    missingSemesters,
+    _fetchedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Phase 2: Live-fetch a single semester via the backend proxy.
+ * This is called by the UI one semester at a time, handling CAPTCHA interactively.
+ * 
+ * @param {string} enrollment 
+ * @param {string} semester 
+ * @param {string} captcha - The captcha text (empty on first call)
+ * @param {string} sessionId - Session ID from previous captcha_required response
+ * @returns {object} - { success, data, type, captchaImg, sessionId }
+ */
+export async function fetchSemesterLive(enrollment, semester, captcha = '', sessionId = null) {
+  const normalized = enrollment.trim().toUpperCase();
+  const data = await fetchProxyResult(normalized, String(semester), captcha, sessionId);
+  
+  if (data.success && data.data) {
+    return {
+      success: true,
+      result: normalizeSemesterResult(data.data, semester),
+    };
+  }
+  
+  // Pass through captcha_required, not_found, etc
+  return data;
+}
+
+/**
+ * Build the academic summary from an array of semester results.
+ * Can be called from the UI after accumulating results.
+ */
+export function buildProfileFromResults(student, semesterResults) {
+  if (!semesterResults || semesterResults.length === 0) {
+    return {
+      found: false,
+      student,
+      semesterResults: [],
+      academicSummary: null,
+      backlogDetails: [],
+    };
+  }
+
+  const sorted = [...semesterResults].sort((a, b) => a.semester - b.semester);
+  const lastResult = sorted[sorted.length - 1];
+
+  // Update student info from results
+  if (!student.name || student.name === 'Unknown') {
+    student.name = lastResult._rawName || 'Unknown';
+    student.branch = lastResult._rawBranch || student.branch || 'N/A';
+  }
+
+  const academicSummary = computeAcademicSummary(sorted, lastResult);
+  const backlogDetails = extractBacklogDetails(sorted);
+
+  return {
+    found: true,
+    student: {
+      ...student,
+      currentSemester: lastResult.semester,
+    },
+    academicSummary,
+    semesterResults: sorted,
     backlogDetails,
     _fetchedAt: new Date().toISOString(),
   };
@@ -243,7 +292,7 @@ function normalizeSemesterResult(raw, semester) {
 }
 
 /**
- * A grade is a backlog if earned credit < total credit OR grade is F/AB/EX/W
+ * A grade is a backlog if grade is F/AB/EX/W
  */
 function isBacklogGrade(grade) {
   if (!grade) return false;
@@ -259,16 +308,6 @@ function computeAcademicSummary(semesterResults, lastResult) {
   const latestCGPA = lastResult?.cgpa ?? null;
   const latestSGPA = lastResult?.sgpa ?? null;
 
-  // Count backlogs across all semesters
-  const allBacklogSubjects = semesterResults.flatMap(r =>
-    r.subjects.filter(s => s.isBacklog).map(s => ({
-      ...s,
-      semester: r.semester,
-    }))
-  );
-
-  // Count cleared backlogs: a subject that appeared as backlog in earlier sem 
-  // but passed in a later sem (by code matching)
   const seenBacklogs = new Map();
   const clearedBacklogs = [];
   const activeBacklogs = [];
@@ -276,12 +315,10 @@ function computeAcademicSummary(semesterResults, lastResult) {
   for (const result of semesterResults) {
     for (const subject of result.subjects) {
       if (subject.isBacklog) {
-        // Mark as backlog in this semester
         if (!seenBacklogs.has(subject.code)) {
           seenBacklogs.set(subject.code, { ...subject, semester: result.semester });
         }
       } else {
-        // Passed — check if it was previously a backlog
         if (seenBacklogs.has(subject.code)) {
           const backlogEntry = seenBacklogs.get(subject.code);
           clearedBacklogs.push({
@@ -294,7 +331,6 @@ function computeAcademicSummary(semesterResults, lastResult) {
     }
   }
 
-  // Whatever remains in seenBacklogs is still active
   for (const [, backlog] of seenBacklogs.entries()) {
     activeBacklogs.push(backlog);
   }
@@ -311,7 +347,7 @@ function computeAcademicSummary(semesterResults, lastResult) {
 }
 
 /**
- * Extract backlog details across all semesters for the detailed view.
+ * Extract backlog details across all semesters.
  */
 function extractBacklogDetails(semesterResults) {
   const seenBacklogs = new Map();
