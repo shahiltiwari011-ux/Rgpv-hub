@@ -53,10 +53,14 @@ export async function findStudentByEnrollment(enrollment) {
   const { data, error } = await supabase
     .from('profiles')
     .select('id, name, email, roll_number, branch, semester, department, college, created_at, role')
-    .or(`roll_number.eq.${normalized},email.ilike.%${normalized}%`)
+    .eq('roll_number', normalized)
     .maybeSingle();
 
-  if (error) throw new Error('Failed to search student');
+  if (error) {
+    console.error("Profile search error:", error);
+    // Don't throw here, just treat it as not found in profiles table
+    // because they might only exist in results_cache
+  }
 
   // Also check the results_cache for student info from RGPV data
   const { data: cacheData } = await supabase
@@ -98,15 +102,31 @@ export async function findStudentByEnrollment(enrollment) {
 export async function getStudentAcademicProfile(enrollment, onProgress = null) {
   const normalized = enrollment.trim().toUpperCase();
 
-  // 1. Find student
-  const student = await findStudentByEnrollment(normalized);
+  // 1. Find student from DB or Cache
+  let student = await findStudentByEnrollment(normalized);
+  
+  // If not found in our DB, we'll construct a basic one later from the RGPV scrape
   if (!student) {
-    return { found: false, student: null };
+    student = {
+      id: null,
+      name: 'Fetching...',
+      email: null,
+      rollNumber: normalized,
+      branch: 'Fetching...',
+      semester: null,
+      department: null,
+      college: 'Fetching...',
+      joinedAt: null,
+      _fromCache: false,
+      _lastResultAt: null,
+    };
   }
 
   // 2. Fetch semester results — first check cache, then scrape
   const semesterResults = [];
   let checkedSemesters = 0;
+  let apiErrors = 0;
+  let scrapeAttempts = 0;
 
   for (const sem of SEMESTERS) {
     // Try the cache first (set by backend on each result check)
@@ -121,23 +141,31 @@ export async function getStudentAcademicProfile(enrollment, onProgress = null) {
 
     // No cache — try live scrape (no captcha on first attempt)
     try {
+      scrapeAttempts++;
       const data = await fetchProxyResult(normalized, String(sem));
       if (data.success && data.data) {
         semesterResults.push(normalizeSemesterResult(data.data, sem));
         checkedSemesters++;
       }
-      // If captcha required or not found, just skip this semester silently
-    } catch {
-      // Network error for this semester — skip
+    } catch (e) {
+      apiErrors++;
     }
 
     if (onProgress) onProgress(sem, SEMESTERS.length);
+  }
+
+  // If we attempted to scrape and ALL attempts threw an exception, the portal is likely down
+  if (scrapeAttempts > 0 && apiErrors === scrapeAttempts && semesterResults.length === 0) {
+    throw new Error('RGPV portal is down');
   }
 
   // 3. Sort by semester ascending
   semesterResults.sort((a, b) => a.semester - b.semester);
 
   if (semesterResults.length === 0) {
+    if (student.name === 'Fetching...') {
+      return { found: false, student: null };
+    }
     return {
       found: true,
       student,
@@ -151,6 +179,11 @@ export async function getStudentAcademicProfile(enrollment, onProgress = null) {
   // 4. Compute Academic Summary from fetched results
   const lastResult = semesterResults[semesterResults.length - 1];
   const academicSummary = computeAcademicSummary(semesterResults, lastResult);
+
+  if (student.name === 'Fetching...') {
+    student.name = lastResult._rawName || 'Unknown';
+    student.branch = lastResult._rawBranch || 'Unknown';
+  }
 
   // 5. Extract backlog details
   const backlogDetails = extractBacklogDetails(semesterResults);
@@ -196,6 +229,8 @@ function normalizeSemesterResult(raw, semester) {
     isPass,
     backlogs,
     subjects,
+    _rawName: raw.name || null,
+    _rawBranch: raw.branch || null,
     _cachedAt: raw._cachedAt || null,
     _timestamp: raw.timestamp || null,
   };
