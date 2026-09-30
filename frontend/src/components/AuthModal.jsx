@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 
 export default function AuthModal({ isOpen, onClose }) {
-  const { login, signup } = useAuth();
+  const { login, signup, resetPassword } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,26 +15,49 @@ export default function AuthModal({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error('Please enter both email and password');
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    if (!isForgotPassword && !password) {
+      toast.error('Please enter your password');
       return;
     }
 
     setLoading(true);
     try {
-      if (isSignUp) {
+      if (isForgotPassword) {
+        await resetPassword(email);
+        toast.success('Password reset link sent to your email!');
+        setIsForgotPassword(false);
+      } else if (isSignUp) {
         await signup(email, password);
         toast.success('Account created successfully!');
+        onClose();
       } else {
         await login(email, password);
         toast.success('Signed in successfully!');
+        onClose();
       }
-      onClose();
     } catch (err) {
       console.error('Auth error:', err);
       toast.error(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleModeSwitch = (mode) => {
+    if (mode === 'forgot') {
+      setIsForgotPassword(true);
+      setIsSignUp(false);
+    } else if (mode === 'signup') {
+      setIsSignUp(true);
+      setIsForgotPassword(false);
+    } else {
+      setIsSignUp(false);
+      setIsForgotPassword(false);
     }
   };
 
@@ -53,9 +77,23 @@ export default function AuthModal({ isOpen, onClose }) {
           </button>
 
           <div className="auth-header">
-            <div className="auth-logo-badge">🔑</div>
-            <h2>{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
-            <p>{isSignUp ? 'Sign up to get full access to study hub features' : 'Enter your credentials to access your account'}</p>
+            <div className="auth-logo-badge">
+              {isForgotPassword ? '📩' : isSignUp ? '🔑' : '👤'}
+            </div>
+            <h2>
+              {isForgotPassword 
+                ? 'Reset Password' 
+                : isSignUp 
+                ? 'Create Account' 
+                : 'Welcome Back'}
+            </h2>
+            <p>
+              {isForgotPassword
+                ? 'Enter your email address to receive a password reset link'
+                : isSignUp
+                ? 'Sign up to get full access to study hub features'
+                : 'Enter your credentials to access your account'}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
@@ -72,21 +110,36 @@ export default function AuthModal({ isOpen, onClose }) {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="auth-password">Password</label>
-              <input 
-                id="auth-password"
-                type="password" 
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            {!isForgotPassword && (
+              <div className="form-group">
+                <div className="label-row">
+                  <label htmlFor="auth-password">Password</label>
+                  {!isSignUp && (
+                    <button 
+                      type="button" 
+                      className="forgot-pass-link"
+                      onClick={() => handleModeSwitch('forgot')}
+                    >
+                      Forgot Password?
+                    </button>
+                  )}
+                </div>
+                <input 
+                  id="auth-password"
+                  type="password" 
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required={!isForgotPassword}
+                />
+              </div>
+            )}
 
             <button type="submit" className="auth-submit-btn" disabled={loading}>
               {loading ? (
                 <span className="btn-spinner"></span>
+              ) : isForgotPassword ? (
+                'Send Reset Link'
               ) : isSignUp ? (
                 'Create Account'
               ) : (
@@ -96,16 +149,29 @@ export default function AuthModal({ isOpen, onClose }) {
           </form>
 
           <div className="auth-footer">
-            <p>
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <button 
-                type="button" 
-                className="auth-switch-btn"
-                onClick={() => setIsSignUp(!isSignUp)}
-              >
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-              </button>
-            </p>
+            {isForgotPassword ? (
+              <p>
+                Remembered your password?{' '}
+                <button 
+                  type="button" 
+                  className="auth-switch-btn"
+                  onClick={() => handleModeSwitch('signin')}
+                >
+                  Sign In
+                </button>
+              </p>
+            ) : (
+              <p>
+                {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+                <button 
+                  type="button" 
+                  className="auth-switch-btn"
+                  onClick={() => handleModeSwitch(isSignUp ? 'signin' : 'signup')}
+                >
+                  {isSignUp ? 'Sign In' : 'Sign Up'}
+                </button>
+              </p>
+            )}
           </div>
         </motion.div>
 
@@ -201,12 +267,34 @@ export default function AuthModal({ isOpen, onClose }) {
             gap: 0.4rem;
           }
 
+          .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
           .form-group label {
             font-size: 0.8rem;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+          }
+
+          .forgot-pass-link {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0;
+            transition: 0.2s;
+          }
+
+          .forgot-pass-link:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
           }
 
           .form-group input {

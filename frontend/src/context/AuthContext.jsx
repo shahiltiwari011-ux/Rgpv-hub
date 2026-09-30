@@ -332,6 +332,18 @@ export function AuthProvider ({ children }) {
     }
   }
 
+  const resetPassword = async (email) => {
+    if (!isSupabaseReady() || !isConnected) {
+      console.warn('Supabase offline: Simulating password reset link')
+      return { message: 'Password reset link sent (Demo Mode)' }
+    }
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/`
+    })
+    if (error) throw error
+    return data
+  }
+
   const ADMIN_EMAILS = [
     'shahiltiwari011@gmail.com',
     ...(import.meta.env.VITE_ADMIN_EMAILS?.split(',') || [])
@@ -345,6 +357,7 @@ export function AuthProvider ({ children }) {
     login,
     signup,
     logout,
+    resetPassword,
     // DERIVED STATE: Admin if role is 'admin' OR if email is in the whitelist
     isAdmin: role === 'admin' || (user && ADMIN_EMAILS.includes(user.email?.toLowerCase())),
     isConnected,
