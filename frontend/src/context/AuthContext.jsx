@@ -56,17 +56,38 @@ export function AuthProvider ({ children }) {
     }
 
     try {
+      // Primary: fetch by id (Supabase auth UUID)
       const { data } = await fetchWithTimeout(
         supabase
           .from('profiles')
-          .select('role, last_active, xp, level, streak_days, badges')
+          .select('role, last_active, xp, level, streak_days, badges, email')
           .eq('id', userId)
           .maybeSingle()
           .throwOnError(),
         3000
       )
 
-      const finalRole = resolveUserRole(effectiveEmail, data?.role);
+      let dbRole = data?.role;
+
+      // Fallback: if no row found or role is still 'student', try fetching by email
+      // (handles case where admin updated profile by email, not by the local UUID)
+      if ((!dbRole || dbRole === 'student') && effectiveEmail) {
+        try {
+          const { data: emailData } = await fetchWithTimeout(
+            supabase
+              .from('profiles')
+              .select('role')
+              .eq('email', effectiveEmail.toLowerCase())
+              .maybeSingle(),
+            2000
+          );
+          if (emailData?.role && emailData.role !== 'student') {
+            dbRole = emailData.role;
+          }
+        } catch {}
+      }
+
+      const finalRole = resolveUserRole(effectiveEmail, dbRole);
 
       const p = {
         role: finalRole,
@@ -78,6 +99,13 @@ export function AuthProvider ({ children }) {
       }
       setProfile(p)
       setRole(finalRole)
+
+      // Persist resolved role so mobile keeps it on next refresh
+      try {
+        const existingLocal = JSON.parse(localStorage.getItem('local_profile') || '{}');
+        localStorage.setItem('local_profile', JSON.stringify({ ...existingLocal, ...p }));
+      } catch {}
+
       return p
     } catch (err) {
       console.warn('Profile fetch notice (Using role fallback):', err.message)
@@ -87,6 +115,7 @@ export function AuthProvider ({ children }) {
       setRole(role);
       return p;
     }
+
   }
 
   // Guarded XP reward (Daily Check-in)

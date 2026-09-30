@@ -69,10 +69,10 @@ export default function Navbar() {
 
           {user || isAdmin ? (
             <div className="user-group">
-              {role === 'tpo' && (
+              {(role === 'tpo' || isAdmin) && (
                 <Link to="/tpo" className="role-btn desktop-only">TPO PORTAL</Link>
               )}
-              {role === 'teacher' && (
+              {(role === 'teacher' || isAdmin) && (
                 <Link to="/teacher" className="role-btn desktop-only">FACULTY</Link>
               )}
               {isAdmin && (
@@ -132,12 +132,12 @@ export default function Navbar() {
             {/* Role-specific navigation links for mobile */}
             {(user || isAdmin) && (
               <div className="mobile-role-section">
-                {role === 'tpo' && (
+                {(role === 'tpo' || isAdmin) && (
                   <Link to="/tpo" className="mobile-role-link tpo" onClick={() => setMobileOpen(false)}>
                     <span>💼</span> TPO Portal
                   </Link>
                 )}
-                {role === 'teacher' && (
+                {(role === 'teacher' || isAdmin) && (
                   <Link to="/teacher" className="mobile-role-link teacher" onClick={() => setMobileOpen(false)}>
                     <span>👨‍🏫</span> Faculty Dashboard
                   </Link>
