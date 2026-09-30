@@ -61,18 +61,18 @@ export default function App () {
             <Route path='/placement/experiences' element={<StudentPlacementExperiences />} />
 
             {/* Teacher Routes */}
-            <Route path='/teacher' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherDashboard /></ProtectedRoute>} />
-            <Route path='/teacher/upload' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherUpload /></ProtectedRoute>} />
-            <Route path='/teacher/academic-profile' element={<ProtectedRoute allowedRoles={['teacher', 'tpo']}><StudentAcademicProfile /></ProtectedRoute>} />
+            <Route path='/teacher' element={<ProtectedRoute allowedRoles={['teacher', 'admin']}><TeacherDashboard /></ProtectedRoute>} />
+            <Route path='/teacher/upload' element={<ProtectedRoute allowedRoles={['teacher', 'admin']}><TeacherUpload /></ProtectedRoute>} />
+            <Route path='/teacher/academic-profile' element={<ProtectedRoute allowedRoles={['teacher', 'tpo', 'admin']}><StudentAcademicProfile /></ProtectedRoute>} />
 
             {/* TPO Routes */}
-            <Route path='/tpo' element={<ProtectedRoute allowedRoles={['tpo']}><TPODashboard /></ProtectedRoute>} />
-            <Route path='/tpo/companies' element={<ProtectedRoute allowedRoles={['tpo']}><TPOCompanies /></ProtectedRoute>} />
-            <Route path='/tpo/drives' element={<ProtectedRoute allowedRoles={['tpo']}><TPODrives /></ProtectedRoute>} />
-            <Route path='/tpo/notices' element={<ProtectedRoute allowedRoles={['tpo']}><TPONotices /></ProtectedRoute>} />
-            <Route path='/tpo/resources' element={<ProtectedRoute allowedRoles={['tpo']}><TPOResources /></ProtectedRoute>} />
-            <Route path='/tpo/packages' element={<ProtectedRoute allowedRoles={['tpo']}><TPOPackages /></ProtectedRoute>} />
-            <Route path='/tpo/experiences' element={<ProtectedRoute allowedRoles={['tpo']}><TPOExperiences /></ProtectedRoute>} />
+            <Route path='/tpo' element={<ProtectedRoute allowedRoles={['tpo', 'admin']}><TPODashboard /></ProtectedRoute>} />
+            <Route path='/tpo/companies' element={<ProtectedRoute allowedRoles={['tpo', 'admin']}><TPOCompanies /></ProtectedRoute>} />
+            <Route path='/tpo/drives' element={<ProtectedRoute allowedRoles={['tpo', 'admin']}><TPODrives /></ProtectedRoute>} />
+            <Route path='/tpo/notices' element={<ProtectedRoute allowedRoles={['tpo', 'admin']}><TPONotices /></ProtectedRoute>} />
+            <Route path='/tpo/resources' element={<ProtectedRoute allowedRoles={['tpo', 'admin']}><TPOResources /></ProtectedRoute>} />
+            <Route path='/tpo/packages' element={<ProtectedRoute allowedRoles={['tpo', 'admin']}><TPOPackages /></ProtectedRoute>} />
+            <Route path='/tpo/experiences' element={<ProtectedRoute allowedRoles={['tpo', 'admin']}><TPOExperiences /></ProtectedRoute>} />
 
             <Route path='/login' element={<Navigate to='/' replace />} />
             <Route path='/auth' element={<Navigate to='/' replace />} />
