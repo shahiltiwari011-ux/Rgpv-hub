@@ -295,6 +295,12 @@ app.post('/api/result', async (req, res) => {
             return res.json({ success: false, type: 'not_found' });
         }
 
+        // Fallback for name/branch if table extraction missed them
+        if (!studentInfo.name) {
+            const nameMatch = postResponse.data.match(/Name[:\s\t]+([A-Za-z\s]+)/i);
+            if (nameMatch) studentInfo.name = nameMatch[1].trim();
+        }
+
         const resultData = { ...studentInfo, semester: sem, subjects, summary, timestamp: new Date().toISOString() };
         sessionStore.delete(currentSessionId);
 
