@@ -129,6 +129,32 @@ export default function Navbar() {
                 {dark ? '🌙 Dark' : '☀️ Light'}
               </button>
             </div>
+            {/* Role-specific navigation links for mobile */}
+            {(user || isAdmin) && (
+              <div className="mobile-role-section">
+                {role === 'tpo' && (
+                  <Link to="/tpo" className="mobile-role-link tpo" onClick={() => setMobileOpen(false)}>
+                    <span>💼</span> TPO Portal
+                  </Link>
+                )}
+                {role === 'teacher' && (
+                  <Link to="/teacher" className="mobile-role-link teacher" onClick={() => setMobileOpen(false)}>
+                    <span>👨‍🏫</span> Faculty Dashboard
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link to="/admin" className="mobile-role-link admin" onClick={() => setMobileOpen(false)}>
+                    <span>🛡️</span> Admin Panel
+                  </Link>
+                )}
+                {user && !isAdmin && role !== 'tpo' && role !== 'teacher' && (
+                  <div className="mobile-user-badge">
+                    <span>🎓</span> Signed in as <strong>{user?.email?.split('@')[0]}</strong>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="mobile-footer">
               {user || isAdmin ? (
                 <button onClick={() => { logout(); setMobileOpen(false); }} className="mobile-logout">SIGN OUT</button>
@@ -229,9 +255,24 @@ export default function Navbar() {
         .mobile-link { display: flex; align-items: center; gap: 1rem; padding: 1.2rem; border-radius: 1.2rem; text-decoration: none; color: var(--text-muted); font-weight: 700; transition: 0.3s; }
         .mobile-link.active { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
         .mobile-footer { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+        /* Hide desktop-only elements on mobile */
+        @media (max-width: 1080px) { .desktop-only { display: none !important; } }
         .mobile-logout, .mobile-login { width: 100%; padding: 1rem; border-radius: 1rem; border: none; font-weight: 900; font-size: 1rem; cursor: pointer; text-align: center; text-decoration: none; display: block; }
         .mobile-logout { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
         .mobile-login { background: var(--text-primary); color: var(--bg-primary); }
+
+        /* Mobile role-specific navigation */
+        .mobile-role-section { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 0.5rem 0; }
+        .mobile-role-link { display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.2rem; border-radius: 1.2rem; text-decoration: none; font-weight: 800; font-size: 1rem; transition: 0.3s; }
+        .mobile-role-link.tpo { background: rgba(59, 130, 246, 0.08); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.2); }
+        .mobile-role-link.tpo:hover { background: rgba(59, 130, 246, 0.15); border-color: var(--accent-blue); }
+        .mobile-role-link.teacher { background: rgba(16, 185, 129, 0.08); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .mobile-role-link.teacher:hover { background: rgba(16, 185, 129, 0.15); border-color: #10b981; }
+        .mobile-role-link.admin { background: rgba(245, 158, 11, 0.08); color: var(--accent-gold); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .mobile-role-link.admin:hover { background: rgba(245, 158, 11, 0.15); border-color: var(--accent-gold); }
+        .mobile-user-badge { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.2rem; border-radius: 1.2rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem; }
+        .mobile-user-badge strong { color: var(--text-primary); }
 
         /* Connectivity Indicator Styles */
         .connectivity-status { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; transition: 0.3s; cursor: help; }
