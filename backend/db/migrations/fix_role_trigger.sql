@@ -21,6 +21,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS tr_prevent_role_escalation ON profiles;
 CREATE TRIGGER tr_prevent_role_escalation
 BEFORE UPDATE ON profiles
 FOR EACH ROW EXECUTE FUNCTION prevent_role_escalation();
