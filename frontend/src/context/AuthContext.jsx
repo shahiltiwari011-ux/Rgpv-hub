@@ -164,64 +164,57 @@ export function AuthProvider ({ children }) {
         const localProfile = JSON.parse(localStorage.getItem('local_profile'))
         
         if (localUser && localProfile) {
-          // Always re-run resolveUserRole to catch roles set by Admin panel
           const resolvedRole = resolveUserRole(localUser.email, localProfile.role);
-          // If role was upgraded, persist it back so next reload is also correct
+          const updatedProfile = { ...localProfile, role: resolvedRole };
           if (resolvedRole !== localProfile.role) {
-            const updatedProfile = { ...localProfile, role: resolvedRole };
             localStorage.setItem('local_profile', JSON.stringify(updatedProfile));
-            setProfile(updatedProfile);
-          } else {
-            setProfile(localProfile);
           }
-          console.log('Resuming local session with role:', resolvedRole)
-          setUser(localUser)
-          setRole(resolvedRole)
-          setLoading(false)
-          // Still try to sync connection in background, then also refresh profile from DB
-          checkSupabaseConnection().then(async (connected) => {
-            setIsConnected(connected);
-            if (connected && isSupabaseReady() && localUser.id && !localUser.id.startsWith('local-')) {
-              // Silently refresh role from DB in background
-              const p = await _fetchProfile(localUser.id, localUser.email).catch(() => null);
+          setProfile(updatedProfile);
+          setUser(localUser);
+          setRole(resolvedRole);
+
+          // If valid Supabase user, fetch latest profile from DB before finishing loading
+          if (isSupabaseReady() && localUser.id && !localUser.id.startsWith('local-')) {
+            try {
+              const p = await _fetchProfile(localUser.id, localUser.email);
               if (p?.role) {
-                localStorage.setItem('local_profile', JSON.stringify({ ...localProfile, role: p.role }));
+                localStorage.setItem('local_profile', JSON.stringify({ ...updatedProfile, ...p, role: p.role }));
               }
+            } catch (pErr) {
+              console.warn('Background profile refresh fallback:', pErr?.message);
             }
-          });
-          return
+          }
+
+          setLoading(false);
+          checkSupabaseConnection().then((connected) => setIsConnected(connected));
+          return;
         }
 
-        const user = await getSafeSession(supabase)
+        const sessionUser = await getSafeSession(supabase);
         
-        if (user) {
-          const session = await getSafeSessionData(supabase)
-          const sessionUser = session?.user || user
-
-          if (sessionUser) {
-            setUser(sessionUser)
-            _subscribeToProfile(sessionUser.id)
-            setLoading(false)
-
-            _fetchProfile(sessionUser.id, sessionUser.email)
-              .then((p) => {
-                void _awardDailyXP(sessionUser.id, p.last_active)
-              })
-              .catch(() => {})
-            return
+        if (sessionUser) {
+          setUser(sessionUser);
+          _subscribeToProfile(sessionUser.id);
+          
+          // Await profile before turning off loading state to prevent flash of wrong role
+          try {
+            const p = await _fetchProfile(sessionUser.id, sessionUser.email);
+            void _awardDailyXP(sessionUser.id, p?.last_active);
+          } catch (pErr) {
+            console.warn('Profile fetch error during init:', pErr?.message);
           }
+          return;
         }
       } catch (err) {
         if (!isAuthLockError(err)) {
-          console.warn('Auth initialization error:', err.message)
+          console.warn('Auth initialization error:', err.message);
         }
       } finally {
-        clearTimeout(failsafe)
-        setLoading(false)
-        // Ensure connectivity check happens even if auth fails
+        clearTimeout(failsafe);
+        setLoading(false);
         checkSupabaseConnection().then((connected) => {
-          setIsConnected(connected)
-        })
+          setIsConnected(connected);
+        });
       }
     }
 
@@ -283,6 +276,29 @@ export function AuthProvider ({ children }) {
       }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Mobile backgrounding/resume session sync listener
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && isSupabaseReady() && isConnected) {
+        try {
+          const sessionUser = await getSafeSession(supabase)
+          if (sessionUser) {
+            setUser(sessionUser)
+            _fetchProfile(sessionUser.id, sessionUser.email).catch(() => {})
+          }
+        } catch {}
+      }
+    }
+
+    window.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleVisibilityChange)
+    }
+  }, [isConnected])
 
   // Auto-reconnect polling: when offline, ping every 30s
   // When connection is restored, re-initialize the auth session
