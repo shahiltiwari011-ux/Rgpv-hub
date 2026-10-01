@@ -11,7 +11,7 @@
 CREATE TABLE IF NOT EXISTS public.profiles (
   id         UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email      TEXT,
-  role       TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+  role       TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin', 'teacher', 'tpo')),
   created_at TIMESTAMPTZ DEFAULT now()
 );
 

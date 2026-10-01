@@ -35,16 +35,16 @@ export default function TeacherUpload() {
     const filePath = `teacher-materials/${user.id}/${fileName}`;
 
     try {
-      // 1. Upload file to Supabase Storage (Assuming 'materials' bucket exists)
+      // 1. Upload file to Supabase Storage ('study-materials' bucket)
       const { error: uploadError } = await supabase.storage
-        .from('materials')
+        .from('study-materials')
         .upload(filePath, formData.file);
 
       if (uploadError) throw uploadError;
 
       // 2. Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('materials')
+        .from('study-materials')
         .getPublicUrl(filePath);
 
       // 3. Insert record into notes table

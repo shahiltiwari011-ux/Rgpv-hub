@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id          UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email       TEXT,
   name        TEXT,
-  role        TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+  role        TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin', 'teacher', 'tpo')),
   xp          INTEGER DEFAULT 0,
   level       INTEGER DEFAULT 1,
   streak_days INTEGER DEFAULT 0,

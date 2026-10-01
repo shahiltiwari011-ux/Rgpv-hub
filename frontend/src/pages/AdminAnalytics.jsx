@@ -48,7 +48,6 @@ export default function AdminAnalytics () {
   }
 
   if (authLoading) return <LoadingSpinner text='Checking permissions…' />
-  if (!user || !isAdmin) return <Navigate to='/' replace />
 
   return (
     <div className="analytics-view">
