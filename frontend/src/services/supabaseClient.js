@@ -37,9 +37,8 @@ if (supabase) {
     }
     
     if (event === 'TOKEN_REFRESHED' && !session) {
-      console.warn('⚠️ Session refresh failed. Clearing local storage to prevent loops.');
+      console.warn('⚠️ Session refresh failed. Clearing local storage.');
       localStorage.removeItem('rgpv_hub_auth_session');
-      window.location.reload();
     }
     
     // If we get an error response indicating invalid key, we should handle it

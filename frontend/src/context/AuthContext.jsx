@@ -245,25 +245,39 @@ export function AuthProvider ({ children }) {
     _initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED' || !session) {
-        setUser(null)
-        setProfile(null)
-        setRole('student')
-        // Remove realtime channel on sign-out
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        localStorage.removeItem('local_user');
+        localStorage.removeItem('local_profile');
+        setUser(null);
+        setProfile(null);
+        setRole('student');
         if (profileChannelRef.current) {
-          supabase.removeChannel(profileChannelRef.current)
-          profileChannelRef.current = null
+          supabase.removeChannel(profileChannelRef.current);
+          profileChannelRef.current = null;
+        }
+      } else if (!session) {
+        // If event is not explicitly SIGNED_OUT, preserve local_user if present
+        const localUser = JSON.parse(localStorage.getItem('local_user') || 'null');
+        const localProfile = JSON.parse(localStorage.getItem('local_profile') || 'null');
+        if (!localUser) {
+          setUser(null);
+          setProfile(null);
+          setRole('student');
+        } else if (localProfile) {
+          setUser(localUser);
+          setProfile(localProfile);
+          setRole(localProfile.role || 'student');
         }
       } else if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-        setUser(session.user)
-        _subscribeToProfile(session.user.id)
+        setUser(session.user);
+        _subscribeToProfile(session.user.id);
         _fetchProfile(session.user.id, session.user.email)
           .then((p) => {
-            void _awardDailyXP(session.user.id, p.last_active)
+            void _awardDailyXP(session.user.id, p.last_active);
           })
-          .catch(() => {})
+          .catch(() => {});
       } else if (session?.user) {
-        setUser(session.user)
+        setUser(session.user);
       }
     })
 
