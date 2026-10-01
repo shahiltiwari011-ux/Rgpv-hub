@@ -20,6 +20,8 @@ const StudentPlacementDrives = lazy(() => import('./pages/StudentPlacementDrives
 const StudentPlacementCompanies = lazy(() => import('./pages/StudentPlacementCompanies'))
 const StudentPlacementPackages = lazy(() => import('./pages/StudentPlacementPackages'))
 const StudentPlacementExperiences = lazy(() => import('./pages/StudentPlacementExperiences'))
+const StudentPlacementNotices = lazy(() => import('./pages/StudentPlacementNotices'))
+const StudentPlacementResources = lazy(() => import('./pages/StudentPlacementResources'))
 const TPODashboard = lazy(() => import('./pages/TPODashboard'))
 const TPOCompanies = lazy(() => import('./pages/TPOCompanies'))
 const TPODrives = lazy(() => import('./pages/TPODrives'))
@@ -59,6 +61,8 @@ export default function App () {
             <Route path='/placement/companies' element={<StudentPlacementCompanies />} />
             <Route path='/placement/packages' element={<StudentPlacementPackages />} />
             <Route path='/placement/experiences' element={<StudentPlacementExperiences />} />
+            <Route path='/placement/notices' element={<StudentPlacementNotices />} />
+            <Route path='/placement/resources' element={<StudentPlacementResources />} />
 
             {/* Teacher Routes */}
             <Route path='/teacher' element={<ProtectedRoute allowedRoles={['teacher', 'admin']}><TeacherDashboard /></ProtectedRoute>} />
