@@ -68,17 +68,15 @@ export async function checkSupabaseConnection() {
     }
 
     // Ping the database
-    const { error } = await supabase.from('resources').select('id', { head: true }).limit(1);
+    const { error } = await supabase.from('profiles').select('id').limit(1);
     
     if (error) {
-      // If the error is "No API key found", it means the anon key was invalid/missing
       if (error.message?.includes('No API key found')) {
         console.error('❌ Supabase Auth Error: No API key found in request headers. Check your VITE_SUPABASE_ANON_KEY.');
         return false;
       }
       
-      // These codes are acceptable for a "connected" state
-      const acceptableCodes = ['PGRST116', '42P01', 'PGRST301'];
+      const acceptableCodes = ['PGRST116', '42P01', 'PGRST301', 'PGRST204'];
       if (acceptableCodes.includes(error.code) || error.message?.includes('not found')) {
         return true;
       }
