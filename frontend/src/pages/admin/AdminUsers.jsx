@@ -128,20 +128,35 @@ export default function AdminUsers() {
     const targetEmail = targetUser?.email;
 
     try {
-      // 1. Update DB profile primary by ID
-      let { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
-
-      // If updating by ID matched 0 rows (e.g. legacy profile), fallback to email
-      if (error || !userId) {
-        if (targetEmail) {
-          const res = await supabase.from('profiles').update({ role: newRole }).eq('email', targetEmail);
-          error = res.error;
+      // 1. Primary approach: Use SECURITY DEFINER RPC function (bypasses RLS recursion)
+      let rpcSuccess = false;
+      try {
+        const { data, error: rpcErr } = await supabase.rpc('admin_update_user_role', {
+          target_user_id: userId,
+          new_role: newRole
+        });
+        if (!rpcErr) {
+          rpcSuccess = true;
+        } else {
+          console.warn('RPC update notice (falling back to direct update):', rpcErr.message);
         }
+      } catch (e) {
+        console.warn('RPC execution exception:', e);
       }
 
-      if (error) throw error;
+      // 2. Fallback: Direct table update if RPC function is not installed in Supabase yet
+      if (!rpcSuccess) {
+        let { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
+        if (error || !userId) {
+          if (targetEmail) {
+            const res = await supabase.from('profiles').update({ role: newRole }).eq('email', targetEmail);
+            error = res.error;
+          }
+        }
+        if (error) throw error;
+      }
 
-      toast.success(`Role for ${targetEmail || 'user'} updated to ${newRole.toUpperCase()} in Supabase DB`);
+      toast.success(`Role for ${targetEmail || 'user'} updated to ${newRole.toUpperCase()}`);
       
       // Update UI state
       setUsers(prev => prev.map(u => u.id === userId || (targetEmail && u.email === targetEmail) ? { ...u, role: newRole } : u));
@@ -187,7 +202,7 @@ export default function AdminUsers() {
           onClick={() => { 
             setInviteName(''); 
             setInviteEmail(''); 
-            setInviteRole('teacher'); 
+            setInviteRole('faculty'); 
             setShowInviteModal(true); 
           }}
         >
