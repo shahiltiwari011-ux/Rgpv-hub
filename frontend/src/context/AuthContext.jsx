@@ -26,6 +26,8 @@ export function AuthProvider ({ children }) {
     return validRoles.includes(normalized) ? normalized : 'student';
   }
 
+  const activeProfileFetch = useRef(null);
+
   // Fetch profile and role directly from Supabase DB public.profiles table by auth user UUID
   async function _fetchProfile (userId) {
     if (!userId || !isSupabaseReady()) {
@@ -34,38 +36,52 @@ export function AuthProvider ({ children }) {
       return null;
     }
 
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('[AUTH DEBUG] Profile fetch error:', error);
-      }
-
-      const rawRole = data?.role;
-      const finalRole = resolveUserRole(rawRole);
-
-      const p = data ? {
-        ...data,
-        role: finalRole
-      } : null;
-
-      if (p) {
-        setProfile(p);
-        setRole(finalRole);
-        console.log('[AUTH DEBUG] user.id:', userId);
-        console.log('[AUTH DEBUG] user.email:', data?.email);
-        console.log('[AUTH DEBUG] profile:', p);
-        console.log('[AUTH DEBUG] profile.role:', finalRole);
-      }
-      return p;
-    } catch (err) {
-      console.error('[AUTH DEBUG] Profile fetch exception:', err);
-      return null;
+    if (activeProfileFetch.current && activeProfileFetch.current.userId === userId) {
+      return activeProfileFetch.current.promise;
     }
+
+    const fetchPromise = (async () => {
+      try {
+        const { data, error } = await fetchWithTimeout(
+          supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single(),
+          8000
+        );
+
+        if (error) {
+          console.error('[AUTH DEBUG] Profile fetch error:', error);
+        }
+
+        const rawRole = data?.role;
+        const finalRole = resolveUserRole(rawRole);
+
+        const p = data ? {
+          ...data,
+          role: finalRole
+        } : null;
+
+        if (p) {
+          setProfile(p);
+          setRole(finalRole);
+          console.log('[AUTH DEBUG] user.id:', userId);
+          console.log('[AUTH DEBUG] user.email:', data?.email);
+          console.log('[AUTH DEBUG] profile:', p);
+          console.log('[AUTH DEBUG] profile.role:', finalRole);
+        }
+        return p;
+      } catch (err) {
+        console.error('[AUTH DEBUG] Profile fetch exception:', err);
+        return null;
+      } finally {
+        activeProfileFetch.current = null;
+      }
+    })();
+
+    activeProfileFetch.current = { userId, promise: fetchPromise };
+    return fetchPromise;
   }
 
   // Daily check-in XP award
