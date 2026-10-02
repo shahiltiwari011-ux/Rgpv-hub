@@ -40,20 +40,22 @@ export default function AuthModal({ isOpen, onClose }) {
         toast.success(`Account created as ${userRole.toUpperCase()}!`);
         onClose();
         
-        // Auto-redirect to respective dashboard
+        // Auto-redirect to respective portal based on authoritative role
         if (userRole === 'tpo') navigate('/tpo');
         else if (userRole === 'faculty' || userRole === 'teacher') navigate('/teacher');
         else if (userRole === 'admin') navigate('/admin');
+        else navigate('/');
       } else {
         const loginRes = await login(email, password);
         const userRole = loginRes?.role || loginRes?.profile?.role || 'student';
         toast.success(`Signed in successfully as ${userRole.toUpperCase()}!`);
         onClose();
 
-        // Auto-redirect to respective dashboard
+        // Auto-redirect to respective portal based on authoritative role
         if (userRole === 'tpo') navigate('/tpo');
         else if (userRole === 'faculty' || userRole === 'teacher') navigate('/teacher');
         else if (userRole === 'admin') navigate('/admin');
+        else navigate('/');
       }
     } catch (err) {
       console.error('Auth error:', err);
