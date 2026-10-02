@@ -70,17 +70,26 @@ export default function Navbar() {
           {user || isAdmin ? (
             <div className="user-group desktop-only">
               {(role === 'tpo' || isAdmin) && (
-                <Link to="/tpo" className="role-btn tpo-btn">💼 TPO PORTAL</Link>
+                <Link to="/tpo" className="role-btn tpo-btn" title="TPO Portal">
+                  <span className="role-icon">💼</span>
+                  <span className="role-label">TPO PORTAL</span>
+                </Link>
               )}
               {(role === 'faculty' || role === 'teacher' || isAdmin) && (
-                <Link to="/teacher" className="role-btn faculty-btn">👨‍🏫 FACULTY</Link>
+                <Link to="/teacher" className="role-btn faculty-btn" title="Faculty Dashboard">
+                  <span className="role-icon">👨‍🏫</span>
+                  <span className="role-label">FACULTY</span>
+                </Link>
               )}
               {isAdmin && (
                 <Link to="/admin" className="avatar-link" title="Admin Panel">
                   <div className="avatar-mini">A</div>
                 </Link>
               )}
-              <button onClick={logout} className="logout-btn desktop-only">LOGOUT</button>
+              <button onClick={logout} className="logout-btn desktop-only" title="Sign Out">
+                <span className="logout-icon">⏻</span>
+                <span className="logout-label">LOGOUT</span>
+              </button>
             </div>
           ) : (
             <button onClick={() => setIsAuthOpen(true)} className="login-btn desktop-only" title="Sign In / Register">
@@ -193,6 +202,17 @@ export default function Navbar() {
           .nav-link .link-label { display: none; }
           .nav-link { padding: 0.5rem; justify-content: center; border-radius: 50%; width: 40px; height: 40px; }
           .active-glow { border-radius: 50%; }
+        }
+
+        /* Laptop/mid-width: collapse role-btn text, logout text to icon-only */
+        @media (min-width: 1081px) and (max-width: 1400px) {
+          .role-label { display: none; }
+          .logout-label { display: none; }
+          .login-label { display: none; }
+          .role-btn { padding: 0; width: 36px; height: 34px; justify-content: center; border-radius: 0.75rem; }
+          .logout-btn { padding: 0; width: 34px; height: 34px; justify-content: center; border-radius: 0.75rem; font-size: 0.9rem; }
+          .login-btn { padding: 0; width: 34px; height: 34px; justify-content: center; }
+          .nav-actions { gap: 0.4rem; }
         }
 
         .nav-actions { display: flex; align-items: center; gap: clamp(0.4rem, 1.5vw, 0.75rem); flex-shrink: 0; flex-wrap: nowrap; }
