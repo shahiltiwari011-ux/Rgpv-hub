@@ -9,7 +9,7 @@ const RECONNECT_INTERVAL_MS = 30_000 // Poll every 30 seconds when offline
 export function AuthProvider ({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
-  const [role, setRole] = useState('user')
+  const [role, setRole] = useState('student')
   const [loading, setLoading] = useState(true)
   const [isConnected, setIsConnected] = useState(true)
   const checkInAttempted = useRef(false)
@@ -63,9 +63,10 @@ export function AuthProvider ({ children }) {
 
       setProfile(p);
       setRole(finalRole);
+      console.log('[Auth] Profile loaded — user:', userId, 'role:', finalRole);
       return p;
     } catch (err) {
-      console.warn('Profile fetch notice from DB:', err.message);
+      console.warn('[Auth] Profile fetch error:', err.message);
       const fallbackRole = 'student';
       const p = { role: fallbackRole, last_active: null, xp: 0 };
       setProfile(p);
@@ -100,6 +101,50 @@ export function AuthProvider ({ children }) {
   // profileChannel ref so we can clean it up without re-running the whole effect
   const profileChannelRef = useRef(null)
 
+  // ─── Realtime subscription helper ───────────────────────────────────
+  // Defined at component body level so it is accessible from login(),
+  // _initAuth(), and onAuthStateChange() without scope issues.
+  function _subscribeToProfile (userId) {
+    if (!userId || !isSupabaseReady()) return
+    if (typeof userId === 'string' && userId.startsWith('local-')) return
+
+    // Tear down previous channel before creating a new one
+    if (profileChannelRef.current) {
+      supabase.removeChannel(profileChannelRef.current)
+      profileChannelRef.current = null
+    }
+
+    try {
+      profileChannelRef.current = supabase
+        .channel(`public:profiles:id=eq.${userId}`)
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${userId}`
+        }, (payload) => {
+          if (payload.new) {
+            const updatedRole = resolveUserRole(payload.new.role);
+            setProfile(prev => ({ ...prev, ...payload.new, role: updatedRole }))
+            setRole(updatedRole)
+            console.log('[Auth] Realtime role update:', updatedRole);
+          }
+        })
+        .subscribe()
+    } catch (err) {
+      // Realtime is optional — never let it break auth
+      console.warn('[Auth] Realtime subscription failed (non-blocking):', err.message);
+    }
+  }
+
+  function _teardownRealtimeChannel () {
+    if (profileChannelRef.current) {
+      supabase.removeChannel(profileChannelRef.current)
+      profileChannelRef.current = null
+    }
+  }
+
+  // ─── Auth initialization effect ─────────────────────────────────────
   useEffect(() => {
     if (!isSupabaseReady()) {
       setLoading(false)
@@ -119,28 +164,24 @@ export function AuthProvider ({ children }) {
         
         if (sessionUser) {
           setUser(sessionUser);
-          _subscribeToProfile(sessionUser.id);
           
           // Await profile from database before finishing loading state
           try {
             const p = await _fetchProfile(sessionUser.id);
             void _awardDailyXP(sessionUser.id, p?.last_active);
           } catch (pErr) {
-            console.warn('Profile fetch error during init:', pErr?.message);
+            console.warn('[Auth] Profile fetch error during init:', pErr?.message);
           }
+
+          // Optional realtime — after profile is loaded
+          _subscribeToProfile(sessionUser.id);
           return;
         }
 
-        // Check fallback for local guest/offline user if no active Supabase session
-        const localUser = JSON.parse(localStorage.getItem('local_user') || 'null');
-        if (localUser && localUser.id?.startsWith('local-')) {
-          setUser(localUser);
-          setRole('student');
-          setProfile({ role: 'student', xp: 0 });
-        }
+        // No active Supabase session — user is not logged in
       } catch (err) {
         if (!isAuthLockError(err)) {
-          console.warn('Auth initialization error:', err.message);
+          console.warn('[Auth] Initialization error:', err.message);
         }
       } finally {
         clearTimeout(failsafe);
@@ -149,31 +190,6 @@ export function AuthProvider ({ children }) {
           setIsConnected(connected);
         });
       }
-    }
-
-    function _subscribeToProfile (userId) {
-      if (!userId || userId.startsWith('local-')) return // No realtime for local users
-      
-      // Tear down previous channel before creating a new one
-      if (profileChannelRef.current) {
-        supabase.removeChannel(profileChannelRef.current)
-        profileChannelRef.current = null
-      }
-      profileChannelRef.current = supabase
-        .channel(`public:profiles:id=eq.${userId}`)
-        .on('postgres_changes', {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${userId}`
-        }, (payload) => {
-          if (payload.new) {
-            const updatedRole = resolveUserRole(payload.new.role);
-            setProfile(prev => ({ ...prev, ...payload.new, role: updatedRole }))
-            setRole(updatedRole)
-          }
-        })
-        .subscribe()
     }
 
     _initAuth()
@@ -185,22 +201,19 @@ export function AuthProvider ({ children }) {
         setUser(null);
         setProfile(null);
         setRole('student');
-        if (profileChannelRef.current) {
-          supabase.removeChannel(profileChannelRef.current);
-          profileChannelRef.current = null;
-        }
+        _teardownRealtimeChannel();
       } else if (!session) {
         setUser(null);
         setProfile(null);
         setRole('student');
       } else if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         setUser(session.user);
-        _subscribeToProfile(session.user.id);
         _fetchProfile(session.user.id)
           .then((p) => {
             void _awardDailyXP(session.user.id, p?.last_active);
           })
           .catch(() => {});
+        _subscribeToProfile(session.user.id);
       } else if (session?.user) {
         setUser(session.user);
       }
@@ -209,10 +222,7 @@ export function AuthProvider ({ children }) {
     return () => {
       clearTimeout(failsafe)
       subscription?.unsubscribe()
-      if (profileChannelRef.current) {
-        supabase.removeChannel(profileChannelRef.current)
-        profileChannelRef.current = null
-      }
+      _teardownRealtimeChannel()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -305,15 +315,23 @@ export function AuthProvider ({ children }) {
       throw new Error('Network connection required to sign in.');
     }
 
+    console.log('[Auth] Attempting login for:', email);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+
+    if (error) {
+      console.error('[Auth] Login error:', error.message, '| status:', error.status);
+      throw error;
+    }
     
+    console.log('[Auth] Login successful, user.id:', data.user?.id);
     setIsConnected(true);
     setUser(data.user);
-    _subscribeToProfile(data.user.id);
     
-    // Fetch authoritative role from Supabase DB
+    // Fetch authoritative role from Supabase DB (required for dashboard routing)
     await _fetchProfile(data.user.id);
+
+    // Optional: start realtime subscription (non-blocking)
+    _subscribeToProfile(data.user.id);
 
     return data;
   }
@@ -327,7 +345,8 @@ export function AuthProvider ({ children }) {
       // Clear UI state immediately
       setUser(null)
       setProfile(null)
-      setRole('user')
+      setRole('student')
+      _teardownRealtimeChannel()
 
       if (isSupabaseReady()) {
         // Attempt to sign out on the backend, wrap with timeout to avoid hanging
