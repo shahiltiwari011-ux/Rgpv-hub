@@ -215,8 +215,8 @@ export default function Navbar() {
           .nav-actions { gap: 0.4rem; }
         }
 
-        .nav-actions { display: flex; align-items: center; gap: clamp(0.4rem, 1.5vw, 0.75rem); flex-shrink: 0; flex-wrap: nowrap; }
-        .user-group { display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap; white-space: nowrap; }
+        .nav-actions { display: flex !important; flex-direction: row !important; align-items: center !important; gap: clamp(0.4rem, 1.5vw, 0.75rem); flex-shrink: 0; flex-wrap: nowrap !important; }
+        .user-group { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0.5rem; flex-wrap: nowrap !important; white-space: nowrap !important; }
         .avatar-link { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
         .theme-toggle { background: var(--bg-card); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 12px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; color: var(--text-primary); flex-shrink: 0; }
         @media (min-width: 769px) { .theme-toggle { width: 38px; height: 38px; font-size: 1rem; } }

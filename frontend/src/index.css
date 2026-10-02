@@ -10,8 +10,8 @@
 @media (min-width: 768px) {
   .mobile-only { display: none !important; }
   .desktop-only { display: block !important; }
-  .desktop-only.nav-user-group { display: flex !important; }
-  .desktop-only.nav-auth-btn { display: inline-flex !important; }
+  div.desktop-only, section.desktop-only, .user-group.desktop-only, .desktop-only.nav-user-group { display: flex !important; }
+  button.desktop-only, a.desktop-only, .desktop-only.nav-auth-btn { display: inline-flex !important; }
 }
 
 .flex-col-mobile { display: flex; flex-direction: column; }
