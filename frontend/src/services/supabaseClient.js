@@ -50,44 +50,33 @@ if (supabase) {
  * Enhanced connection check with session validation
  */
 export async function checkSupabaseConnection() {
-  if (!supabase) {
-    console.error('❌ Supabase client not initialized');
+  if (!supabase || !supabaseUrl) {
     return false;
   }
   
   try {
-    // Check if the current session is valid
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // Ping Supabase REST API root - works for any anon/authed user without triggering RLS
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
     
-    if (sessionError) {
-      console.warn('⚠️ Session error detected:', sessionError.message);
-      if (sessionError.message.includes('refresh_token') || sessionError.message.includes('invalid')) {
-        console.log('🧹 Clearing corrupted session...');
-        localStorage.removeItem('rgpv_hub_auth_session');
-      }
-    }
-
-    // Ping the database
-    const { error } = await supabase.from('profiles').select('id').limit(1);
+    const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+      method: 'HEAD',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      signal: controller.signal,
+    });
     
-    if (error) {
-      if (error.message?.includes('No API key found')) {
-        console.error('❌ Supabase Auth Error: No API key found in request headers. Check your VITE_SUPABASE_ANON_KEY.');
-        return false;
-      }
-      
-      const acceptableCodes = ['PGRST116', '42P01', 'PGRST301', 'PGRST204'];
-      if (acceptableCodes.includes(error.code) || error.message?.includes('not found')) {
-        return true;
-      }
-      
-      console.error('❌ Supabase Connection Failed:', error.message);
-      return false;
-    }
-    
-    return true;
+    clearTimeout(timeoutId);
+    // 200 or 401 both mean the server is reachable
+    return res.status < 500;
   } catch (err) {
-    console.error('❌ Supabase Exception:', err.message);
+    if (err.name === 'AbortError') {
+      console.warn('⚠️ Supabase connection check timed out');
+    } else {
+      console.warn('⚠️ Supabase connection check failed:', err.message);
+    }
     return false;
   }
 }
