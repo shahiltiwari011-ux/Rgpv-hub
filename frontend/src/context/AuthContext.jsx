@@ -35,43 +35,36 @@ export function AuthProvider ({ children }) {
     }
 
     try {
-      const { data, error } = await fetchWithTimeout(
-        supabase
-          .from('profiles')
-          .select('id, email, name, role, last_active, xp, level, streak_days, badges')
-          .eq('id', userId)
-          .maybeSingle(),
-        6000
-      );
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
       if (error) {
-        console.warn('[Auth] Profile fetch error:', error.message);
+        console.error('[AUTH DEBUG] Profile fetch error:', error);
       }
 
-      const finalRole = resolveUserRole(data?.role);
+      const rawRole = data?.role;
+      const finalRole = resolveUserRole(rawRole);
 
-      const p = {
-        id: userId,
-        role: finalRole,
-        name: data?.name || null,
-        email: data?.email || null,
-        last_active: data?.last_active || null,
-        xp: data?.xp || 0,
-        level: data?.level || 1,
-        streak_days: data?.streak_days || 0,
-        badges: data?.badges || []
-      };
+      const p = data ? {
+        ...data,
+        role: finalRole
+      } : null;
 
-      setProfile(p);
-      setRole(finalRole);
-      console.log('[Auth] Authoritative profile loaded — user:', userId, 'role:', finalRole);
+      if (p) {
+        setProfile(p);
+        setRole(finalRole);
+        console.log('[AUTH DEBUG] user.id:', userId);
+        console.log('[AUTH DEBUG] user.email:', data?.email);
+        console.log('[AUTH DEBUG] profile:', p);
+        console.log('[AUTH DEBUG] profile.role:', finalRole);
+      }
       return p;
     } catch (err) {
-      console.warn('[Auth] Profile fetch exception:', err.message);
-      const fallbackProfile = { id: userId, role: 'student', last_active: null, xp: 0 };
-      setProfile(fallbackProfile);
-      setRole('student');
-      return fallbackProfile;
+      console.error('[AUTH DEBUG] Profile fetch exception:', err);
+      return null;
     }
   }
 
@@ -290,23 +283,30 @@ export function AuthProvider ({ children }) {
       throw new Error('Network connection required to sign in.');
     }
 
-    console.log('[Auth] Signing in with Supabase Auth:', email);
+    console.log('[AUTH DEBUG] Attempting login for email:', email);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      console.error('[Auth] Login error:', error.message);
+      console.error('[AUTH DEBUG] Login error:', error.message);
       throw error;
     }
-    
+
+    console.log('[AUTH DEBUG] Supabase signInWithPassword user.id:', data?.user?.id);
+    console.log('[AUTH DEBUG] Supabase signInWithPassword user.email:', data?.user?.email);
+
     setIsConnected(true);
     setUser(data.user);
-    
+
     // Fetch authoritative profile directly from Supabase DB
     const p = await _fetchProfile(data.user.id);
 
     _subscribeToProfile(data.user.id);
 
-    return { ...data, profile: p, role: p?.role || 'student' };
+    const loginRole = p?.role || 'student';
+    console.log('[AUTH DEBUG] login result role:', loginRole);
+    console.log('[AUTH DEBUG] auth context role:', loginRole);
+
+    return { ...data, profile: p, role: loginRole };
   }
 
   const logout = async () => {

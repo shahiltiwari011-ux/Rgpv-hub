@@ -48,14 +48,25 @@ export default function AuthModal({ isOpen, onClose }) {
       } else {
         const loginRes = await login(email, password);
         const userRole = loginRes?.role || loginRes?.profile?.role || 'student';
+        console.log('[AUTH DEBUG] login result role:', loginRes?.role);
+        console.log('[AUTH DEBUG] userRole:', userRole);
         toast.success(`Signed in successfully as ${userRole.toUpperCase()}!`);
         onClose();
 
-        // Auto-redirect to respective portal based on authoritative role
-        if (userRole === 'tpo') navigate('/tpo');
-        else if (userRole === 'faculty' || userRole === 'teacher') navigate('/teacher');
-        else if (userRole === 'admin') navigate('/admin');
-        else navigate('/');
+        // Auto-redirect to respective portal based on authoritative role returned from login()
+        if (userRole === 'admin') {
+          console.log('[AUTH DEBUG] navigation: /admin');
+          navigate('/admin');
+        } else if (userRole === 'faculty' || userRole === 'teacher') {
+          console.log('[AUTH DEBUG] navigation: /teacher');
+          navigate('/teacher');
+        } else if (userRole === 'tpo') {
+          console.log('[AUTH DEBUG] navigation: /tpo');
+          navigate('/tpo');
+        } else {
+          console.log('[AUTH DEBUG] navigation: /');
+          navigate('/');
+        }
       }
     } catch (err) {
       console.error('Auth error:', err);
