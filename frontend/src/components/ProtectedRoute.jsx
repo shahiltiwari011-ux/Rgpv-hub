@@ -29,7 +29,7 @@ export function ProtectedRoute ({ children, adminOnly = false, allowedRoles = []
 
     if (!allowedRoles.includes(effectiveRole) && !isAdmin) {
       // Redirect to their respective dashboard
-      if (effectiveRole === 'teacher') return <Navigate to='/teacher' replace />
+      if (effectiveRole === 'faculty' || effectiveRole === 'teacher') return <Navigate to='/teacher' replace />
       if (effectiveRole === 'tpo') return <Navigate to='/tpo' replace />
       return <Navigate to='/' replace />
     }

@@ -33,8 +33,8 @@ export default function AuthModal({ isOpen, onClose }) {
         toast.success('Password reset link sent to your email!');
         setIsForgotPassword(false);
       } else if (isSignUp) {
-        await signup(email, password, selectedRole);
-        toast.success(`Account created as ${selectedRole.toUpperCase()}!`);
+        await signup(email, password);
+        toast.success('Account created successfully!');
         onClose();
       } else {
         await login(email, password);
@@ -98,34 +98,7 @@ export default function AuthModal({ isOpen, onClose }) {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            {isSignUp && (
-              <div className="form-group">
-                <label>Select Your Role</label>
-                <div className="role-selector-pills">
-                  <button
-                    type="button"
-                    className={`role-pill ${selectedRole === 'student' ? 'active' : ''}`}
-                    onClick={() => setSelectedRole('student')}
-                  >
-                    🎓 Student
-                  </button>
-                  <button
-                    type="button"
-                    className={`role-pill ${selectedRole === 'teacher' ? 'active' : ''}`}
-                    onClick={() => setSelectedRole('teacher')}
-                  >
-                    👨‍🏫 Faculty
-                  </button>
-                  <button
-                    type="button"
-                    className={`role-pill ${selectedRole === 'tpo' ? 'active' : ''}`}
-                    onClick={() => setSelectedRole('tpo')}
-                  >
-                    💼 TPO Officer
-                  </button>
-                </div>
-              </div>
-            )}
+
 
             <div className="form-group">
               <label htmlFor="auth-email">Email Address</label>

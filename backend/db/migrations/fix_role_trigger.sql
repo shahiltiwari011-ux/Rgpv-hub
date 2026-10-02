@@ -14,7 +14,7 @@ BEGIN
     IF EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin') THEN
         RETURN NEW;
     END IF;
-    IF auth.uid() = NEW.id AND NEW.role NOT IN ('admin', 'tpo', 'teacher') THEN
+    IF auth.uid() = NEW.id AND NEW.role NOT IN ('admin', 'tpo', 'faculty', 'teacher') THEN
         RETURN NEW;
     END IF;
     RAISE EXCEPTION 'Only administrators can change user roles.';

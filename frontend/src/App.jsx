@@ -64,10 +64,10 @@ export default function App () {
             <Route path='/placement/notices' element={<StudentPlacementNotices />} />
             <Route path='/placement/resources' element={<StudentPlacementResources />} />
 
-            {/* Teacher Routes */}
-            <Route path='/teacher' element={<ProtectedRoute allowedRoles={['teacher', 'admin']}><TeacherDashboard /></ProtectedRoute>} />
-            <Route path='/teacher/upload' element={<ProtectedRoute allowedRoles={['teacher', 'admin']}><TeacherUpload /></ProtectedRoute>} />
-            <Route path='/teacher/academic-profile' element={<ProtectedRoute allowedRoles={['teacher', 'tpo', 'admin']}><StudentAcademicProfile /></ProtectedRoute>} />
+            {/* Faculty Routes */}
+            <Route path='/teacher' element={<ProtectedRoute allowedRoles={['faculty', 'teacher', 'admin']}><TeacherDashboard /></ProtectedRoute>} />
+            <Route path='/teacher/upload' element={<ProtectedRoute allowedRoles={['faculty', 'teacher', 'admin']}><TeacherUpload /></ProtectedRoute>} />
+            <Route path='/teacher/academic-profile' element={<ProtectedRoute allowedRoles={['faculty', 'teacher', 'tpo', 'admin']}><StudentAcademicProfile /></ProtectedRoute>} />
 
             {/* TPO Routes */}
             <Route path='/tpo' element={<ProtectedRoute allowedRoles={['tpo', 'admin']}><TPODashboard /></ProtectedRoute>} />

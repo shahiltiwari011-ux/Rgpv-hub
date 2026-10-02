@@ -25,7 +25,7 @@ export default function AdminUsers() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('teacher');
+  const [inviteRole, setInviteRole] = useState('faculty');
 
   useEffect(() => {
     fetchUsers();
@@ -40,24 +40,18 @@ export default function AdminUsers() {
       );
       if (error) throw error;
       if (data && data.length > 0) {
-        setUsers(data);
+        // Map legacy 'teacher' to 'faculty' in fetched profiles display
+        setUsers(data.map(u => ({ ...u, role: u.role === 'teacher' ? 'faculty' : (u.role === 'user' ? 'student' : u.role) })));
       } else {
         throw new Error('No DB users found');
       }
     } catch (err) {
-      console.warn('Profiles fetch fallback:', err.message);
-      const localUsers = JSON.parse(localStorage.getItem('admin_managed_users') || '[]');
-      if (localUsers.length > 0) {
-        setUsers(localUsers);
-      } else {
-        const defaultUsers = [
-          { id: getSafeUUID(), name: 'System Admin', email: 'shahiltiwari011@gmail.com', role: 'admin' },
-          { id: getSafeUUID(), name: 'Faculty Coordinator', email: 'teacher@rgpv.ac.in', role: 'teacher' },
-          { id: getSafeUUID(), name: 'Placement Officer', email: 'tpo@rgpv.ac.in', role: 'tpo' }
-        ];
-        setUsers(defaultUsers);
-        localStorage.setItem('admin_managed_users', JSON.stringify(defaultUsers));
-      }
+      console.warn('Profiles fetch notice:', err.message);
+      setUsers([
+        { id: getSafeUUID(), name: 'System Admin', email: 'shahiltiwari011@gmail.com', role: 'admin' },
+        { id: getSafeUUID(), name: 'Faculty Coordinator', email: 'faculty@rgpv.ac.in', role: 'faculty' },
+        { id: getSafeUUID(), name: 'Placement Officer', email: 'tpo@rgpv.ac.in', role: 'tpo' }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -87,29 +81,26 @@ export default function AdminUsers() {
 
     try {
       const newUserId = getSafeUUID();
+      const targetRole = inviteRole || 'faculty';
       const newUser = {
         id: newUserId,
         email: email,
         name: name,
-        role: inviteRole || 'teacher',
+        role: targetRole,
         created_at: new Date().toISOString()
       };
 
       // 1. Immediately update UI state
-      setUsers(prevUsers => {
-        const next = [newUser, ...prevUsers.filter(u => u.email !== newUser.email)];
-        try { localStorage.setItem('admin_managed_users', JSON.stringify(next)); } catch {}
-        return next;
-      });
+      setUsers(prevUsers => [newUser, ...prevUsers.filter(u => u.email !== newUser.email)]);
 
       // 2. Close modal & reset input fields immediately
       setShowInviteModal(false);
       setInviteName('');
       setInviteEmail('');
-      setInviteRole('teacher');
+      setInviteRole('faculty');
 
       // 3. Show success toast
-      toast.success(`Invite created for ${email} (${(inviteRole || 'teacher').toUpperCase()})`);
+      toast.success(`Invite created for ${email} (${targetRole.toUpperCase()})`);
 
       // 4. Background DB insertion (safe fire-and-forget without blocking UI)
       void (async () => {
@@ -118,7 +109,7 @@ export default function AdminUsers() {
             id: newUserId,
             name: name,
             email: email,
-            role: inviteRole || 'teacher'
+            role: targetRole
           }, { onConflict: 'email' });
         } catch (dbErr) {
           console.warn('Background profile sync notice:', dbErr.message);
@@ -133,26 +124,30 @@ export default function AdminUsers() {
   const handleRoleChange = async (userId, newRole) => {
     if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
 
-    // Instant UI & localStorage update
-    const updatedUsers = users.map(u => u.id === userId ? { ...u, role: newRole } : u);
-    setUsers(updatedUsers);
-    localStorage.setItem('admin_managed_users', JSON.stringify(updatedUsers));
-    toast.success('Role updated successfully');
-
-    // Get the email for this user (needed to update DB by email as fallback)
     const targetUser = users.find(u => u.id === userId);
     const targetEmail = targetUser?.email;
 
-    // Background DB sync — update by email because locally generated IDs won't match DB
     try {
-      if (targetEmail) {
-        await fetchWithTimeout(
-          supabase.from('profiles').update({ role: newRole }).eq('email', targetEmail),
-          2000
-        );
+      // 1. Update DB profile primary by ID
+      let { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
+
+      // If updating by ID matched 0 rows (e.g. legacy profile), fallback to email
+      if (error || !userId) {
+        if (targetEmail) {
+          const res = await supabase.from('profiles').update({ role: newRole }).eq('email', targetEmail);
+          error = res.error;
+        }
       }
+
+      if (error) throw error;
+
+      toast.success(`Role for ${targetEmail || 'user'} updated to ${newRole.toUpperCase()} in Supabase DB`);
+      
+      // Update UI state
+      setUsers(prev => prev.map(u => u.id === userId || (targetEmail && u.email === targetEmail) ? { ...u, role: newRole } : u));
     } catch (err) {
-      console.warn('Background role update notice:', err.message);
+      console.error('Role update error:', err);
+      toast.error('Failed to update role in Supabase: ' + err.message);
     }
   };
 
@@ -252,7 +247,7 @@ export default function AdminUsers() {
                   disabled={u.id === user?.id}
                 >
                   <option value="student">Student</option>
-                  <option value="teacher">Teacher</option>
+                  <option value="faculty">Faculty</option>
                   <option value="tpo">TPO</option>
                   <option value="admin">Admin</option>
                 </select>
@@ -311,7 +306,7 @@ export default function AdminUsers() {
                 value={inviteRole} 
                 onChange={e => setInviteRole(e.target.value)}
               >
-                <option value="teacher">Teacher</option>
+                <option value="faculty">Faculty</option>
                 <option value="tpo">TPO</option>
               </select>
             </div>

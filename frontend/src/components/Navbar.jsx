@@ -72,7 +72,7 @@ export default function Navbar() {
               {(role === 'tpo' || isAdmin) && (
                 <Link to="/tpo" className="role-btn desktop-only">TPO PORTAL</Link>
               )}
-              {(role === 'teacher' || isAdmin) && (
+              {(role === 'faculty' || role === 'teacher' || isAdmin) && (
                 <Link to="/teacher" className="role-btn desktop-only">FACULTY</Link>
               )}
               {isAdmin && (
@@ -137,7 +137,7 @@ export default function Navbar() {
                     <span>💼</span> TPO Portal
                   </Link>
                 )}
-                {(role === 'teacher' || isAdmin) && (
+                {(role === 'faculty' || role === 'teacher' || isAdmin) && (
                   <Link to="/teacher" className="mobile-role-link teacher" onClick={() => setMobileOpen(false)}>
                     <span>👨‍🏫</span> Faculty Dashboard
                   </Link>
@@ -147,7 +147,7 @@ export default function Navbar() {
                     <span>🛡️</span> Admin Panel
                   </Link>
                 )}
-                {user && !isAdmin && role !== 'tpo' && role !== 'teacher' && (
+                {user && !isAdmin && role !== 'tpo' && role !== 'faculty' && role !== 'teacher' && (
                   <div className="mobile-user-badge">
                     <span>🎓</span> Signed in as <strong>{user?.email?.split('@')[0]}</strong>
                   </div>
