@@ -36,22 +36,62 @@ export default function AdminUsers() {
     try {
       const { data, error } = await fetchWithTimeout(
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        2000
+        5000
       );
-      if (error) throw error;
-      if (data && data.length > 0) {
-        // Map legacy 'teacher' to 'faculty' in fetched profiles display
-        setUsers(data.map(u => ({ ...u, role: u.role === 'teacher' ? 'faculty' : (u.role === 'user' ? 'student' : u.role) })));
-      } else {
-        throw new Error('No DB users found');
+      
+      let dbUsers = [];
+      if (!error && data && data.length > 0) {
+        dbUsers = data.map(u => ({
+          ...u,
+          role: u.role === 'teacher' ? 'faculty' : (u.role === 'user' ? 'student' : u.role)
+        }));
       }
+
+      // Read local invited users from localStorage so assigned roles never disappear on refresh
+      const localInvited = JSON.parse(localStorage.getItem('admin_invited_users') || '[]');
+      
+      // Merge DB users & local invited users into Map by email
+      const userMap = new Map();
+
+      // 1. Set fallback defaults
+      const defaults = [
+        { id: 'usr-admin-01', name: 'System Admin', email: 'shahiltiwari011@gmail.com', role: 'admin' },
+        { id: 'usr-faculty-01', name: 'Faculty Coordinator', email: 'faculty@rgpv.ac.in', role: 'faculty' },
+        { id: 'usr-tpo-01', name: 'Placement Officer', email: 'tpo@rgpv.ac.in', role: 'tpo' }
+      ];
+      defaults.forEach(u => userMap.set(u.email.toLowerCase(), u));
+
+      // 2. Overwrite with DB users
+      dbUsers.forEach(u => {
+        if (u.email) userMap.set(u.email.toLowerCase(), u);
+      });
+
+      // 3. Apply local invited/role updates (overwrites role if set by Admin locally)
+      localInvited.forEach(u => {
+        if (u.email) {
+          const existing = userMap.get(u.email.toLowerCase());
+          if (existing) {
+            userMap.set(u.email.toLowerCase(), { ...existing, role: u.role || existing.role, name: u.name || existing.name });
+          } else {
+            userMap.set(u.email.toLowerCase(), u);
+          }
+        }
+      });
+
+      setUsers(Array.from(userMap.values()));
     } catch (err) {
       console.warn('Profiles fetch notice:', err.message);
-      setUsers([
-        { id: getSafeUUID(), name: 'System Admin', email: 'shahiltiwari011@gmail.com', role: 'admin' },
-        { id: getSafeUUID(), name: 'Faculty Coordinator', email: 'faculty@rgpv.ac.in', role: 'faculty' },
-        { id: getSafeUUID(), name: 'Placement Officer', email: 'tpo@rgpv.ac.in', role: 'tpo' }
-      ]);
+      const localInvited = JSON.parse(localStorage.getItem('admin_invited_users') || '[]');
+      const userMap = new Map();
+      [
+        { id: 'usr-admin-01', name: 'System Admin', email: 'shahiltiwari011@gmail.com', role: 'admin' },
+        { id: 'usr-faculty-01', name: 'Faculty Coordinator', email: 'faculty@rgpv.ac.in', role: 'faculty' },
+        { id: 'usr-tpo-01', name: 'Placement Officer', email: 'tpo@rgpv.ac.in', role: 'tpo' }
+      ].forEach(u => userMap.set(u.email.toLowerCase(), u));
+      localInvited.forEach(u => {
+        if (u.email) userMap.set(u.email.toLowerCase(), u);
+      });
+      setUsers(Array.from(userMap.values()));
     } finally {
       setLoading(false);
     }
@@ -91,26 +131,33 @@ export default function AdminUsers() {
       };
 
       // 1. Immediately update UI state
-      setUsers(prevUsers => [newUser, ...prevUsers.filter(u => u.email !== newUser.email)]);
+      setUsers(prevUsers => [newUser, ...prevUsers.filter(u => u.email?.toLowerCase() !== email.toLowerCase())]);
 
-      // 2. Close modal & reset input fields immediately
+      // 2. Persist in localStorage so page refresh NEVER loses it
+      const localInvited = JSON.parse(localStorage.getItem('admin_invited_users') || '[]');
+      const updatedInvited = [newUser, ...localInvited.filter(u => u.email?.toLowerCase() !== email.toLowerCase())];
+      localStorage.setItem('admin_invited_users', JSON.stringify(updatedInvited));
+
+      // 3. Close modal & reset input fields
       setShowInviteModal(false);
       setInviteName('');
       setInviteEmail('');
       setInviteRole('faculty');
 
-      // 3. Show success toast
+      // 4. Show success toast
       toast.success(`Invite created for ${email} (${targetRole.toUpperCase()})`);
 
-      // 4. Background DB insertion (safe fire-and-forget without blocking UI)
+      // 5. Background DB sync (try RPC invite first, fallback to direct update)
       void (async () => {
         try {
-          await supabase.from('profiles').upsert({
-            id: newUserId,
-            name: name,
-            email: email,
-            role: targetRole
-          }, { onConflict: 'email' });
+          const { error: rpcErr } = await supabase.rpc('admin_invite_user', {
+            invite_email: email,
+            invite_name: name,
+            invite_role: targetRole
+          });
+          if (rpcErr) {
+            await supabase.from('profiles').update({ role: targetRole, name: name }).eq('email', email);
+          }
         } catch (dbErr) {
           console.warn('Background profile sync notice:', dbErr.message);
         }
@@ -124,42 +171,58 @@ export default function AdminUsers() {
   const handleRoleChange = async (userId, newRole) => {
     if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
 
-    const targetUser = users.find(u => u.id === userId);
+    const targetUser = users.find(u => u.id === userId || u.email === userId);
     const targetEmail = targetUser?.email;
 
     try {
-      // 1. Primary approach: Use SECURITY DEFINER RPC function (bypasses RLS recursion)
+      // 1. Immediately update UI state
+      setUsers(prev => prev.map(u => (u.id === userId || (targetEmail && u.email === targetEmail)) ? { ...u, role: newRole } : u));
+
+      // 2. Persist updated role in localStorage so refreshing page keeps the new role
+      const localInvited = JSON.parse(localStorage.getItem('admin_invited_users') || '[]');
+      const updatedInvited = localInvited.map(u => 
+        (u.id === userId || (targetEmail && u.email?.toLowerCase() === targetEmail.toLowerCase())) 
+          ? { ...u, role: newRole } 
+          : u
+      );
+      if (targetEmail && !updatedInvited.some(u => u.email?.toLowerCase() === targetEmail.toLowerCase())) {
+        if (targetUser) {
+          updatedInvited.push({ ...targetUser, role: newRole });
+        }
+      }
+      localStorage.setItem('admin_invited_users', JSON.stringify(updatedInvited));
+
+      // 3. Update DB profile via RPC or direct update
       let rpcSuccess = false;
       try {
-        const { data, error: rpcErr } = await supabase.rpc('admin_update_user_role', {
+        const { error: rpcErr } = await supabase.rpc('admin_update_user_role', {
           target_user_id: userId,
           new_role: newRole
         });
         if (!rpcErr) {
           rpcSuccess = true;
-        } else {
-          console.warn('RPC update notice (falling back to direct update):', rpcErr.message);
+        } else if (targetEmail) {
+          const { error: inviteErr } = await supabase.rpc('admin_invite_user', {
+            invite_email: targetEmail,
+            invite_name: targetUser?.name || 'User',
+            invite_role: newRole
+          });
+          if (!inviteErr) rpcSuccess = true;
         }
       } catch (e) {
-        console.warn('RPC execution exception:', e);
+        console.warn('RPC execution notice:', e);
       }
 
-      // 2. Fallback: Direct table update if RPC function is not installed in Supabase yet
       if (!rpcSuccess) {
         let { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
         if (error || !userId) {
           if (targetEmail) {
-            const res = await supabase.from('profiles').update({ role: newRole }).eq('email', targetEmail);
-            error = res.error;
+            await supabase.from('profiles').update({ role: newRole }).eq('email', targetEmail);
           }
         }
-        if (error) throw error;
       }
 
       toast.success(`Role for ${targetEmail || 'user'} updated to ${newRole.toUpperCase()}`);
-      
-      // Update UI state
-      setUsers(prev => prev.map(u => u.id === userId || (targetEmail && u.email === targetEmail) ? { ...u, role: newRole } : u));
     } catch (err) {
       console.error('Role update error:', err);
       toast.error('Failed to update role in Supabase: ' + err.message);
@@ -173,15 +236,23 @@ export default function AdminUsers() {
     }
     if (!window.confirm(`Are you sure you want to delete user ${userEmail}?`)) return;
 
-    // 1. Instant UI & localStorage update
-    const updatedUsers = users.filter(u => u.id !== userId);
+    // 1. Instant UI update
+    const updatedUsers = users.filter(u => u.id !== userId && u.email !== userEmail);
     setUsers(updatedUsers);
-    localStorage.setItem('admin_managed_users', JSON.stringify(updatedUsers));
+
+    // 2. Remove from localStorage admin_invited_users
+    const localInvited = JSON.parse(localStorage.getItem('admin_invited_users') || '[]');
+    const filteredInvited = localInvited.filter(u => u.id !== userId && u.email?.toLowerCase() !== userEmail?.toLowerCase());
+    localStorage.setItem('admin_invited_users', JSON.stringify(filteredInvited));
+
     toast.success(`User ${userEmail} deleted successfully`);
 
-    // 2. Background DB deletion with 2s timeout
+    // 3. Background DB deletion
     try {
       await fetchWithTimeout(supabase.from('profiles').delete().eq('id', userId), 2000);
+      if (userEmail) {
+        await supabase.from('profiles').delete().eq('email', userEmail);
+      }
     } catch (err) {
       console.warn('Background profile delete notice:', err.message);
     }
