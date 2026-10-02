@@ -24,7 +24,7 @@ export default function Profile () {
     <>
       <SEO
         title={`${profile.name}'s Profile`}
-        description={`View ${profile.name}'s profile on PROJECTX.`}
+        description={`View ${profile.name}'s profile on CollegeOne.`}
         urlPath={`/profile/${sanitizedId}`}
       />
       <div className='page-hero' style={{ paddingBottom: '2rem' }}>
@@ -61,7 +61,7 @@ export default function Profile () {
         }}>
           <h3 style={{ fontFamily: 'Syne, sans-serif', marginBottom: '1rem', fontWeight: 700 }}>About Student</h3>
           <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            This student is part of the ProjectX academic community.
+            This student is part of the CollegeOne academic community.
           </p>
         </div>
       </section>

@@ -23,16 +23,16 @@ export default function AdminLayout() {
     <div className="admin-console-layout">
       {/* Mobile Top Header */}
       <header className="mobile-admin-header">
-        <div className="brand-logo">X</div>
-        <span className="main-brand">PROJECTX CONSOLE</span>
+        <div className="brand-logo">C</div>
+        <span className="main-brand">COLLEGEONE CONSOLE</span>
       </header>
 
       {/* Sidebar (Desktop) */}
       <aside className="console-sidebar">
         <div className="sidebar-brand">
-          <div className="brand-logo">X</div>
+          <div className="brand-logo">C</div>
           <div className="brand-titles">
-            <span className="main-brand">PROJECTX</span>
+            <span className="main-brand">COLLEGEONE</span>
             <span className="sub-brand">RESOURCE CONSOLE</span>
           </div>
         </div>

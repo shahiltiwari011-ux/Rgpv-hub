@@ -256,7 +256,7 @@ export default function StudentAcademicProfile() {
 
   return (
     <div className="apx-wrap">
-      <SEO title="Student Academic Profile | ProjectX" description="Search and view student academic records" urlPath="/teacher/academic-profile" />
+      <SEO title="Student Academic Profile | CollegeOne" description="Search and view student academic records" urlPath="/teacher/academic-profile" />
       <div className="apx-mesh" />
 
       {/* Header */}

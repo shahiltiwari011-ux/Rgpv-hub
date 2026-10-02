@@ -14,7 +14,7 @@ export default function TeacherDashboard() {
   
   return (
     <div className="px-placement">
-      <SEO title="Teacher Portal | PROJECTX" description="Educator Resource Management Portal" urlPath="/teacher" />
+      <SEO title="Teacher Portal | CollegeOne" description="Educator Resource Management Portal" urlPath="/teacher" />
       <div className="px-pl-mesh"></div>
 
       <section className="px-pl-hero">

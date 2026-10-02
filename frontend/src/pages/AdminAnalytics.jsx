@@ -56,7 +56,7 @@ export default function AdminAnalytics () {
       
       <div className="view-header">
         <h1 className="view-title">Platform <span>Analytics</span></h1>
-        <p className="view-subtitle">Real-time performance insights for PROJECTX ecosystem.</p>
+        <p className="view-subtitle">Real-time performance insights for CollegeOne ecosystem.</p>
       </div>
 
       <div className="analytics-content">

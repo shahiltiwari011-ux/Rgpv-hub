@@ -44,7 +44,7 @@ export default function StudentPlacementPackages() {
 
   return (
     <div className="projectx-tpo-crud">
-      <SEO title="Placement Packages | PROJECTX" />
+      <SEO title="Placement Packages | CollegeOne" />
       <div className="home-mesh-bg"></div>
       
       <div className="crud-container">

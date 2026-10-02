@@ -59,7 +59,7 @@ export default function StudentPlacementExperiences() {
 
   return (
     <div className="projectx-tpo-crud">
-      <SEO title="Interview Experiences | PROJECTX" />
+      <SEO title="Interview Experiences | CollegeOne" />
       <div className="home-mesh-bg"></div>
       
       <div className="crud-container">

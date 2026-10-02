@@ -98,7 +98,7 @@ const Result = () => {
             
             const opt = {
                 margin:       [10, 10, 10, 10],
-                filename:     `ProjectX_Result_${result.enroll}_Sem_${result.semester || semester}.pdf`,
+                filename:     `CollegeOne_Result_${result.enroll}_Sem_${result.semester || semester}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
                     scale: 3, 
@@ -237,9 +237,9 @@ const Result = () => {
                             )}
 
                             <div className="glass-panel transcript-container">
-                                <div className="transcript-watermark">PROJECTX OFFICIAL TRANSCRIPT</div>
+                                <div className="transcript-watermark">COLLEGEONE OFFICIAL TRANSCRIPT</div>
                                 <div className="pdf-header-premium">
-                                    <div className="pdf-logo">PROJECT<span>X</span></div>
+                                    <div className="pdf-logo">COLLEGE<span>ONE</span></div>
                                     <div className="pdf-title-group">
                                         <div className="pdf-title">OFFICIAL DIGITAL TRANSCRIPT</div>
                                         <div className="pdf-subtitle">RAJIV GANDHI PROUDYOGIKI VISHWAVIDYALAYA, BHOPAL</div>
@@ -312,7 +312,7 @@ const Result = () => {
                                 </div>
 
                                 <div className="transcript-footer">
-                                    <p>© {new Date().getFullYear()} ProjectX Verified Digital Transcript</p>
+                                    <p>© {new Date().getFullYear()} CollegeOne Verified Digital Transcript</p>
                                     <button onClick={handleDownload} className="download-button" data-html2canvas-ignore="true">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />

@@ -29,7 +29,7 @@ export default function Footer() {
       <div className="footer-wrap">
         <div className="footer-main">
           <div className="brand-zone">
-            <h2 className="footer-logo">PROJECT<span>X</span></h2>
+            <h2 className="footer-logo">COLLEGE<span>ONE</span></h2>
             <p className="footer-tagline">
               The next-generation academic portal for RGPV Diploma students. 
               Engineering success through technology and transparency.

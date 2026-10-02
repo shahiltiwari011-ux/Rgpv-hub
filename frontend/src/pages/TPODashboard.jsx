@@ -17,7 +17,7 @@ export default function TPODashboard() {
   
   return (
     <div className="px-placement">
-      <SEO title="TPO Portal | PROJECTX" description="Training and Placement Officer Portal" urlPath="/tpo" />
+      <SEO title="TPO Portal | CollegeOne" description="Training and Placement Officer Portal" urlPath="/tpo" />
       <div className="px-pl-mesh"></div>
 
       <section className="px-pl-hero">

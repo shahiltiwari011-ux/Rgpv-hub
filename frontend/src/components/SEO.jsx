@@ -9,7 +9,7 @@ function getSiteUrl () {
 }
 
 export default function SEO ({ title, description, keywords, urlPath = '', noIndex = false }) {
-  const siteName = 'PROJECTX'
+  const siteName = 'CollegeOne'
   const fullTitle = title ? `${title} | ${siteName}` : siteName
   const fullDescription = description || 'Elite Academic Portal for RGPV Diploma. Access premium notes, PYQs, and real-time result analytics.'
   const siteUrl = getSiteUrl()

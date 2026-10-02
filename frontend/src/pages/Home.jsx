@@ -25,7 +25,7 @@ export default function Home() {
 
   return (
     <div className="projectx-home">
-      <SEO title="PROJECTX | Elite Academic Portal" description="Access premium notes, pyq, and real-time results for RGPV Diploma." urlPath="/" />
+      <SEO title="CollegeOne | Elite Academic Portal" description="Access premium notes, pyq, and real-time results for RGPV Diploma." urlPath="/" />
 
       <OfflineBanner isMock={isMock} onRetry={() => { checkSupabaseConnection().then(connected => { if (connected) window.dispatchEvent(new Event('online')) }) }} />
 
@@ -47,7 +47,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             className="hero-main-title"
           >
-            PROJECT<span>X</span>
+            COLLEGE<span>ONE</span>
           </motion.h1>
 
           <motion.p 
@@ -178,19 +178,24 @@ export default function Home() {
         .hero-badge span { font-size: clamp(0.6rem, 2.5vw, 0.75rem); font-weight: 900; letter-spacing: 3px; color: var(--accent-blue); }
         .hero-main-title { 
           font-family: 'Syne', sans-serif; 
-          font-size: clamp(2rem, 10.5vw, 8rem); 
+          font-size: clamp(1.8rem, 8.5vw, 5.8rem); 
           font-weight: 800; 
-          line-height: 1; 
-          margin: 0; 
+          line-height: 1.05; 
+          margin: 0 auto; 
           letter-spacing: -0.04em;
-          display: block;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           text-align: center;
           width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
           color: var(--text-primary);
+          white-space: nowrap;
         }
         .hero-main-title span { color: var(--accent-blue); text-shadow: 0 0 80px rgba(59, 130, 246, 0.4); }
-        .hero-lead { font-size: clamp(0.9rem, 4.5vw, 1.2rem); color: var(--text-secondary); margin: 1.5rem 0 2.5rem; line-height: 1.5; font-weight: 500; max-width: 700px; padding: 0 1rem; }
-        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%; padding: 0 1rem; }
+        .hero-lead { font-size: clamp(0.9rem, 4.5vw, 1.2rem); color: var(--text-secondary); margin: 1.5rem auto 2.5rem; line-height: 1.5; font-weight: 500; max-width: 700px; padding: 0 1rem; text-align: center; }
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; align-items: center; flex-wrap: wrap; width: 100%; padding: 0 1rem; margin: 0 auto; }
 
         .btn-glow-blue { padding: 1.1rem 2rem; background: var(--accent-blue); color: #fff; text-decoration: none; border-radius: 1.25rem; font-weight: 900; font-size: 0.95rem; transition: 0.3s; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3); white-space: nowrap; flex: 1; min-width: 200px; max-width: 280px; text-align: center; }
         .btn-glow-blue:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(59, 130, 246, 0.4); }

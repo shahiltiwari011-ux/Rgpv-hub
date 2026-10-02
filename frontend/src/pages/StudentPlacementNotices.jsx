@@ -65,7 +65,7 @@ export default function StudentPlacementNotices() {
 
   return (
     <div className="projectx-tpo-crud">
-      <SEO title="Placement Notices | PROJECTX" />
+      <SEO title="Placement Notices | CollegeOne" />
       <div className="home-mesh-bg"></div>
       
       <div className="crud-container">

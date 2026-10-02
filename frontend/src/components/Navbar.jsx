@@ -34,9 +34,9 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="nav-brand" onClick={() => setMobileOpen(false)}>
           <div className="brand-icon">
-            <div className="icon-inner">X</div>
+            <div className="icon-inner">C</div>
           </div>
-          <span className="brand-text">PROJECT<span>X</span></span>
+          <span className="brand-text">COLLEGE<span>ONE</span></span>
         </Link>
 
         {/* Desktop Links */}
@@ -178,60 +178,59 @@ export default function Navbar() {
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
       <style>{`
-        .projectx-nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 1.5rem 0; }
-        .projectx-nav.scrolled { background: rgba(var(--bg-glass-rgb), 0.8); backdrop-filter: blur(20px); padding: 1rem 0; border-bottom: 1px solid var(--border); }
+        .projectx-nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 1rem 0; }
+        .projectx-nav.scrolled { background: rgba(var(--bg-glass-rgb), 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 0.75rem 0; border-bottom: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         
-        .nav-container { max-width: 1300px; margin: 0 auto; padding: 0 var(--container-px); display: flex; align-items: center; justify-content: space-between; }
+        .nav-container { max-width: 1440px; width: 100%; margin: 0 auto; padding: 0 clamp(0.75rem, 2vw, 1.5rem); display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }
 
-        .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
-        .brand-icon { width: 32px; height: 32px; background: var(--accent-blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; transform: rotate(10deg); transition: 0.3s; }
-        .nav-brand:hover .brand-icon { transform: rotate(0deg) scale(1.1); }
-        .icon-inner { font-weight: 900; color: #fff; font-size: 1.1rem; }
-        .brand-text { font-family: 'Syne', sans-serif; font-size: clamp(1rem, 5vw, 1.4rem); font-weight: 800; color: var(--text-primary); letter-spacing: -1px; white-space: nowrap; }
+        .nav-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
+        .brand-icon { width: 32px; height: 32px; background: var(--accent-blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; transform: rotate(8deg); transition: 0.3s; flex-shrink: 0; }
+        .nav-brand:hover .brand-icon { transform: rotate(0deg) scale(1.08); }
+        .icon-inner { font-weight: 900; color: #fff; font-size: 1.05rem; }
+        .brand-text { font-family: 'Syne', sans-serif; font-size: clamp(1rem, 2.5vw, 1.25rem); font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; white-space: nowrap; }
         .brand-text span { color: var(--accent-blue); }
 
-        .nav-links-desktop { display: flex; align-items: center; gap: 0.25rem; background: rgba(var(--bg-glass-rgb), 0.05); padding: 0.4rem; border-radius: 1.25rem; border: 1px solid var(--border); }
+        .nav-links-desktop { display: flex; align-items: center; gap: 0.2rem; background: rgba(var(--bg-glass-rgb), 0.05); padding: 0.3rem 0.4rem; border-radius: 1.25rem; border: 1px solid var(--border); flex-shrink: 1; }
         @media (max-width: 1080px) { .nav-links-desktop { display: none; } }
         
-        .nav-link { text-decoration: none; padding: 0.5rem 0.8rem; border-radius: 1rem; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem; transition: 0.3s; position: relative; white-space: nowrap; }
-        .nav-link:hover { color: var(--text-primary); background: rgba(var(--bg-glass-rgb), 0.05); }
+        .nav-link { text-decoration: none; padding: 0.4rem 0.65rem; border-radius: 0.85rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem; transition: 0.25s; position: relative; white-space: nowrap; }
+        .nav-link:hover { color: var(--text-primary); background: rgba(var(--bg-glass-rgb), 0.06); }
         .nav-link.active { color: var(--accent-blue); }
-        .active-glow { position: absolute; inset: 0; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 1rem; z-index: -1; }
+        .active-glow { position: absolute; inset: 0; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 0.85rem; z-index: -1; }
 
-        @media (max-width: 1280px) {
+        @media (max-width: 1240px) {
           .nav-link .link-label { display: none; }
-          .nav-link { padding: 0.5rem; justify-content: center; border-radius: 50%; width: 40px; height: 40px; }
+          .nav-link { padding: 0.4rem; justify-content: center; border-radius: 50%; width: 36px; height: 36px; }
           .active-glow { border-radius: 50%; }
         }
 
-        /* Laptop/mid-width: collapse role-btn text, logout text to icon-only */
-        @media (min-width: 1081px) and (max-width: 1400px) {
+        /* Laptop/mid-width breakpoint: collapse text labels on role & logout buttons */
+        @media (min-width: 1081px) and (max-width: 1480px) {
           .role-label { display: none; }
           .logout-label { display: none; }
           .login-label { display: none; }
-          .role-btn { padding: 0; width: 36px; height: 34px; justify-content: center; border-radius: 0.75rem; }
-          .logout-btn { padding: 0; width: 34px; height: 34px; justify-content: center; border-radius: 0.75rem; font-size: 0.9rem; }
-          .login-btn { padding: 0; width: 34px; height: 34px; justify-content: center; }
-          .nav-actions { gap: 0.4rem; }
+          .role-btn { padding: 0 !important; width: 34px !important; height: 32px !important; justify-content: center; border-radius: 0.65rem !important; }
+          .logout-btn { padding: 0 !important; width: 34px !important; height: 32px !important; justify-content: center; border-radius: 0.65rem !important; font-size: 0.85rem; }
+          .login-btn { padding: 0 !important; width: 34px !important; height: 32px !important; justify-content: center; }
+          .nav-actions { gap: 0.35rem !important; }
         }
 
-        .nav-actions { display: flex !important; flex-direction: row !important; align-items: center !important; gap: clamp(0.4rem, 1.5vw, 0.75rem); flex-shrink: 0; flex-wrap: nowrap !important; }
-        .user-group { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0.5rem; flex-wrap: nowrap !important; white-space: nowrap !important; }
+        .nav-actions { display: flex !important; flex-direction: row !important; align-items: center !important; gap: clamp(0.35rem, 1vw, 0.6rem); flex-shrink: 0; flex-wrap: nowrap !important; }
+        .user-group { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0.4rem; flex-wrap: nowrap !important; white-space: nowrap !important; }
         .avatar-link { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
-        .theme-toggle { background: var(--bg-card); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 12px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; color: var(--text-primary); flex-shrink: 0; }
-        @media (min-width: 769px) { .theme-toggle { width: 38px; height: 38px; font-size: 1rem; } }
+        .theme-toggle { background: var(--bg-card); border: 1px solid var(--border); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; transition: 0.25s; color: var(--text-primary); flex-shrink: 0; }
         .theme-toggle:hover { background: rgba(var(--bg-glass-rgb), 0.1); border-color: var(--accent-blue); }
 
-        .avatar-mini { width: 34px; height: 34px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 0.85rem; border: 2px solid rgba(59,130,246,0.4); flex-shrink: 0; }
-        .logout-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 0 0.9rem; height: 34px; border-radius: 0.75rem; font-weight: 800; font-size: 0.7rem; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; white-space: nowrap; flex-shrink: 0; }
+        .avatar-mini { width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 0.8rem; border: 2px solid rgba(59,130,246,0.4); flex-shrink: 0; }
+        .logout-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 0 0.75rem; height: 32px; border-radius: 0.65rem; font-weight: 800; font-size: 0.68rem; cursor: pointer; transition: 0.25s; display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; flex-shrink: 0; }
         .logout-btn:hover { color: #f43f5e; border-color: rgba(244,63,94,0.4); background: rgba(244,63,94,0.08); }
         
-        .role-btn { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-primary); padding: 0 0.9rem; height: 34px; border-radius: 0.75rem; font-weight: 800; font-size: 0.7rem; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-flex; align-items: center; white-space: nowrap; flex-shrink: 0; }
+        .role-btn { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-primary); padding: 0 0.75rem; height: 32px; border-radius: 0.65rem; font-weight: 800; font-size: 0.68rem; cursor: pointer; transition: 0.25s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; flex-shrink: 0; }
         .role-btn:hover { color: var(--accent-blue); border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.1); }
         
-        .login-btn { background: var(--accent-blue); color: #fff; border: 1px solid rgba(59, 130, 246, 0.4); padding: 0 0.9rem; height: 34px; border-radius: 0.75rem; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); flex-shrink: 0; }
+        .login-btn { background: var(--accent-blue); color: #fff; border: 1px solid rgba(59, 130, 246, 0.4); padding: 0 0.75rem; height: 32px; border-radius: 0.65rem; font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: 0.25s; display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); flex-shrink: 0; }
         .login-btn:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); }
-        .login-icon { font-size: 0.85rem; }
+        .login-icon { font-size: 0.8rem; }
         
         @media (max-width: 768px) {
           .projectx-nav { padding: 0.75rem 0; }

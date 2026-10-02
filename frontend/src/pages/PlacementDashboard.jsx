@@ -14,7 +14,7 @@ const CARDS = [
 export default function PlacementDashboard() {
   return (
     <div className="px-placement">
-      <SEO title="Placements | PROJECTX" description="Access premium placement resources and drives." urlPath="/placement" />
+      <SEO title="Placements | CollegeOne" description="Access premium placement resources and drives." urlPath="/placement" />
       <div className="px-pl-mesh"></div>
 
       <section className="px-pl-hero">
