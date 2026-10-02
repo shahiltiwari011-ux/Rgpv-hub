@@ -68,7 +68,7 @@ export default function Navbar() {
           </button>
 
           {user || isAdmin ? (
-            <div className="user-group">
+            <div className="user-group desktop-only">
               {(role === 'tpo' || isAdmin) && (
                 <Link to="/tpo" className="role-btn tpo-btn">💼 TPO PORTAL</Link>
               )}
@@ -213,13 +213,15 @@ export default function Navbar() {
         .login-btn:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); }
         .login-icon { font-size: 0.85rem; }
         
-        @media (max-width: 576px) {
-          .nav-container { padding: 0 0.75rem; }
-          .brand-text { font-size: 1.1rem; }
-          .role-btn { padding: 0.4rem 0.65rem; font-size: 0.68rem; border-radius: 0.6rem; }
-          .nav-actions { gap: 0.35rem; }
-          .theme-toggle { width: 34px; height: 34px; font-size: 0.9rem; border-radius: 10px; }
+        @media (max-width: 768px) {
+          .projectx-nav { padding: 0.75rem 0; }
+          .projectx-nav.scrolled { padding: 0.5rem 0; }
+          .nav-container { padding: 0 0.75rem; width: 100%; box-sizing: border-box; }
+          .brand-text { font-size: 1.15rem; }
+          .nav-actions { gap: 0.5rem; }
+          .theme-toggle { width: 34px; height: 34px; font-size: 0.95rem; border-radius: 10px; }
           .mobile-toggle { width: 34px; height: 34px; }
+          .user-group { display: none !important; }
         }
 
         .nav-actions .streak-wrap, 
@@ -249,14 +251,14 @@ export default function Navbar() {
         }
         .theme-toggle-mobile:hover { background: rgba(var(--bg-glass-rgb), 0.1); }
 
-        .mobile-toggle { width: 36px; height: 36px; display: none; flex-direction: column; justify-content: center; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; }
+        .mobile-toggle { width: 36px; height: 36px; display: none; flex-direction: column; justify-content: center; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; flex-shrink: 0; }
         @media (max-width: 1080px) { .mobile-toggle { display: flex; } }
         .mobile-toggle span { width: 18px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: 0.3s; }
         .mobile-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
         .mobile-toggle.open span:nth-child(2) { opacity: 0; }
         .mobile-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-        .mobile-menu { position: fixed; top: calc(var(--nav-height) + 10px); left: 0.75rem; right: 0.75rem; background: var(--bg-card); backdrop-filter: blur(30px); border: 1px solid var(--border); border-radius: 1.5rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; z-index: 999; max-height: calc(100vh - var(--nav-height) - 30px); overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .mobile-menu { position: fixed; top: 60px; left: 0.75rem; right: 0.75rem; background: var(--bg-card); backdrop-filter: blur(30px); border: 1px solid var(--border); border-radius: 1.5rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; z-index: 1001; max-height: calc(100vh - 80px); overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .mobile-link { display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.1rem; border-radius: 1rem; text-decoration: none; color: var(--text-muted); font-weight: 700; font-size: 0.95rem; transition: 0.3s; }
         .mobile-link.active { background: rgba(59, 130, 246, 0.12); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.2); }
         .mobile-footer { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
