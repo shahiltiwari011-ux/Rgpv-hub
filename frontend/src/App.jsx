@@ -38,7 +38,7 @@ const Admin = lazy(() => import('./pages/Admin'))
 const AdminAnalytics = lazy(() => import('./pages/AdminAnalytics'))
 const AdminUpload = lazy(() => import('./pages/admin/AdminUpload'))
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
-import AdminLayout from './components/AdminLayout'
+const AdminLayout = lazy(() => import('./components/AdminLayout'))
 
 export default function App () {
   return (

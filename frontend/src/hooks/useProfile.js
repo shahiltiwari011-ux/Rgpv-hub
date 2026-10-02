@@ -39,5 +39,21 @@ export function useProfile (userId) {
     fetchProfileData()
   }, [userId])
 
-  return { profile, badges, loading, error }
+  const refetch = () => {
+    if (!userId) return;
+    setLoading(true);
+    getUserProfile(userId)
+      .then(p => {
+        setProfile(p);
+        setError(null);
+      })
+      .catch(err => {
+        if (!isAuthLockError(err)) {
+          setError(err.message || 'Failed to load profile');
+        }
+      })
+      .finally(() => setLoading(false));
+  };
+
+  return { profile, badges, loading, error, refetch }
 }

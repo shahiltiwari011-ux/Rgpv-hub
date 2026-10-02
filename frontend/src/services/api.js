@@ -658,27 +658,54 @@ const getApiUrl = () => {
 
 const PROXY_API_URL = getApiUrl();
 
+const resultCache = new Map();
+const resultInFlight = new Map();
+
 export async function fetchProxyResult(enroll, sem, captcha = null, sessionId = null) {
-  try {
-    const response = await fetch(`${PROXY_API_URL}/api/result`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ enroll, sem, captcha, sessionId })
-    });
+  const cacheKey = `${enroll}_${sem}`;
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch result');
-    }
-
-    return data;
-  } catch (error) {
-    logger.error('Proxy result fetch failed', { error: error.message });
-    throw error;
+  if (!captcha && !sessionId && resultCache.has(cacheKey)) {
+    return resultCache.get(cacheKey);
   }
+
+  if (!captcha && !sessionId && resultInFlight.has(cacheKey)) {
+    return resultInFlight.get(cacheKey);
+  }
+
+  const fetchPromise = (async () => {
+    try {
+      const response = await fetch(`${PROXY_API_URL}/api/result`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ enroll, sem, captcha, sessionId })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch result');
+      }
+
+      if (data && data.success) {
+        resultCache.set(cacheKey, data);
+      }
+
+      return data;
+    } catch (error) {
+      logger.error('Proxy result fetch failed', { error: error.message });
+      throw error;
+    } finally {
+      resultInFlight.delete(cacheKey);
+    }
+  })();
+
+  if (!captcha && !sessionId) {
+    resultInFlight.set(cacheKey, fetchPromise);
+  }
+
+  return fetchPromise;
 }
 
 /**

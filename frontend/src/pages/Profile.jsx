@@ -10,11 +10,11 @@ export default function Profile () {
   // Sanitize malformed UUIDs (e.g., spaces instead of hyphens)
   const sanitizedId = id ? id.replace(/\s+/g, '-') : null
 
-  const { profile, loading, error } = useProfile(sanitizedId)
+  const { profile, loading, error, refetch } = useProfile(sanitizedId)
   const { user: currentUser } = useAuth()
 
   if (loading) return <LoadingSpinner text='Loading user profile...' />
-  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
+  if (error) return <ErrorState message={error} onRetry={refetch} />
   if (!profile) return <EmptyState icon='🔍' title='User not found' message='This profile does not exist or has been deleted.' />
 
   // Use sanitizedId for ownership comparison to ensure consistency

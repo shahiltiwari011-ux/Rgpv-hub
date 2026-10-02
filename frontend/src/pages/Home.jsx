@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useStats } from '../hooks/useStats';
 import { useTrending } from '../hooks/useTrending';
 import { useAuth } from '../context/AuthContext';
+import { checkSupabaseConnection } from '../services/supabaseClient';
 import SEO from '../components/SEO';
 import TrendingSection from '../components/TrendingSection';
 import OfflineBanner from '../components/OfflineBanner';
@@ -26,7 +27,7 @@ export default function Home() {
     <div className="projectx-home">
       <SEO title="PROJECTX | Elite Academic Portal" description="Access premium notes, pyq, and real-time results for RGPV Diploma." urlPath="/" />
 
-      <OfflineBanner isMock={isMock} onRetry={() => window.location.reload()} />
+      <OfflineBanner isMock={isMock} onRetry={() => { checkSupabaseConnection().then(connected => { if (connected) window.dispatchEvent(new Event('online')) }) }} />
 
       <div className="home-mesh-bg"></div>
 
