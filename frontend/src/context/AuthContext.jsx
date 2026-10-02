@@ -26,7 +26,7 @@ export function AuthProvider ({ children }) {
     return validRoles.includes(normalized) ? normalized : 'student';
   }
 
-  // Fetch role and last_active from DB by authenticated user.id
+  // Fetch role and last_active from DB by authenticated user.id or email
   async function _fetchProfile (userId) {
     if (!userId || !isSupabaseReady()) {
       const defaultRole = 'student';
@@ -37,6 +37,9 @@ export function AuthProvider ({ children }) {
     }
 
     try {
+      let fetchedRole = null;
+      let fetchedEmail = null;
+
       // Primary: fetch by id (Supabase auth UUID)
       const { data, error } = await fetchWithTimeout(
         supabase
@@ -44,16 +47,46 @@ export function AuthProvider ({ children }) {
           .select('role, last_active, xp, level, streak_days, badges, email')
           .eq('id', userId)
           .maybeSingle(),
-        3000
+        6000
       );
 
-      if (error) throw error;
+      if (!error && data) {
+        fetchedRole = data.role;
+        fetchedEmail = data.email;
+      }
 
-      const finalRole = resolveUserRole(data?.role);
+      // Secondary: If role by ID is missing or default 'student'/'user', lookup DB by user email
+      if (!fetchedRole || fetchedRole === 'user' || fetchedRole === 'student') {
+        const sessionUser = (await getSafeSession(supabase)) || user;
+        const userEmail = sessionUser?.email || fetchedEmail;
+
+        if (userEmail) {
+          try {
+            const { data: emailData } = await fetchWithTimeout(
+              supabase.from('profiles').select('role').eq('email', userEmail).maybeSingle(),
+              4000
+            );
+            if (emailData?.role && emailData.role !== 'user' && emailData.role !== 'student') {
+              fetchedRole = emailData.role;
+            }
+          } catch {}
+
+          // Tertiary: Check local invited users
+          if (!fetchedRole || fetchedRole === 'user' || fetchedRole === 'student') {
+            const localInvited = JSON.parse(localStorage.getItem('admin_invited_users') || '[]');
+            const invitedMatch = localInvited.find(u => u.email?.toLowerCase() === userEmail.toLowerCase());
+            if (invitedMatch?.role) {
+              fetchedRole = invitedMatch.role;
+            }
+          }
+        }
+      }
+
+      const finalRole = resolveUserRole(fetchedRole);
 
       const p = {
         role: finalRole,
-        email: data?.email || null,
+        email: data?.email || fetchedEmail || null,
         last_active: data?.last_active || null,
         xp: data?.xp || 0,
         level: data?.level || 1,
@@ -67,7 +100,18 @@ export function AuthProvider ({ children }) {
       return p;
     } catch (err) {
       console.warn('[Auth] Profile fetch error:', err.message);
-      const fallbackRole = 'student';
+      let fallbackRole = 'student';
+      try {
+        const sessionUser = user;
+        if (sessionUser?.email) {
+          const localInvited = JSON.parse(localStorage.getItem('admin_invited_users') || '[]');
+          const invitedMatch = localInvited.find(u => u.email?.toLowerCase() === sessionUser.email.toLowerCase());
+          if (invitedMatch?.role) {
+            fallbackRole = resolveUserRole(invitedMatch.role);
+          }
+        }
+      } catch {}
+
       const p = { role: fallbackRole, last_active: null, xp: 0 };
       setProfile(p);
       setRole(fallbackRole);
@@ -297,15 +341,30 @@ export function AuthProvider ({ children }) {
     if (error) throw error;
     if (data?.user) {
       setUser(data.user);
-      // Ensure user profile default role 'student' is created in database
+
+      // Check if this email was pre-assigned a role in DB profiles or local invitations
+      let assignedRole = 'student';
+      try {
+        const { data: existing } = await supabase.from('profiles').select('role').eq('email', email).maybeSingle();
+        if (existing?.role && existing.role !== 'user') {
+          assignedRole = resolveUserRole(existing.role);
+        } else {
+          const localInvited = JSON.parse(localStorage.getItem('admin_invited_users') || '[]');
+          const match = localInvited.find(u => u.email?.toLowerCase() === email.toLowerCase());
+          if (match?.role) assignedRole = resolveUserRole(match.role);
+        }
+      } catch {}
+
+      // Preserve pre-assigned role or fallback to 'student'
       await supabase.from('profiles').upsert({ 
         id: data.user.id, 
         email: email, 
-        role: 'student', 
+        role: assignedRole, 
         name: email.split('@')[0] 
       }, { onConflict: 'id' });
 
-      await _fetchProfile(data.user.id);
+      const p = await _fetchProfile(data.user.id);
+      return { ...data, profile: p, role: p?.role || assignedRole };
     }
     return data;
   }
@@ -328,12 +387,12 @@ export function AuthProvider ({ children }) {
     setUser(data.user);
     
     // Fetch authoritative role from Supabase DB (required for dashboard routing)
-    await _fetchProfile(data.user.id);
+    const p = await _fetchProfile(data.user.id);
 
     // Optional: start realtime subscription (non-blocking)
     _subscribeToProfile(data.user.id);
 
-    return data;
+    return { ...data, profile: p, role: p?.role };
   }
 
   const logout = async () => {

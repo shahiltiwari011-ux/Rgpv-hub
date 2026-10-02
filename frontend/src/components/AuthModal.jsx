@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 
 export default function AuthModal({ isOpen, onClose }) {
   const { login, signup, resetPassword } = useAuth();
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -33,13 +35,25 @@ export default function AuthModal({ isOpen, onClose }) {
         toast.success('Password reset link sent to your email!');
         setIsForgotPassword(false);
       } else if (isSignUp) {
-        await signup(email, password);
-        toast.success('Account created successfully!');
+        const signupRes = await signup(email, password);
+        const userRole = signupRes?.role || signupRes?.profile?.role || 'student';
+        toast.success(`Account created as ${userRole.toUpperCase()}!`);
         onClose();
+        
+        // Auto-redirect to respective dashboard
+        if (userRole === 'tpo') navigate('/tpo');
+        else if (userRole === 'faculty' || userRole === 'teacher') navigate('/teacher');
+        else if (userRole === 'admin') navigate('/admin');
       } else {
-        await login(email, password);
-        toast.success('Signed in successfully!');
+        const loginRes = await login(email, password);
+        const userRole = loginRes?.role || loginRes?.profile?.role || 'student';
+        toast.success(`Signed in successfully as ${userRole.toUpperCase()}!`);
         onClose();
+
+        // Auto-redirect to respective dashboard
+        if (userRole === 'tpo') navigate('/tpo');
+        else if (userRole === 'faculty' || userRole === 'teacher') navigate('/teacher');
+        else if (userRole === 'admin') navigate('/admin');
       }
     } catch (err) {
       console.error('Auth error:', err);

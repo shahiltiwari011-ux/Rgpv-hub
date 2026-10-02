@@ -70,13 +70,13 @@ export default function Navbar() {
           {user || isAdmin ? (
             <div className="user-group">
               {(role === 'tpo' || isAdmin) && (
-                <Link to="/tpo" className="role-btn desktop-only">TPO PORTAL</Link>
+                <Link to="/tpo" className="role-btn tpo-btn">💼 TPO PORTAL</Link>
               )}
               {(role === 'faculty' || role === 'teacher' || isAdmin) && (
-                <Link to="/teacher" className="role-btn desktop-only">FACULTY</Link>
+                <Link to="/teacher" className="role-btn faculty-btn">👨‍🏫 FACULTY</Link>
               )}
               {isAdmin && (
-                <Link to="/admin" className="avatar-link desktop-only">
+                <Link to="/admin" className="avatar-link" title="Admin Panel">
                   <div className="avatar-mini">A</div>
                 </Link>
               )}
