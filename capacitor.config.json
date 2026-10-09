@@ -1,0 +1,5 @@
+{
+  "appId": "com.collegeone.app",
+  "appName": "CollegeOne",
+  "webDir": "frontend/dist"
+}

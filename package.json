@@ -9,6 +9,9 @@
     "install:all": "npm install --prefix frontend && npm install --prefix backend"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "vite": "^8.0.10"
   }
 }

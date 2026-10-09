@@ -134,7 +134,7 @@ const Result = () => {
                     className="portal-top"
                 >
                     <div className="branding">
-                        <h1 className="portal-logo">PROJECT<span>X</span></h1>
+                        <h1 className="portal-logo">COLLEGE<span>ONE</span></h1>
                         <p className="portal-tagline">OFFICIAL ACADEMIC PORTAL V2.0</p>
                     </div>
                 </motion.header>
@@ -329,30 +329,32 @@ const Result = () => {
             </div>
 
             <style>{`
-                .portal-container { min-height: 100vh; background: var(--bg-primary); color: var(--text-primary); padding: 8rem 1rem 6rem; font-family: 'Space Grotesk', sans-serif; position: relative; overflow-x: hidden; transition: 0.3s ease; }
+                .portal-container { min-height: 100vh; background: var(--bg-primary); color: var(--text-primary); padding: 7rem 0.75rem 4rem; font-family: 'Space Grotesk', sans-serif; position: relative; overflow-x: hidden; transition: 0.3s ease; width: 100%; max-width: 100%; box-sizing: border-box; }
                 .ambient-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%); pointer-events: none; }
-                .content-wrapper { max-width: 1100px; margin: 0 auto; position: relative; z-index: 10; }
+                .content-wrapper { max-width: 1100px; width: 100%; margin: 0 auto; position: relative; z-index: 10; box-sizing: border-box; }
 
-                .portal-top { display: flex; flex-direction: column; align-items: center; margin-bottom: 4rem; text-align: center; }
-                .portal-logo { font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 10vw, 5.5rem); font-weight: 800; letter-spacing: -3px; margin: 0; color: var(--text-primary); line-height: 1; }
+                .portal-top { display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; text-align: center; width: 100%; max-width: 100%; box-sizing: border-box; }
+                .branding { width: 100%; max-width: 100%; box-sizing: border-box; }
+                .portal-logo { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 8vw, 5.5rem); font-weight: 800; letter-spacing: -0.04em; margin: 0 auto; color: var(--text-primary); line-height: 1.05; white-space: nowrap; max-width: 100%; box-sizing: border-box; overflow: hidden; text-overflow: clip; }
                 .portal-logo span { color: var(--accent-blue); text-shadow: 0 0 60px rgba(59, 130, 246, 0.4); }
-                .portal-tagline { font-size: 0.75rem; font-weight: 900; letter-spacing: 5px; color: var(--text-muted); margin-top: 1rem; text-transform: uppercase; }
+                .portal-tagline { font-size: clamp(0.6rem, 2.5vw, 0.75rem); font-weight: 900; letter-spacing: 3px; color: var(--text-muted); margin-top: 0.75rem; text-transform: uppercase; }
 
-                .glass-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 2.5rem; backdrop-filter: blur(25px); box-shadow: var(--shadow-lg); transition: border-color 0.3s; }
+                .glass-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 2.5rem; backdrop-filter: blur(25px); box-shadow: var(--shadow-lg); transition: border-color 0.3s; max-width: 100%; box-sizing: border-box; }
                 .glass-panel:hover { border-color: var(--border-hover); }
                 
-                .search-panel { padding: clamp(2rem, 5vw, 4rem); margin-bottom: 3rem; }
-                .search-grid { display: grid; grid-template-columns: 1.2fr 1fr 220px; gap: 2rem; align-items: flex-end; }
-                @media (max-width: 900px) { .search-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
+                .search-panel { padding: clamp(1.25rem, 4vw, 3.5rem); margin-bottom: 2.5rem; width: 100%; max-width: 100%; box-sizing: border-box; }
+                .search-grid { display: grid; grid-template-columns: 1.2fr 1fr 220px; gap: 1.75rem; align-items: flex-end; width: 100%; box-sizing: border-box; }
+                @media (max-width: 900px) { .search-grid { grid-template-columns: 1fr; gap: 1.25rem; } }
 
-                .input-group-premium label { font-size: 0.7rem; font-weight: 900; color: var(--text-muted); margin-bottom: 1rem; display: block; text-transform: uppercase; letter-spacing: 2px; }
-                .field-inner { position: relative; }
-                .field-inner input { width: 100%; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 1.25rem; padding: 1.1rem 1.5rem; color: var(--text-primary); font-weight: 700; font-size: 1.1rem; outline: none; transition: 0.3s; position: relative; z-index: 2; }
+                .input-group-premium { width: 100%; max-width: 100%; box-sizing: border-box; }
+                .input-group-premium label { font-size: 0.7rem; font-weight: 900; color: var(--text-muted); margin-bottom: 0.75rem; display: block; text-transform: uppercase; letter-spacing: 2px; }
+                .field-inner { position: relative; width: 100%; max-width: 100%; box-sizing: border-box; }
+                .field-inner input { width: 100%; max-width: 100%; box-sizing: border-box; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 1.25rem; padding: 1rem 1.25rem; color: var(--text-primary); font-weight: 700; font-size: 1.05rem; outline: none; transition: 0.3s; position: relative; z-index: 2; }
                 .field-inner input:focus { border-color: var(--accent-blue); background: var(--bg-primary); }
                 .field-glow { position: absolute; inset: -2px; background: var(--accent-blue); opacity: 0; filter: blur(15px); transition: 0.3s; z-index: 1; border-radius: 1.4rem; }
                 .field-inner input:focus + .field-glow { opacity: 0.15; }
 
-                .action-button { height: 60px; background: var(--accent-blue); border: none; border-radius: 1.25rem; color: #fff; font-weight: 900; font-size: 1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3); letter-spacing: 1px; }
+                .action-button { width: 100%; max-width: 100%; height: 56px; background: var(--accent-blue); border: none; border-radius: 1.25rem; color: #fff; font-weight: 900; font-size: 0.95rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3); letter-spacing: 1px; box-sizing: border-box; }
                 .action-button:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4); background: #2563eb; }
                 .action-button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
@@ -411,15 +413,28 @@ const Result = () => {
                 @keyframes spin { to { transform: rotate(360deg); } }
 
                 @media (max-width: 768px) {
-                    .portal-container { padding-top: 6rem; }
-                    .search-panel { border-radius: 2rem; padding: 2rem 1.5rem; }
-                    .transcript-container { padding: 2rem 1rem; border-radius: 2rem; }
-                    th, td { padding: 1rem; font-size: 0.85rem; }
-                    .identity-table strong { font-size: 1rem; }
-                    .summary-table td { font-size: 1.1rem; }
-                    .summary-table .highlight-val { font-size: 1.6rem; }
-                    .transcript-footer { flex-direction: column; gap: 2rem; text-align: center; }
+                    .portal-container { padding-top: 5.5rem; }
+                    .search-panel { border-radius: 1.5rem; padding: 1.5rem 1rem; }
+                    .transcript-container { padding: 1.5rem 0.75rem; border-radius: 1.5rem; }
+                    th, td { padding: 0.75rem 0.5rem; font-size: 0.78rem; }
+                    .identity-table strong { font-size: 0.95rem; }
+                    .summary-table td { font-size: 1rem; }
+                    .summary-table .highlight-val { font-size: 1.4rem; }
+                    .transcript-footer { flex-direction: column; gap: 1.5rem; text-align: center; }
                     .download-button { width: 100%; justify-content: center; }
+                }
+
+                @media (max-width: 480px) {
+                    .portal-top { margin-bottom: 2rem; }
+                    .portal-logo { font-size: clamp(1.3rem, 7.8vw, 2.2rem); letter-spacing: -0.02em; white-space: nowrap; }
+                    .portal-tagline { font-size: 0.65rem; letter-spacing: 2px; margin-top: 0.5rem; }
+                    .search-panel { padding: 1.25rem 0.85rem; border-radius: 1.25rem; }
+                    .field-inner input { font-size: 0.95rem; padding: 0.85rem 1rem; }
+                    .action-button { height: 50px; font-size: 0.88rem; border-radius: 1rem; }
+                }
+
+                @media (max-width: 360px) {
+                    .portal-logo { font-size: clamp(1.15rem, 7.2vw, 1.6rem); letter-spacing: -0.02em; white-space: nowrap; }
                 }
 
                 /* PDF Export Optimizations */

@@ -88,9 +88,18 @@
   --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.2);
 }
 
-/* ---------- Base Reset ---------- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+/* ---------- Global Safe Responsive Reset ---------- */
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 body {
   font-family: 'Space Grotesk', sans-serif;

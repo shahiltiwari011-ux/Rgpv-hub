@@ -448,7 +448,6 @@ export async function createResource (resourceData) {
             semester: resourceData.semester,
             subject: resourceData.subject?.trim() || null,
             file_url: resourceData.file_url,
-            file_size: resourceData.file_size || null,
             icon: resourceData.icon || null,
             year: resourceData.year || null,
             created_by: resourceData.created_by || null

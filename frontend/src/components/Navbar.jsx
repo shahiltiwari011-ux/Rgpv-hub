@@ -233,14 +233,23 @@ export default function Navbar() {
         .login-icon { font-size: 0.8rem; }
         
         @media (max-width: 768px) {
-          .projectx-nav { padding: 0.75rem 0; }
-          .projectx-nav.scrolled { padding: 0.5rem 0; }
-          .nav-container { padding: 0 0.75rem; width: 100%; box-sizing: border-box; }
-          .brand-text { font-size: 1.15rem; }
-          .nav-actions { gap: 0.5rem; }
-          .theme-toggle { width: 34px; height: 34px; font-size: 0.95rem; border-radius: 10px; }
-          .mobile-toggle { width: 34px; height: 34px; }
+          .projectx-nav { padding: 0.6rem 0; }
+          .projectx-nav.scrolled { padding: 0.45rem 0; }
+          .nav-container { padding: 0 0.6rem; width: 100%; max-width: 100%; box-sizing: border-box; }
+          .brand-text { font-size: 1.05rem; }
+          .nav-actions { gap: 0.35rem !important; }
+          .theme-toggle { width: 32px; height: 32px; font-size: 0.9rem; border-radius: 8px; }
+          .mobile-toggle { width: 32px; height: 32px; }
           .user-group { display: none !important; }
+        }
+
+        @media (max-width: 480px) {
+          .brand-text { font-size: clamp(0.85rem, 4.2vw, 1rem); letter-spacing: -0.02em; }
+          .brand-icon { width: 28px; height: 28px; border-radius: 6px; }
+          .icon-inner { font-size: 0.9rem; }
+          .nav-brand { gap: 0.4rem; }
+          .connectivity-status { padding: 0.25rem 0.45rem; }
+          .status-dot { width: 6px; height: 6px; }
         }
 
         .nav-actions .streak-wrap, 
