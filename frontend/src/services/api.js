@@ -652,7 +652,7 @@ const getApiUrl = () => {
   }
   
   // Production default (Render)
-  return 'https://rgpv-hub.onrender.com';
+  return 'https://collegeone-backend.onrender.com';
 };
 
 const PROXY_API_URL = getApiUrl();
