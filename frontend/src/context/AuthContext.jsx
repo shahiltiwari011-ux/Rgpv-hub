@@ -53,6 +53,8 @@ export function AuthProvider ({ children }) {
 
         if (error) {
           console.error('[AUTH DEBUG] Profile fetch error:', error);
+          // Don't silently fall back to student if the fetch genuinely failed
+          return null;
         }
 
         const rawRole = data?.role;
