@@ -87,29 +87,37 @@ app.get('/api/test', (req, res) => {
     res.json({ message: "API is working ✅" });
 });
 
-// PDF Proxy — Hides Supabase URL from users
+// PDF Proxy — Hides Supabase URL from users and prevents OOM by streaming
 app.get('/api/pdf', async (req, res) => {
     const { path: filePath } = req.query;
     if (!filePath) return res.status(400).json({ error: 'Path required' });
     if (!supabase) return res.status(500).json({ error: 'Supabase not configured' });
 
     try {
-        // Download file from Supabase Storage
-        const { data, error } = await supabase.storage.from('study-materials').download(filePath);
-        
-        if (error) {
-            console.error('Supabase download error:', error.message);
-            return res.status(404).json({ error: 'File not found' });
+        // Get the public URL for the file
+        const { data } = supabase.storage.from('study-materials').getPublicUrl(filePath);
+        if (!data || !data.publicUrl) {
+            return res.status(404).json({ error: 'Failed to generate public URL' });
         }
 
-        // Stream PDF to browser
+        // Fetch the file using axios as a stream
+        const response = await axios({
+            method: 'get',
+            url: data.publicUrl,
+            responseType: 'stream'
+        });
+
+        // Set appropriate headers
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename="document.pdf"');
-        
-        const buffer = Buffer.from(await data.arrayBuffer());
-        res.send(buffer);
+
+        // Pipe the stream directly to the client
+        response.data.pipe(res);
     } catch (err) {
         console.error('PDF Proxy general error:', err.message);
+        if (err.response && err.response.status === 404) {
+             return res.status(404).json({ error: 'File not found on storage server' });
+        }
         res.status(500).json({ error: 'Proxy failed to fetch file' });
     }
 });
